@@ -42,7 +42,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ModFunctions.connectionEventDataReset("Leave"));
 
-        HudElementRegistry.attachElementBefore(VanillaHudElements.PLAYER_LIST, Identifier.of("strayers-skyblock-utils", "ssuHud"), (guiGraphics, deltaTracker) ->
+        HudElementRegistry.attachElementBefore(VanillaHudElements.PLAYER_LIST, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (guiGraphics, deltaTracker) ->
                 SsuHud.onHudRender(guiGraphics, ModFunctions.getCurrentLocation(MinecraftClient.getInstance()))
         );
 
@@ -84,6 +84,6 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             DungeonPartyCommands.autoRejoin(cleanMessage);
         });
 
-        ClientSendMessageEvents.MODIFY_CHAT.register((message) -> ChatModifications.modifiedChat(message));
+        ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::modifiedChat);
     }
 }
