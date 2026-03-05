@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "skyblockutils",
+  "version": "${version}",
+  "name": "Strayer's Skyblock Utils (SSU)",
+  "description": "Adds a few useful Skyblock tweaks such as chat filters and dungeon party commands (/ssu for commands)",
+  "authors": [
+    "Strayercat"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Strayercat/Strayer-s-Skyblock-Utils",
+    "sources": "https://github.com/Strayercat/Strayer-s-Skyblock-Utils"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/strayers-skyblock-utils/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+    ],
+    "client": [
+      "com.skyblockutils.StrayersSkyblockUtilsClient"
+    ],
+    "modmenu": [
+      "com.skyblockutils.config.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "strayers-skyblock-utils.mixins.json",
+    {
+      "config": "strayers-skyblock-utils.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.17.3",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*",
+    "yet_another_config_lib_v3": ">=3.7.1"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
