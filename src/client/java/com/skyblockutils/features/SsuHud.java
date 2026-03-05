@@ -52,7 +52,7 @@ public class SsuHud {
     private static @NotNull List<HudLine> getHudLines(MinecraftClient client, String location) {
         int whiteColor = 0xFFFFFFFF;
         int lineColor = 0xFFAAFFAA;
-//        List<String> hubLocations = List.of("⏣ Village", "⏣ Combat Settlement", "⏣ Graveyard", "⏣ Mining District", "⏣ Farm", "⏣ Fishing Outpost", "⏣ Colosseum", "⏣ Wilderness", "⏣ Mountain", "⏣ Unincorporated", "⏣ Ruins", "⏣ Forest", "⏣ Community Center", "⏣ Election Room", "⏣ Canvas Room", "⏣ Auction House", "⏣ Bazaar Alley", "⏣ Bank", "⏣ Builder's House", "⏣ Pet Care", "⏣ Taylor's Shop", "⏣ Fashion Shop", "⏣ Fisherman's Hut", "⏣ Thaumaturgist", "⏣ Tavern", "⏣ Crypts", "⏣ Coal Mine", "⏣ Catacombs Entrance", "⏣ Foraging Camp", "⏣ Sewer", "⏣ Rabbit House", "⏣ Flower House", "⏣ Artist's Abode", "⏣ Wizard Tower", "⏣ Shen's Auction", "⏣ Trade Center");
+//        List<String> hubLocations = List.of("⏣ Village", "⏣ Combat Settlement", "⏣ Graveyard", "⏣ Mining District", "⏣ Farm", "⏣ Fishing Outpost", "⏣ Colosseum", "⏣ Wilderness", "⏣ Mountain", "⏣ Unincorporated", "⏣ Ruins", "⏣ Forest", "⏣ Community Center", "⏣ Election Room", "⏣ Canvas Room", "⏣ Auction House", "⏣ Bazaar Alley", "⏣ Bank", "⏣ Builder's House", "⏣ Pet Care", "⏣ Taylor's Shop", "⏣ Fashion Shop", "⏣ Fisherman's Hut", "⏣ Thaumaturgist", "⏣ Tavern", "⏣ Crypts", "⏣ Coal Mine", "⏣ Catacombs Entrance", "⏣ Foraging Camp", "⏣ Sewer", "⏣ Rabbit House", "⏣ Flower House", "⏣ Artist's Abode", "⏣ Wizard Tower", "⏣ Shen's Auction", "⏣ Trade Center", "⏣ Hexatorum");
         List<HudLine> lines = new java.util.ArrayList<>(List.of(
                 new HudLine("STRAYER'S SKYBLOCK UTILS", 0xFF66FF66),
                 new HudLine("--------------------------------", whiteColor)));
