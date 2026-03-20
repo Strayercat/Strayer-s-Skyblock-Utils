@@ -37,7 +37,7 @@ public class WorldTimeMixin {
                 float sum = 0;
                 int count = Math.min(sampleIndex, tpsSamples.length);
                 for (int i = 0; i < count; i++) sum += tpsSamples[i];
-                ModFunctions.tps = sum / count;
+                ModFunctions.tps =  sum / count;
             }
         }
 

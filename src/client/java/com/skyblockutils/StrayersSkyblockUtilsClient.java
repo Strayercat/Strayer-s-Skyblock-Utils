@@ -71,6 +71,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         });
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
+            if (!isInSkyblock) return true;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
@@ -78,10 +79,12 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         });
 
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
+            if (!isInSkyblock) return;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             DowntimeTracker.trackDowntime(cleanMessage);
             DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);
             DungeonPartyCommands.autoRejoin(cleanMessage);
+            ChatCommands.handleCommands(cleanMessage);
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::modifiedChat);
