@@ -26,6 +26,7 @@ public class PartyInfo {
         }
 
         if (message.contains("The party was transfered to")) {
+            //TODO handle party leader leaving
             leader = message.replaceFirst("The party was transfered to", "").replaceAll("\\[[^]]+]", "").trim().split(" ")[0];
         }
     }
