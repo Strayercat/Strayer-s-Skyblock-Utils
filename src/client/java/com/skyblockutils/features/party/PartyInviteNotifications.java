@@ -1,4 +1,4 @@
-package com.skyblockutils.features;
+package com.skyblockutils.features.party;
 
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.config.ModConfig;

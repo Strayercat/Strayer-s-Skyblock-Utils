@@ -7,6 +7,10 @@ import com.skyblockutils.features.chatFilters.ChatFilter;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.SsuHud;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
+import com.skyblockutils.features.party.PartyCommands;
+import com.skyblockutils.features.party.PartyInfo;
+import com.skyblockutils.features.party.PartyInviteNotifications;
+import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.ClientPlayNetworkHandlerAccessor;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
@@ -21,6 +25,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PingMeasurer;
 import net.minecraft.util.Identifier;
+
+import java.util.Objects;
 
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public static boolean isInSkyblock = false;
@@ -38,6 +44,9 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             if (!handler.getConnection().getAddress().toString().contains("hypixel.net")) return;
             AutoFish.registerListener(client);
             ModFunctions.connectionEventDataReset("Join");
+
+            PartyListParser.expectingPartyList = true;
+            Objects.requireNonNull(client.getNetworkHandler()).sendChatCommand("party list");
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ModFunctions.connectionEventDataReset("Leave"));
@@ -75,7 +84,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
-            return chatFilter && partyMsgFilter;
+            boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
+            return chatFilter && partyMsgFilter && partyListMessages;
         });
 
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
@@ -85,6 +95,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);
             DungeonPartyCommands.autoRejoin(cleanMessage);
             ChatCommands.handleCommands(cleanMessage);
+            PartyCommands.handlePartyCommands(cleanMessage);
+            PartyInfo.handlePartyMessages(cleanMessage);
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::modifiedChat);
