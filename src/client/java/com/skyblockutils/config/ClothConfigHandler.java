@@ -27,12 +27,25 @@ public class ClothConfigHandler {
 
         // Dungeons subcategory
         SubCategoryBuilder dungeonsBuilder = entryBuilder.startSubCategory(Text.literal("Dungeons")).setTooltip(Text.literal("Dungeon-related features"));
-
         dungeonsBuilder.add(entryBuilder.startBooleanToggle(Text.literal("Downtime Tracker"), ModConfig.INSTANCE.downtimeTracker).setDefaultValue(false).setTooltip(Text.literal("Detect messages starting with '!dt' or 'dt' and remind you when a dungeon run ends")).setSaveConsumer(newValue -> ModConfig.INSTANCE.downtimeTracker = newValue).build());
         dungeonsBuilder.add(entryBuilder.startBooleanToggle(Text.literal("Floor Commands"), ModConfig.INSTANCE.dungeonPartyCommands).setDefaultValue(false).setTooltip(Text.literal("Allow '!f2' format messages for joining a dungeon")).setSaveConsumer(newValue -> ModConfig.INSTANCE.dungeonPartyCommands = newValue).build());
         dungeonsBuilder.add(entryBuilder.startBooleanToggle(Text.literal("Auto-Rejoin Reminders"), ModConfig.INSTANCE.autoRejoinReminders).setDefaultValue(false).setTooltip(Text.literal("Reminds you about auto-rejoin being enabled every time a run ends")).setSaveConsumer(newValue -> ModConfig.INSTANCE.autoRejoinReminders = newValue).build());
-
         general.addEntry(dungeonsBuilder.build());
+
+        // Mining subcategory
+        SubCategoryBuilder miningBuilder = entryBuilder.startSubCategory(Text.literal("Mining")).setTooltip(Text.literal("Mining-related features"));
+        miningBuilder.add(entryBuilder.startBooleanToggle(Text.literal("Display Glacite Tunnels Waypoints"), ModConfig.INSTANCE.displayGlaciteWaypoints).setDefaultValue(true).setTooltip(Text.literal("Whether or not to display umber and tungsten vein waypoints while in the glacite tunnels")).setSaveConsumer(newValue -> ModConfig.INSTANCE.displayGlaciteWaypoints = newValue).build());
+        miningBuilder.add(entryBuilder
+                .startEnumSelector(
+                        Text.literal("Mining Waypoints"),
+                        ModConfig.GlaciteWaypoints.class,
+                        ModConfig.INSTANCE.glaciteWaypoints
+                )
+                .setDefaultValue(ModConfig.GlaciteWaypoints.BOTH)
+                .setTooltip(Text.literal("Cycles between which waypoints to display: Umber, Tungsten, or Both."))
+                .setSaveConsumer(newValue -> ModConfig.INSTANCE.glaciteWaypoints = newValue)
+                .build());
+        general.addEntry(miningBuilder.build());
 
         // Chat Filters Category
         ConfigCategory cfCategory = builder.getOrCreateCategory(Text.literal("Chat Filters"));

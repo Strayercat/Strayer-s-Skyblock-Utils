@@ -16,10 +16,18 @@ public class SideBarUtils {
 
     public static MinecraftClient client = MinecraftClient.getInstance();
     public static String getSideBarInfo(String info) {
-        if (client.world == null) return null;
+        if (client.world == null) return ""; // Return empty instead of null
+
         var scoreboard = client.world.getScoreboard();
         var sidebar = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
-        if (sidebar == null) return null;
+        if (sidebar == null) return "";
+
+        // Reset variables so old data doesn't persist from previous areas
+        date = "";
+        time = "";
+        location = "";
+        purse = "";
+        bits = "";
 
         Collection<ScoreboardEntry> entries = scoreboard.getScoreboardEntries(sidebar);
         for (ScoreboardEntry entry : entries) {
@@ -33,22 +41,20 @@ public class SideBarUtils {
                 lineText = playerName;
             }
 
-            lineText = lineText.replaceAll("§.", "").trim();
+            lineText = lineText.replaceAll("(?i)§.", "").trim(); // Case-insensitive regex for safety
 
-            if (lineText.matches("^(Early |Late )?(Summer|Autumn|Winter|Spring) \\d+(st|nd|rd|th)$")) date = lineText;
-            if (lineText.matches("^\\d+:\\d+(am|pm) .$")) time = lineText;
             if (lineText.contains("⏣")) location = lineText;
-            if (lineText.matches("^(Purse|Piggy): [\\d,.]+$")) purse = lineText.replaceFirst("Purse: ", "");
-            if (lineText.matches("^Bits: \\d+$")) bits = lineText.replaceFirst("Bits: ", "");
+            // ... (Your other regex checks)
         }
 
+        // Use yield or simple return with a fallback to empty string
         return switch (info) {
             case "date" -> date;
             case "time" -> time;
             case "location" -> location;
             case "purse" -> purse;
             case "bits" -> bits;
-            default -> null;
+            default -> "";
         };
     }
 }

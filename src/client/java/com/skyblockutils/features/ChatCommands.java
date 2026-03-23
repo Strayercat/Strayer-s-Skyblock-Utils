@@ -22,8 +22,8 @@ public class ChatCommands {
         if (messageContent.equalsIgnoreCase("!tps"))
             networkHandler.sendChatMessage("Tps: " + String.format("%.1f", ModFunctions.tps));
         if (messageContent.equalsIgnoreCase("!ping")) networkHandler.sendChatMessage("Ping: " + ModFunctions.ping);
+        if (messageContent.equalsIgnoreCase("!fps")) networkHandler.sendChatMessage("Fps: " + MinecraftClient.getInstance().getCurrentFps());
 
-        // Silly messages
         List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist");
         if (allowedCommands.contains(messageContent.replaceFirst("!", "").split(" ")[0])) {
             int randomPercentage = (int) (Math.random() * 100) + 1;
