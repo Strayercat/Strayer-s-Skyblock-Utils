@@ -7,6 +7,7 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.GlowingPlayers;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
 import com.skyblockutils.utils.OnScreenNotification;
+import com.skyblockutils.utils.SideBarUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -124,7 +125,7 @@ public class ModCommands {
                             return 1;
                         }))
                         .then(ClientCommandManager.literal("location").executes(context -> {
-                            context.getSource().sendFeedback(Text.literal("§6" + StrayersSkyblockUtilsClient.location));
+                            context.getSource().sendFeedback(Text.literal("§6" + SideBarUtils.getSideBarInfo("location")));
                             return 1;
                         }))
                 );

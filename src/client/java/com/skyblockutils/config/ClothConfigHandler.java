@@ -20,7 +20,6 @@ public class ClothConfigHandler {
         // General Settings Category
         ConfigCategory general = builder.getOrCreateCategory(Text.literal("General Settings"));
 
-        general.addEntry(entryBuilder.startBooleanToggle(Text.literal("Welcome Home Message"), ModConfig.INSTANCE.welcomeHomeMessage).setDefaultValue(false).setTooltip(Text.literal("Show welcome message when returning home")).setSaveConsumer(newValue -> ModConfig.INSTANCE.welcomeHomeMessage = newValue).build());
         general.addEntry(entryBuilder.startBooleanToggle(Text.literal("Party Invite Notifications"), ModConfig.INSTANCE.partyInviteNotifications).setDefaultValue(false).setTooltip(Text.literal("Sends party invites as a notification instead of a chat message")).setSaveConsumer(newValue -> ModConfig.INSTANCE.partyInviteNotifications = newValue).build());
         general.addEntry(entryBuilder.startBooleanToggle(Text.literal("Fancy Emotes"), ModConfig.INSTANCE.fancyEmotes).setDefaultValue(false).setTooltip(Text.literal("Transforms <3 into ♥ and such")).setSaveConsumer(newValue -> ModConfig.INSTANCE.fancyEmotes = newValue).build());
         general.addEntry(entryBuilder.startBooleanToggle(Text.literal("Auto Hoppity Eggs"), ModConfig.INSTANCE.autoHoppityEggs).setDefaultValue(false).setTooltip(Text.literal("Whether to instantly collect hoppity eggs or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.autoHoppityEggs = newValue).build());
@@ -48,6 +47,7 @@ public class ClothConfigHandler {
         // SSU HUD category
         ConfigCategory hud = builder.getOrCreateCategory(Text.literal("HUD Settings"));
         hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("HUD Enabled"), ModConfig.INSTANCE.hudEnabled).setDefaultValue(true).setTooltip(Text.literal("Whether to enable SSU HUD or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudEnabled = newValue).build());
+        hud.addEntry(entryBuilder.startIntSlider(Text.literal("HUD Scale (%)"), ModConfig.INSTANCE.hudScale, 50, 100).setDefaultValue(100).setTooltip(Text.literal("The scale adjustment for the HUD")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudScale = newValue).build());
         hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("HUD Ping"), ModConfig.INSTANCE.hudPing).setDefaultValue(true).setTooltip(Text.literal("Whether to show ping in the hud or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudPing = newValue).build());
         hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("HUD Time"), ModConfig.INSTANCE.hudTime).setDefaultValue(true).setTooltip(Text.literal("Whether to show real time in the hud or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudTime = newValue).build());
         hud.addEntry(entryBuilder.startSelector(Text.literal("HUD Time Format"), new String[]{"24H", "12H"}, ModConfig.INSTANCE.hudTime12hFormat ? "12H" : "24H")
@@ -56,7 +56,11 @@ public class ClothConfigHandler {
                 .setSaveConsumer(newValue -> ModConfig.INSTANCE.hudTime12hFormat = newValue.equals("12H"))
                 .build());
         hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("HUD TPS"), ModConfig.INSTANCE.hudTps).setDefaultValue(true).setTooltip(Text.literal("Whether to show server TPS in the hud or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudTps = newValue).build());
+        hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("HUD FPS"), ModConfig.INSTANCE.hudFps).setDefaultValue(true).setTooltip(Text.literal("Whether to show current fps in the hud or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudFps = newValue).build());
         hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("Island Fun Facts"), ModConfig.INSTANCE.hudIslandFunFact).setDefaultValue(true).setTooltip(Text.literal("Whether to display a fun fact when on your island or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudIslandFunFact = newValue).build());
+        hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("HUD Party Info"), ModConfig.INSTANCE.hudPartyInfo).setDefaultValue(true).setTooltip(Text.literal("Whether or not to show the current party leader and members in the HUD")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudPartyInfo = newValue).build());
+        hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("HUD Party Info In Dungeons"), ModConfig.INSTANCE.hudPartyInfoInDungeons).setDefaultValue(false).setTooltip(Text.literal("Whether or not to show the current party leader and members in the HUD when in dungeons")).setSaveConsumer(newValue -> ModConfig.INSTANCE.hudPartyInfoInDungeons = newValue).build());
+        hud.addEntry(entryBuilder.startBooleanToggle(Text.literal("Scoreboard In HUD"), ModConfig.INSTANCE.sideBarInHud).setDefaultValue(false).setTooltip(Text.literal("Whether or not to show the scoreboard info in the HUD instead")).setSaveConsumer(newValue -> ModConfig.INSTANCE.sideBarInHud = newValue).build());
         return builder.build();
     }
 

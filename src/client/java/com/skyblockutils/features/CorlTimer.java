@@ -1,7 +1,7 @@
 package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
-import com.skyblockutils.StrayersSkyblockUtilsClient;
+import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -69,7 +69,7 @@ public class CorlTimer {
             corlTimerEnabled = false;
             client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §cToggled off"));
         } else {
-            String currentLocation = StrayersSkyblockUtilsClient.location;
+            String currentLocation = SideBarUtils.getSideBarInfo("location");
             List<String> allowedLocations = List.of("⏣ Mithril Deposits", "⏣ Precursor Remnants", "⏣ Jungle", "⏣ Goblin Holdout", "⏣ Crystal Nucleus", "⏣ Magma Fields");
 
             System.out.println(allowedLocations.contains(currentLocation));

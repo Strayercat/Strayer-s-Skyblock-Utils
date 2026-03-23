@@ -1,12 +1,22 @@
 package com.skyblockutils.features.party;
 
+import net.minecraft.client.MinecraftClient;
+
 import java.util.*;
 
 public class PartyListParser {
 
     public static boolean expectingPartyList = false;
+    public static boolean onJoinCommandHandled = false;
     private static boolean reading = false;
     private static final List<String> buffer = new ArrayList<>();
+
+    public static void handleOnJoinCommand() {
+        if (onJoinCommandHandled) return;
+        expectingPartyList = true;
+        Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler()).sendChatCommand("party list");
+        onJoinCommandHandled = true;
+    }
 
     public static boolean handleMessage(String message) {
         if (!expectingPartyList) return true;
@@ -34,14 +44,17 @@ public class PartyListParser {
     private static void parseBuffer() {
         PartyInfo.members.clear();
 
+        if (buffer.size() == 1) {
+            resetPartyInfo();
+            return;
+        }
+
         for (String line : buffer) {
             line = line.trim();
             if (line.isEmpty()) continue;
 
             if (line.startsWith("Party Leader:")) {
-                String name = extractName(line);
-                PartyInfo.leader = name;
-                PartyInfo.members.add(name);
+                PartyInfo.leader = extractName(line);
             }
 
             if (line.startsWith("Party Moderators:")) {
@@ -78,5 +91,11 @@ public class PartyListParser {
             }
         }
         return names;
+    }
+
+    private static void resetPartyInfo() {
+        PartyInfo.isInParty = false;
+        PartyInfo.leader = null;
+        PartyInfo.members.clear();
     }
 }

@@ -1,5 +1,6 @@
 package com.skyblockutils.features.dungeons;
 
+import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.config.ModConfig;
@@ -10,6 +11,7 @@ import net.minecraft.sound.SoundEvents;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +26,7 @@ public class DungeonPartyCommands {
 
     public static void handleDungeonPartyCommands(String message) {
         if (!ModConfig.INSTANCE.dungeonPartyCommands) return;
+        if (!Objects.equals(PartyInfo.leader, MinecraftClient.getInstance().getSession().getUsername())) return;
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
         if (!message.startsWith("Party >")) return;

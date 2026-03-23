@@ -14,6 +14,7 @@ import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.ClientPlayNetworkHandlerAccessor;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
+import com.skyblockutils.utils.SideBarUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -22,15 +23,11 @@ import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PingMeasurer;
 import net.minecraft.util.Identifier;
 
-import java.util.Objects;
-
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public static boolean isInSkyblock = false;
-    public static String location = "";
 
     @Override
     public void onInitializeClient() {
@@ -44,15 +41,12 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             if (!handler.getConnection().getAddress().toString().contains("hypixel.net")) return;
             AutoFish.registerListener(client);
             ModFunctions.connectionEventDataReset("Join");
-
-            PartyListParser.expectingPartyList = true;
-            Objects.requireNonNull(client.getNetworkHandler()).sendChatCommand("party list");
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ModFunctions.connectionEventDataReset("Leave"));
 
-        HudElementRegistry.attachElementBefore(VanillaHudElements.PLAYER_LIST, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (guiGraphics, deltaTracker) ->
-                SsuHud.onHudRender(guiGraphics, ModFunctions.getCurrentLocation(MinecraftClient.getInstance()))
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (guiGraphics, deltaTracker) ->
+                SsuHud.onHudRender(guiGraphics, SideBarUtils.getSideBarInfo("location"))
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -71,12 +65,10 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             isInSkyblock = skyblockCheck;
             if (!isInSkyblock) return;
 
-            location = ModFunctions.getCurrentLocation(client);
-
             AutoFish.autoFish(client);
             CorlTimer.corlTimerTick(client);
-            ModFunctions.handlePlayerOnIsland(client, location);
             ModFunctions.handleKeybinds(client);
+            PartyListParser.handleOnJoinCommand();
         });
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {

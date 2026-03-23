@@ -1,8 +1,9 @@
 package com.skyblockutils.features.chatFilters;
 
+import com.skyblockutils.ModFunctions;
 import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
-import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
+import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.List;
@@ -31,17 +32,13 @@ public class ChatFilter {
             if (ModConfig.INSTANCE.getChatFilter(filter.configKey)) {
                 if (filter.requiredLocation != null) {
                     if (filter.requiredLocation.equals("The Catacombs")) {
-                        boolean isInCatacombs = StrayersSkyblockUtilsClient.location.contains("The Catacombs");
-                        boolean hasF3Boss = ((BossHealthOverlayAccessor) MinecraftClient.getInstance().inGameHud.getBossBarHud())
-                                .getEvents().values().stream().findFirst()
-                                .map(bossBar -> bossBar.getName().getString().replaceAll("§.", "").contains("The Professor"))
-                                .orElse(false);
-
-                        if (!isInCatacombs && !hasF3Boss) {
+                        MinecraftClient client = MinecraftClient.getInstance();
+                        if (!ModFunctions.isInDungeons(client)) {
                             continue;
                         }
                     } else {
-                        if (!StrayersSkyblockUtilsClient.location.contains(filter.requiredLocation)) {
+                        String location = SideBarUtils.getSideBarInfo("location");
+                        if (location == null || !location.contains(filter.requiredLocation)) {
                             continue;
                         }
                     }

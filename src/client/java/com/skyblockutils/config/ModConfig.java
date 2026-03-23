@@ -20,7 +20,6 @@ public class ModConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("SkyblockUtils.json");
 
     // General
-    public boolean welcomeHomeMessage;
     public boolean chatFiltersEnabled;
     public boolean partyInviteNotifications;
     public boolean fancyEmotes;
@@ -33,10 +32,15 @@ public class ModConfig {
 
     // HUD
     public boolean hudEnabled;
+    public int hudScale;
     public boolean hudTime;
     public boolean hudTime12hFormat;
     public boolean hudPing;
     public boolean hudTps;
+    public boolean hudFps;
+    public boolean sideBarInHud;
+    public boolean hudPartyInfo;
+    public boolean hudPartyInfoInDungeons;
     public boolean hudIslandFunFact;
 
     private final Map<String, Boolean> chatFilters = new HashMap<>();
@@ -74,7 +78,6 @@ public class ModConfig {
             ConfigData loadedData = GSON.fromJson(reader, ConfigData.class);
 
             if (loadedData != null) {
-                INSTANCE.welcomeHomeMessage = loadedData.welcomeHomeMessage;
                 INSTANCE.chatFiltersEnabled = loadedData.chatFiltersEnabled;
                 INSTANCE.downtimeTracker = loadedData.downtimeTracker;
                 INSTANCE.dungeonPartyCommands = loadedData.dungeonPartyCommands;
@@ -83,10 +86,15 @@ public class ModConfig {
                 INSTANCE.fancyEmotes = loadedData.fancyEmotes;
                 INSTANCE.autoHoppityEggs = loadedData.autoHoppityEggs;
                 INSTANCE.hudEnabled = loadedData.hudEnabled;
+                INSTANCE.hudScale = loadedData.hudScale;
                 INSTANCE.hudTime = loadedData.hudTime;
                 INSTANCE.hudTime12hFormat = loadedData.hudTime12hFormat;
                 INSTANCE.hudPing = loadedData.hudPing;
                 INSTANCE.hudTps = loadedData.hudTps;
+                INSTANCE.hudFps = loadedData.hudFps;
+                INSTANCE.sideBarInHud = loadedData.sideBarInHud;
+                INSTANCE.hudPartyInfo = loadedData.hudPartyInfo;
+                INSTANCE.hudPartyInfoInDungeons = loadedData.hudPartyInfoInDungeons;
                 INSTANCE.coordinatesSendLocation = loadedData.coordinatesSendLocation;
                 INSTANCE.hudIslandFunFact = loadedData.hudIslandFunFact;
 
@@ -112,7 +120,6 @@ public class ModConfig {
     public static void save() {
         try (FileWriter writer = new FileWriter(CONFIG_PATH.toFile())) {
             ConfigData data = new ConfigData();
-            data.welcomeHomeMessage = INSTANCE.welcomeHomeMessage;
             data.chatFiltersEnabled = INSTANCE.chatFiltersEnabled;
             data.downtimeTracker = INSTANCE.downtimeTracker;
             data.chatFilters = INSTANCE.getChatFilters();
@@ -122,10 +129,15 @@ public class ModConfig {
             data.fancyEmotes = INSTANCE.fancyEmotes;
             data.autoHoppityEggs = INSTANCE.autoHoppityEggs;
             data.hudEnabled = INSTANCE.hudEnabled;
+            data.hudScale = INSTANCE.hudScale;
             data.hudTime = INSTANCE.hudTime;
             data.hudTime12hFormat = INSTANCE.hudTime12hFormat;
             data.hudPing = INSTANCE.hudPing;
             data.hudTps = INSTANCE.hudTps;
+            data.hudFps = INSTANCE.hudFps;
+            data.sideBarInHud = INSTANCE.sideBarInHud;
+            data.hudPartyInfo = INSTANCE.hudPartyInfo;
+            data.hudPartyInfoInDungeons = INSTANCE.hudPartyInfoInDungeons;
             data.coordinatesSendLocation = INSTANCE.coordinatesSendLocation;
             data.glowingPlayers = INSTANCE.glowingPlayers;
             data.hudIslandFunFact = INSTANCE.hudIslandFunFact;
@@ -148,7 +160,6 @@ public class ModConfig {
     }
 
     private static class ConfigData {
-        public boolean welcomeHomeMessage = false;
         public boolean chatFiltersEnabled = true;
         public boolean downtimeTracker = true;
         public boolean dungeonPartyCommands = true;
@@ -157,10 +168,15 @@ public class ModConfig {
         public boolean fancyEmotes = true;
         public boolean autoHoppityEggs = false;
         public boolean hudEnabled = true;
+        public int hudScale = 100;
         public boolean hudTime = true;
         public boolean hudTime12hFormat = false;
         public boolean hudPing = true;
         public boolean hudTps = true;
+        public boolean hudFps = true;
+        public boolean sideBarInHud = false;
+        public boolean hudPartyInfo = true;
+        public boolean hudPartyInfoInDungeons = false;
         public boolean hudIslandFunFact = true;
         public boolean coordinatesSendLocation = true;
 

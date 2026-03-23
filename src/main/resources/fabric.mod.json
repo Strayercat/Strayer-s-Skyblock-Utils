@@ -12,7 +12,7 @@
     "sources": "https://github.com/Strayercat/Strayer-s-Skyblock-Utils"
   },
   "license": "CC0-1.0",
-  "icon": "assets/strayers-skyblock-utils/icon.png",
+  "icon": "assets/skyblockutils/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [

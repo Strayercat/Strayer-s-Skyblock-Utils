@@ -1,5 +1,7 @@
 package com.skyblockutils.mixin.client;
 
+import com.skyblockutils.StrayersSkyblockUtilsClient;
+import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -15,5 +17,10 @@ public class InGameHudMixin {
     private void onRenderEnd(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         MinecraftClient mc = MinecraftClient.getInstance();
         OnScreenNotification.render(context, mc.getWindow().getScaledWidth(), mc.getWindow().getScaledHeight());
+    }
+
+    @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
+    private void hideSidebarMixin(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        if (ModConfig.INSTANCE.sideBarInHud && StrayersSkyblockUtilsClient.isInSkyblock) ci.cancel();
     }
 }

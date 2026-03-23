@@ -4,20 +4,42 @@ import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
+import com.skyblockutils.features.party.PartyInfo;
+import com.skyblockutils.utils.FunFacts;
+import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SsuHud {
+    private static final Identifier CAT_IMAGE = Identifier.of("skyblockutils", "textures/hud/cat.png");
+
     private static boolean isVisible = false;
     public static boolean showBossBar = true;
-    public static String funFact;
-    public static int hudWidth = 200;
-    public static int lineHeight = 12;
+    public static String funFact = null;
+    public static boolean funFactHandled = false;
+
+    public static float scale;
+
+    private static final int BASE_HUD_WIDTH = 200;
+    private static final int BASE_LINE_HEIGHT = 12;
+    private static final int BASE_DIVIDER_HEIGHT = 6;
+    private static final int BASE_PADDING = 10;
+
+    private static final int COLOR_TITLE = 0xFFFFFFFF;
+    private static final int COLOR_SUBTITLE = 0xFFAAAAAA;
+    private static final int COLOR_LINE = 0xFFAAFFAA;
+    private static final int COLOR_HEADER = 0xFF66FF66;
+    private static final int COLOR_OUTLINE = 0xFF00AA00;
+    private static final int COLOR_BG = 0xAA000000;
+    private static final int COLOR_DIVIDER = 0xFF00AA00;
 
     public static void setVisible(boolean visible) {
         if (!ModConfig.INSTANCE.hudEnabled) return;
@@ -25,82 +47,188 @@ public class SsuHud {
         showBossBar = !visible;
     }
 
-    private record HudLine(String text, int color) {
+    private record HudLine(String text, int color, boolean isDivider) {
+        static HudLine of(String text, int color) {
+            return new HudLine(text, color, false);
+        }
+
+        static HudLine divider() {
+            return new HudLine("", COLOR_DIVIDER, true);
+        }
     }
 
     public static void onHudRender(DrawContext context, String location) {
         if (!isVisible) return;
 
+        scale = ModConfig.INSTANCE.hudScale / 100.0f;
+
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
+
         List<HudLine> lines = getHudLines(client, location);
-        if (lines.size() == 2) return;
+        if (lines.size() <= 2) return;
 
         int screenWidth = client.getWindow().getScaledWidth();
-        int hudHeight = lines.size() * lineHeight + 10;
-        int textAlignment = screenWidth / 2 - (hudWidth / 2) + 5;
-        int y = 5;
+        int dividerCount = (int) lines.stream().filter(HudLine::isDivider).count();
+        int scaledHudWidth = (int) (BASE_HUD_WIDTH * scale);
+        int renderX = screenWidth / 2 - scaledHudWidth / 2;
+        int unscaledRenderX = (int) (renderX / scale);
+        int unscaledRenderY = BASE_PADDING / 2;
+        int unscaledHudWidth = BASE_HUD_WIDTH;
+        int unscaledHudHeight = (lines.size() - dividerCount) * BASE_LINE_HEIGHT + dividerCount * BASE_DIVIDER_HEIGHT + BASE_PADDING;
+        int scaledHudHeight = (int)(unscaledHudHeight * scale);
 
-        context.fill((screenWidth / 2) - (hudWidth / 2), 0, (screenWidth / 2) + (hudWidth / 2), hudHeight, 0xAA000000);
+        context.fill(renderX, 0, renderX + scaledHudWidth, scaledHudHeight, COLOR_BG);
+        context.getMatrices().pushMatrix();
+        context.getMatrices().scale(scale, scale);
+        context.fill(unscaledRenderX, 0, unscaledRenderX + 1, unscaledHudHeight, COLOR_OUTLINE);
+        context.fill(unscaledRenderX + unscaledHudWidth - 1, 0, unscaledRenderX + unscaledHudWidth, unscaledHudHeight, COLOR_OUTLINE);
+        context.fill(unscaledRenderX, 0, unscaledRenderX + unscaledHudWidth, 1, COLOR_OUTLINE);
+        context.fill(unscaledRenderX, unscaledHudHeight - 1, unscaledRenderX + unscaledHudWidth, unscaledHudHeight, COLOR_OUTLINE);
 
         for (HudLine line : lines) {
-            context.drawTextWithShadow(client.textRenderer, line.text(), textAlignment, y, line.color());
-            y += lineHeight;
+            if (line.isDivider()) {
+                int lineY = unscaledRenderY + 1;
+                context.fill(unscaledRenderX + 4, lineY, unscaledRenderX + BASE_HUD_WIDTH - 4, lineY + 1, COLOR_DIVIDER);
+                unscaledRenderY += BASE_DIVIDER_HEIGHT;
+            } else {
+                context.drawTextWithShadow(client.textRenderer, line.text(), unscaledRenderX + 5, unscaledRenderY, line.color());
+                unscaledRenderY += BASE_LINE_HEIGHT;
+            }
         }
+
+        context.getMatrices().popMatrix();
+        context.getMatrices().pushMatrix();
+        float imageScale = (1.0f / 6.0f) * scale;
+        context.getMatrices().scale(imageScale, imageScale);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, CAT_IMAGE,
+                (int)((renderX + scaledHudWidth) / imageScale) - 31,
+                (int)((scaledHudHeight / 2.0f) / imageScale) - 175,
+                0, 0, 418, 418, 418, 418);
+        context.getMatrices().popMatrix();
     }
 
     private static @NotNull List<HudLine> getHudLines(MinecraftClient client, String location) {
-        int whiteColor = 0xFFFFFFFF;
-        int lineColor = 0xFFAAFFAA;
-//        List<String> hubLocations = List.of("⏣ Village", "⏣ Combat Settlement", "⏣ Graveyard", "⏣ Mining District", "⏣ Farm", "⏣ Fishing Outpost", "⏣ Colosseum", "⏣ Wilderness", "⏣ Mountain", "⏣ Unincorporated", "⏣ Ruins", "⏣ Forest", "⏣ Community Center", "⏣ Election Room", "⏣ Canvas Room", "⏣ Auction House", "⏣ Bazaar Alley", "⏣ Bank", "⏣ Builder's House", "⏣ Pet Care", "⏣ Taylor's Shop", "⏣ Fashion Shop", "⏣ Fisherman's Hut", "⏣ Thaumaturgist", "⏣ Tavern", "⏣ Crypts", "⏣ Coal Mine", "⏣ Catacombs Entrance", "⏣ Foraging Camp", "⏣ Sewer", "⏣ Rabbit House", "⏣ Flower House", "⏣ Artist's Abode", "⏣ Wizard Tower", "⏣ Shen's Auction", "⏣ Trade Center");
-        List<HudLine> lines = new java.util.ArrayList<>(List.of(
-                new HudLine("STRAYER'S SKYBLOCK UTILS", 0xFF66FF66),
-                new HudLine("--------------------------------", whiteColor)));
+        List<HudLine> lines = new ArrayList<>();
+        lines.add(HudLine.of("STRAYER'S SKYBLOCK UTILS", COLOR_HEADER));
+        addDivider(lines);
 
-        if (ModConfig.INSTANCE.hudTime)
-            lines.add(new HudLine("Current time: " + LocalTime.now()
-                    .format(ModConfig.INSTANCE.hudTime12hFormat
-                            ? DateTimeFormatter.ofPattern("h:mm a")
-                            : DateTimeFormatter.ofPattern("H:mm")).toUpperCase().replaceAll("\\.", ""), lineColor));
-        if (ModConfig.INSTANCE.hudPing) lines.add(new HudLine("Ping: " + ModFunctions.getPing(client), lineColor));
-        if (ModConfig.INSTANCE.hudTps)
-            lines.add(new HudLine("Server tps: " + String.format("%.1f", ModFunctions.tps), lineColor));
+        boolean anyGeneralInfo = false;
+
+        if (ModConfig.INSTANCE.hudTime) {
+            DateTimeFormatter fmt = ModConfig.INSTANCE.hudTime12hFormat
+                    ? DateTimeFormatter.ofPattern("h:mm a")
+                    : DateTimeFormatter.ofPattern("H:mm");
+            String time = LocalTime.now().format(fmt).toUpperCase().replaceAll("\\.", "");
+            lines.add(HudLine.of("Current time: " + time, COLOR_LINE));
+            anyGeneralInfo = true;
+        }
+
+        if (ModConfig.INSTANCE.hudPing) {
+            lines.add(HudLine.of("Ping: " + ModFunctions.getPing(client), COLOR_LINE));
+            anyGeneralInfo = true;
+        }
+
+        if (ModConfig.INSTANCE.hudTps) {
+            lines.add(HudLine.of("Server tps: " + String.format("%.1f", ModFunctions.tps), COLOR_LINE));
+            anyGeneralInfo = true;
+        }
+
+        if (ModConfig.INSTANCE.hudFps) {
+            lines.add(HudLine.of("Fps: " + client.getCurrentFps(), COLOR_LINE));
+            anyGeneralInfo = true;
+        }
+
+        if (ModConfig.INSTANCE.sideBarInHud) {
+            addSidebarSection(lines, anyGeneralInfo);
+            anyGeneralInfo = true;
+        }
+
+        if (ModConfig.INSTANCE.hudPartyInfo) {
+            boolean showParty = !ModFunctions.isInDungeons(client)
+                    || ModConfig.INSTANCE.hudPartyInfoInDungeons;
+            if (showParty) {
+                addPartySection(lines, anyGeneralInfo);
+                anyGeneralInfo = true;
+            }
+        }
 
         if (location.equals("⏣ Dungeon Hub") || ModFunctions.isInDungeons(client)) {
-            if (ModConfig.INSTANCE.hudTps || ModConfig.INSTANCE.hudPing || ModConfig.INSTANCE.hudTime)
-                lines.add(new HudLine("--------------------------------", whiteColor));
-            lines.add(new HudLine("Dungeon HUD", whiteColor));
-            lines.add(new HudLine("Downtime requested: " + (DowntimeTracker.downtimeRequested ? "Yes" : "No"), lineColor));
-            lines.add(new HudLine("Requested by: " + (DowntimeTracker.downtimeRequested ? DowntimeTracker.requesterUsername : ""), lineColor));
-            lines.add(new HudLine("", whiteColor));
-            lines.add(new HudLine("Floor Auto-Rejoin: " + (DungeonPartyCommands.autoRejoinEnabled ? "On" : "Off"), lineColor));
-            lines.add(new HudLine("Current floor: " + DungeonPartyCommands.currentFloor, lineColor));
+            addDungeonSection(lines, anyGeneralInfo);
             return lines;
         }
 
-        if (location.equals("⏣ Your Island")) {
-            if (ModConfig.INSTANCE.hudIslandFunFact) {
-                lines.add(new HudLine("--------------------------------", whiteColor));
-                lines.addAll(wrapText("Fun fact: " + funFact, hudWidth - 10, lineColor));
-            }
-            return lines;
+        if (location.equals("⏣ Your Island") && ModConfig.INSTANCE.hudIslandFunFact) {
+            if (!funFactHandled) funFact = FunFacts.funFacts.get((int) (Math.random() * FunFacts.funFacts.size()));
+            if (anyGeneralInfo) addDivider(lines);
+            lines.addAll(wrapText("Fun fact: " + funFact, (int) (BASE_HUD_WIDTH * scale) - 10, COLOR_LINE));
+            funFactHandled = true;
         }
+
         return lines;
+    }
+
+    private static void addDivider(List<HudLine> lines) {
+        lines.add(HudLine.divider());
+    }
+
+    private static void addSidebarSection(List<HudLine> lines, boolean preceded) {
+        if (preceded) addDivider(lines);
+        lines.add(HudLine.of("Scoreboard Info", COLOR_TITLE));
+
+        String date = SideBarUtils.getSideBarInfo("date");
+        String time = SideBarUtils.getSideBarInfo("time");
+        String sbLoc = SideBarUtils.getSideBarInfo("location");
+        String purse = SideBarUtils.getSideBarInfo("purse");
+        String bits = SideBarUtils.getSideBarInfo("bits");
+
+        if (date != null) lines.add(HudLine.of(date, COLOR_LINE));
+        if (time != null) lines.add(HudLine.of(time, COLOR_LINE));
+        if (sbLoc != null) lines.add(HudLine.of(sbLoc, COLOR_LINE));
+        if (purse != null) lines.add(HudLine.of("Purse: " + purse, COLOR_LINE));
+        if (bits != null) lines.add(HudLine.of("Bits: " + bits, COLOR_LINE));
+    }
+
+    private static void addPartySection(List<HudLine> lines, boolean preceded) {
+        if (preceded) addDivider(lines);
+        lines.add(HudLine.of("Party Info", COLOR_TITLE));
+
+        if (!PartyInfo.isInParty) {
+            lines.add(HudLine.of("Not currently in a party", COLOR_LINE));
+            return;
+        }
+
+        lines.add(HudLine.of("Leader:", COLOR_SUBTITLE));
+        lines.add(HudLine.of(PartyInfo.leader, COLOR_LINE));
+        lines.add(HudLine.of("Members:", COLOR_SUBTITLE));
+
+        String memberList = PartyInfo.members.toString().replace("[", "").replace("]", "");
+        lines.addAll(wrapText(memberList, (int) (BASE_HUD_WIDTH * scale) - 10, COLOR_LINE));
+    }
+
+    private static void addDungeonSection(List<HudLine> lines, boolean preceded) {
+        if (preceded) addDivider(lines);
+        lines.add(HudLine.of("Dungeon HUD", COLOR_TITLE));
+        lines.add(HudLine.of("Downtime requested: " + (DowntimeTracker.downtimeRequested ? "Yes" : "No"), COLOR_LINE));
+
+        if (DowntimeTracker.downtimeRequested) {
+            lines.add(HudLine.of("Requested by: " + DowntimeTracker.requesterUsername, COLOR_LINE));
+        }
+
+        lines.add(HudLine.of("Floor Auto-Rejoin: " + (DungeonPartyCommands.autoRejoinEnabled ? "On" : "Off"), COLOR_LINE));
+        lines.add(HudLine.of("Current floor: " + DungeonPartyCommands.currentFloor, COLOR_LINE));
     }
 
     private static List<HudLine> wrapText(String text, int maxWidth, int color) {
         MinecraftClient client = MinecraftClient.getInstance();
-        List<HudLine> wrappedLines = new java.util.ArrayList<>();
-
+        List<HudLine> wrappedLines = new ArrayList<>();
         String[] words = text.split(" ");
         StringBuilder currentLine = new StringBuilder();
 
         for (String word : words) {
             String testLine = currentLine.isEmpty() ? word : currentLine + " " + word;
-            int lineWidth = client.textRenderer.getWidth(testLine);
-
-            if (lineWidth > maxWidth && !currentLine.isEmpty()) {
-                wrappedLines.add(new HudLine(currentLine.toString(), color));
+            if (client.textRenderer.getWidth(testLine) > maxWidth && !currentLine.isEmpty()) {
+                wrappedLines.add(HudLine.of(currentLine.toString(), color));
                 currentLine = new StringBuilder(word);
             } else {
                 currentLine = new StringBuilder(testLine);
@@ -108,7 +236,7 @@ public class SsuHud {
         }
 
         if (!currentLine.isEmpty()) {
-            wrappedLines.add(new HudLine(currentLine.toString(), color));
+            wrappedLines.add(HudLine.of(currentLine.toString(), color));
         }
 
         return wrappedLines;

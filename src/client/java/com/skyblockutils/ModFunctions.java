@@ -6,62 +6,47 @@ import com.skyblockutils.features.CorlTimer;
 import com.skyblockutils.features.SsuHud;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
+import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.GuiAccessor;
-import com.skyblockutils.utils.FunFacts;
 import com.skyblockutils.utils.GuiBlocker;
+import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.scoreboard.ScoreboardDisplaySlot;
-import net.minecraft.scoreboard.ScoreboardEntry;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.util.profiler.MultiValueDebugSampleLogImpl;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class ModFunctions {
     public static boolean playerWelcomedToIsland = false;
-    public static boolean funFactFetched = false;
     public static long lastTimePingCalculated;
     public static int ping = 0;
     public static float tps = 0;
 
     public static void connectionEventDataReset(String type) {
         if (type.equals("Join")) {
-            StrayersSkyblockUtilsClient.location = "";
             playerWelcomedToIsland = false;
-            funFactFetched = false;
 
             GuiBlocker.shouldHideScreen = false;
+            PartyListParser.onJoinCommandHandled = false;
+            SsuHud.funFactHandled = false;
 
             DowntimeTracker.resetDowntimeTracker();
             CorlTimer.resetCorlTimer();
             AutoFish.resetAutoFish();
         } else {
             StrayersSkyblockUtilsClient.isInSkyblock = false;
-            StrayersSkyblockUtilsClient.location = "";
             playerWelcomedToIsland = false;
-            funFactFetched = false;
+            SsuHud.funFactHandled = false;
+
+            PartyListParser.onJoinCommandHandled = false;
 
             DungeonPartyCommands.resetDungeonPartyCommands();
             CorlTimer.resetCorlTimer();
             AutoFish.resetAutoFish();
             DowntimeTracker.resetDowntimeTracker();
-        }
-    }
-
-    public static void handlePlayerOnIsland(MinecraftClient client, String location) {
-        if (ModConfig.INSTANCE.welcomeHomeMessage) {
-            if (!playerWelcomedToIsland && location.contains("⏣ Your Island"))
-                showTitle(client, "§2WELCOME HOME", 40);
-            playerWelcomedToIsland = true;
-        }
-
-        if (ModConfig.INSTANCE.hudIslandFunFact && !funFactFetched) {
-            SsuHud.funFact = FunFacts.funFacts.get((int) Math.floor(Math.random() * FunFacts.funFacts.size()));
-            funFactFetched = true;
         }
     }
 
@@ -92,7 +77,7 @@ public class ModFunctions {
                 + " z:" + (int) client.player.getZ();
 
         String coordinatesMessage = (arguments.contains("withLocation")
-                ? ModFunctions.getCurrentLocation(client) + " | "
+                ? SideBarUtils.getSideBarInfo("location") + " | "
                 : "") + coordinates;
 
         client.getNetworkHandler().sendChatMessage(coordinatesMessage);
@@ -118,33 +103,13 @@ public class ModFunctions {
         return sidebar.getDisplayName().getString().contains("SKYBLOCK");
     }
 
-    public static String getCurrentLocation(net.minecraft.client.MinecraftClient client) {
-        String location = "None";
-        if (client.world == null) return location;
-        var scoreboard = client.world.getScoreboard();
-        var sidebar = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
-        if (sidebar == null) return location;
-
-        Collection<ScoreboardEntry> entries = scoreboard.getScoreboardEntries(sidebar);
-        for (ScoreboardEntry entry : entries) {
-            String playerName = entry.owner();
-            Team team = scoreboard.getScoreHolderTeam(playerName);
-            String fullText;
-
-            if (team != null) {
-                fullText = team.getPrefix().getString() + playerName + team.getSuffix().getString();
-            } else {
-                fullText = playerName;
-            }
-
-            if (fullText.contains("⏣")) location = fullText.replaceAll("§.", "").trim();
-        }
-        return location;
-    }
-
     public static Boolean isInDungeons(net.minecraft.client.MinecraftClient client) {
-        boolean isInCatacombs = StrayersSkyblockUtilsClient.location.contains("The Catacombs");
-        boolean hasF3Boss = ((BossHealthOverlayAccessor) client.inGameHud.getBossBarHud()).getEvents().values().stream().findFirst().map(bossBar -> bossBar.getName().getString().replaceAll("§.", "").contains("The Professor")).orElse(false);
+        String location = SideBarUtils.getSideBarInfo("location");
+        boolean isInCatacombs = location != null && location.contains("The Catacombs");
+        boolean hasF3Boss = ((BossHealthOverlayAccessor) client.inGameHud.getBossBarHud())
+                .getEvents().values().stream().findFirst()
+                .map(bossBar -> bossBar.getName().getString().replaceAll("§.", "").contains("The Professor"))
+                .orElse(false);
 
         return isInCatacombs || hasF3Boss;
     }
