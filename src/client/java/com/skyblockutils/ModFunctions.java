@@ -6,7 +6,6 @@ import com.skyblockutils.features.CorlTimer;
 import com.skyblockutils.features.SsuHud;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
-import com.skyblockutils.features.dungeons.DungeonPartyCommands;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.GuiAccessor;
