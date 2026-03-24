@@ -2,7 +2,7 @@ package com.skyblockutils;
 
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.AutoFish;
-import com.skyblockutils.features.CorlTimer;
+import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.SsuHud;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;

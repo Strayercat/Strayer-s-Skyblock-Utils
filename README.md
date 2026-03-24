@@ -21,7 +21,7 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Fancy emotes (o/ into ( ﾟ◡ﾟ)/ and such)
 ### Misc
 - A customizable contextual hud
-- Glowing players via /ssu glowingplayers
+- Glowing players via /ssu glowingPlayers
 - Custom party invite notifications
 - Auto Hoppity eggs
 </details>

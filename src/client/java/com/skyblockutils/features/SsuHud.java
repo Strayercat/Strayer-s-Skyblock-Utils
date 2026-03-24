@@ -211,15 +211,13 @@ public class SsuHud {
         lines.add(HudLine.of("Dungeon HUD", COLOR_TITLE));
         lines.add(HudLine.of("Downtime requested: " + (DowntimeTracker.downtimeRequested ? "Yes" : "No"), COLOR_LINE));
 
-        if (DowntimeTracker.downtimeRequested) {
-            lines.add(HudLine.of("Requested by: " + DowntimeTracker.requesterUsername, COLOR_LINE));
-        }
+        if (DowntimeTracker.downtimeRequested) lines.add(HudLine.of("Requested by: " + DowntimeTracker.requesterUsername, COLOR_LINE));
 
         lines.add(HudLine.of("Floor Auto-Rejoin: " + (AutoRejoin.autoRejoinEnabled ? "On" : "Off"), COLOR_LINE));
-        lines.add(HudLine.of("Current floor: " + AutoRejoin.currentFloor, COLOR_LINE));
+        if (AutoRejoin.autoRejoinEnabled) lines.add(HudLine.of("Current floor: " + AutoRejoin.currentFloor, COLOR_LINE));
     }
 
-    private static List<HudLine> wrapText(String text, int maxWidth, int color) {
+    private static List<HudLine> wrapText(String text, int maxWidth, int color){
         MinecraftClient client = MinecraftClient.getInstance();
         List<HudLine> wrappedLines = new ArrayList<>();
         String[] words = text.split(" ");

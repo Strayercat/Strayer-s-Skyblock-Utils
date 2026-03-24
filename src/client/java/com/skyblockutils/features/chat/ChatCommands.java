@@ -38,19 +38,8 @@ public class ChatCommands {
         List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist", "sus", "furry", "goon");
         String command = messageContent.replaceFirst("!", "").split(" ")[0].trim().toLowerCase();
         if (allowedCommands.contains(command)) {
-            String formatResult;
-            switch (command) {
-                case "goon" -> {
-                    int times = (int) (Math.random() * 47);
-                    formatResult = "goons " + times + " times per week";
-                }
-                default -> {
-                    int randomPercentage = (int) (Math.random() * 100) + 1;
-                    formatResult = "is " + randomPercentage + "% " + command;
-                }
-            }
-
-            final String result = formatResult;
+            int randomPercentage = (int) (Math.random() * 100) + 1;
+            final String result = "is " + randomPercentage + "% " + command;
 
             if (messageContent.split(" ").length == 1) {
                 String cleanMessageHeader = parts[0].replaceAll("\\[.*?]", "").trim();
