@@ -29,12 +29,12 @@ public class ChatCommands {
             sendMessageInChannel("Tps: " + String.format("%.1f", ModFunctions.tps), messageChannel);
         if (messageContent.equalsIgnoreCase("!ping"))
             sendMessageInChannel("Ping: " + ModFunctions.ping, messageChannel);
-        if(messageContent.equalsIgnoreCase("!fps")) sendMessageInChannel("Fps: ".concat(String.valueOf(MinecraftClient.getInstance().getCurrentFps())), messageChannel);
+        if (messageContent.equalsIgnoreCase("!fps"))
+            sendMessageInChannel("Fps: ".concat(String.valueOf(MinecraftClient.getInstance().getCurrentFps())), messageChannel);
 
         // Silly messages
-        List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist", "sus");
+        List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist", "sus", "furry");
         String command = messageContent.replaceFirst("!", "").split(" ")[0].trim().toLowerCase();
-        System.out.println(command);
         if (allowedCommands.contains(command)) {
             int randomPercentage = (int) (Math.random() * 100) + 1;
 
@@ -45,16 +45,14 @@ public class ChatCommands {
             } else {
                 String username = messageContent.split(" ")[1];
 
-                PlayerLookup.getFormattedUsername(username).thenAccept(formattedName ->
-                        MinecraftClient.getInstance().execute(() -> {
-                            if (formattedName == null) {
-                                sendMessageInChannel(username + " is not a valid username", messageChannel);
-                                return;
-                            }
+                PlayerLookup.getFormattedUsername(username).thenAccept(formattedName -> MinecraftClient.getInstance().execute(() -> {
+                    if (formattedName == null) {
+                        sendMessageInChannel(username + " is not a valid username", messageChannel);
+                        return;
+                    }
 
-                            sendMessageInChannel(formattedName + " is " + randomPercentage + "% " + command, messageChannel);
-                        })
-                );
+                    sendMessageInChannel(formattedName + " is " + randomPercentage + "% " + command, messageChannel);
+                }));
             }
         }
     }
