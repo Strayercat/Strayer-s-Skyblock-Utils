@@ -24,6 +24,8 @@ public class ClothConfigHandler {
         general.addEntry(entryBuilder.startBooleanToggle(Text.literal("Fancy Emotes"), ModConfig.INSTANCE.fancyEmotes).setDefaultValue(false).setTooltip(Text.literal("Transforms <3 into ♥ and such")).setSaveConsumer(newValue -> ModConfig.INSTANCE.fancyEmotes = newValue).build());
         general.addEntry(entryBuilder.startBooleanToggle(Text.literal("Auto Hoppity Eggs"), ModConfig.INSTANCE.autoHoppityEggs).setDefaultValue(false).setTooltip(Text.literal("Whether to instantly collect hoppity eggs or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.autoHoppityEggs = newValue).build());
         general.addEntry(entryBuilder.startBooleanToggle(Text.literal("Coordinates Location"), ModConfig.INSTANCE.coordinatesSendLocation).setDefaultValue(true).setTooltip(Text.literal("Wheter printing your coordinates (via the keybind) should also send the Skyblock location or not")).setSaveConsumer(newValue -> ModConfig.INSTANCE.coordinatesSendLocation = newValue).build());
+        general.addEntry(entryBuilder.startBooleanToggle(Text.literal("Chat Commands"), ModConfig.INSTANCE.chatCommands).setDefaultValue(true).setTooltip(Text.literal("Wheter or not to enable !gay !furry !sus and such commands")).setSaveConsumer(newValue -> ModConfig.INSTANCE.chatCommands = newValue).build());
+
 
         // Dungeons subcategory
         SubCategoryBuilder dungeonsBuilder = entryBuilder.startSubCategory(Text.literal("Dungeons")).setTooltip(Text.literal("Dungeon-related features"));

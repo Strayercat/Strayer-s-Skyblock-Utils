@@ -37,7 +37,7 @@ public class PartyInfo {
             scheduler.schedule(() -> {
                 PartyListParser.expectingPartyList = true;
                 Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler()).sendChatCommand("party list");
-            }, 2, TimeUnit.SECONDS);
+            }, 500, TimeUnit.MILLISECONDS);
         }
     }
 }

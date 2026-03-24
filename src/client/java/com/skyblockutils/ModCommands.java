@@ -55,7 +55,11 @@ public class ModCommands {
                                         .suggests((ctx, builder) -> {
                                             var handler = MinecraftClient.getInstance().getNetworkHandler();
                                             if (handler != null) {
-                                                handler.getPlayerList().forEach(entry -> builder.suggest(entry.getProfile().name()));
+                                                String remaining = builder.getRemaining().toLowerCase();
+                                                handler.getPlayerList().stream()
+                                                        .map(entry -> entry.getProfile().name())
+                                                        .filter(name -> name.toLowerCase().startsWith(remaining))
+                                                        .forEach(builder::suggest);
                                             }
                                             return builder.buildFuture();
                                         })

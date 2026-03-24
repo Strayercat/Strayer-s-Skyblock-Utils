@@ -1,6 +1,7 @@
 package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
+import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.PlayerLookup;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -33,15 +34,28 @@ public class ChatCommands {
             sendMessageInChannel("Fps: ".concat(String.valueOf(MinecraftClient.getInstance().getCurrentFps())), messageChannel);
 
         // Silly messages
-        List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist", "sus", "furry");
+        if (!ModConfig.INSTANCE.chatCommands) return;
+        List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist", "sus", "furry", "goon");
         String command = messageContent.replaceFirst("!", "").split(" ")[0].trim().toLowerCase();
         if (allowedCommands.contains(command)) {
-            int randomPercentage = (int) (Math.random() * 100) + 1;
+            String formatResult;
+            switch (command) {
+                case "goon" -> {
+                    int times = (int) (Math.random() * 47);
+                    formatResult = "goons " + times + " times per week";
+                }
+                default -> {
+                    int randomPercentage = (int) (Math.random() * 100) + 1;
+                    formatResult = "is " + randomPercentage + "% " + command;
+                }
+            }
+
+            final String result = formatResult;
 
             if (messageContent.split(" ").length == 1) {
                 String cleanMessageHeader = parts[0].replaceAll("\\[.*?]", "").trim();
                 String messageSender = cleanMessageHeader.split(" ")[cleanMessageHeader.split(" ").length - 1];
-                sendMessageInChannel(messageSender + " is " + randomPercentage + "% " + command, messageChannel);
+                sendMessageInChannel(messageSender + " " + result, messageChannel);
             } else {
                 String username = messageContent.split(" ")[1];
 
@@ -51,7 +65,7 @@ public class ChatCommands {
                         return;
                     }
 
-                    sendMessageInChannel(formattedName + " is " + randomPercentage + "% " + command, messageChannel);
+                    sendMessageInChannel(formattedName + " " + result, messageChannel);
                 }));
             }
         }

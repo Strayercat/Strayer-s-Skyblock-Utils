@@ -25,6 +25,7 @@ public class ModConfig {
     public boolean fancyEmotes;
     public boolean autoHoppityEggs;
     public boolean coordinatesSendLocation;
+    public boolean chatCommands;
     // Dungeons
     public boolean downtimeTracker;
     public boolean dungeonPartyCommands;
@@ -113,6 +114,7 @@ public class ModConfig {
                 INSTANCE.hudIslandFunFact = loadedData.hudIslandFunFact;
                 INSTANCE.glaciteWaypoints = loadedData.glaciteWaypoints;
                 INSTANCE.displayGlaciteWaypoints = loadedData.displayGlaciteWaypoints;
+                INSTANCE.chatCommands = loadedData.chatCommands;
 
                 if (loadedData.chatFilters != null) {
                     for (Map.Entry<String, Boolean> entry : loadedData.chatFilters.entrySet()) {
@@ -159,6 +161,7 @@ public class ModConfig {
             data.hudIslandFunFact = INSTANCE.hudIslandFunFact;
             data.glaciteWaypoints = INSTANCE.glaciteWaypoints;
             data.displayGlaciteWaypoints = INSTANCE.displayGlaciteWaypoints;
+            data.chatCommands = INSTANCE.chatCommands;
 
             GSON.toJson(data, writer);
         } catch (IOException ignored) {
@@ -185,6 +188,7 @@ public class ModConfig {
         public boolean partyInviteNotifications = true;
         public boolean fancyEmotes = true;
         public boolean autoHoppityEggs = false;
+        public boolean chatCommands = true;
         public boolean hudEnabled = true;
         public int hudScale = 100;
         public boolean hudTime = true;

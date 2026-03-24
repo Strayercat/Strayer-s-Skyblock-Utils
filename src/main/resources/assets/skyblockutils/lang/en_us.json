@@ -2,6 +2,6 @@
   "key.category.minecraft.ssu": "Strayer's Skyblock Utils",
   "key.ssu.autofish": "Toggle Autofish",
   "key.ssu.corlTimer": "Toggle Corleone Timer",
-  "key.ssu.dungeonHud": "Open dungeons HUD",
+  "key.ssu.hud": "Show SSU HUD",
   "key.ssu.sendCoordinates": "Send coordinates in chat"
 }
