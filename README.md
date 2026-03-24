@@ -8,17 +8,22 @@ SSU started as a personal project. I wanted to make something for myself to help
 <details>
 <summary>Features:</summary>
 
-- A customizable contextual hud
-- Glowing players
+### Dungeons
+- Dungeon join commands in "!M7" format
+- Floor auto-rejoin via /ssu autorejoin (floor("m7" format))
+- Downtime tracker via !dt/dt (reason(optional))
+### Mining
+- Corleone reminders via keybinds (reminds you 1 minute after killing it)
+- Umber and tungsten veins waypoints while in the glacite tunnels
+### Chat
 - Chat filter toggles (Incomplete)
+- Printing coordinates to chat via keybinds
+- Fancy emotes (o/ into ( ﾟ◡ﾟ)/ and such)
+### Misc
+- A customizable contextual hud
+- Glowing players via /ssu glowingplayers
 - Custom party invite notifications
-- Fancy emotes
 - Auto Hoppity eggs
-- Floor auto-rejoin for dungeons
-- Downtime tracker for dungeons
-- !M7 format commands for dungeons
-- Corleone reminders via a keybind
-- Printing coordinates via a keybind
 </details>
 
 ## REPORTING ISSUES
