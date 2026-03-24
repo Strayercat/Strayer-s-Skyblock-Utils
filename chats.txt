@@ -1,0 +1,141 @@
+ARACHNE
+[BOSS] Arachne: The Era of Spiders begins now.
+Arachne's Brood used Venom Shot on you hitting you for 71.7 damage and infecting you with venom.
+
+ABILITIES
+No more charges, next one in 12.8s!
+You healed yourself for 937.7 health!
+
+CRIMSON ISLE
+A Vanquisher is spawning nearby!
+
+EXPERIMENTS
+You claimed the Ultrasequencer rewards!
+You claimed the Chronomatron rewards!
+You claimed the Superpairs rewards!
+ +21,000 Enchanting Exp
+ +0 Superpairs clicks
+
+MISC
+NPC MESSAGES [NPC]
+You received 67,437.9 coins! (ehopper)
+This item cannot be salvaged!
+You salvaged 9 items for:
+45x Crimson Essence!
+You salvaged 14 items for:
+110x Undead Essence!
+15x Crimson Essence!
+5x Wither Essence!
+You salvaged 7 items for:
+35x Crimson Essence!
+You filled your quiver with 2,880 extra arrows!
+You don't meet the requirement!
+BUFF! You splashed yourself with Healing VIII!
+BUFF! You have gained Healing V!
+You earned 358 GEXP + 1,074 Event EXP from playing SkyBlock!
+You earned 588 GEXP + 1,764 Event EXP from playing SkyBlock!
+You earned 588 GEXP + 1,764 Event EXP from playing SkyBlock!
+You have already found that Fairy Soul!
+SOUL! You found a Fairy Soul!
+Talk to Tia the Fairy in Wilderness to learn about how souls work!
+Not enough mana! (Costs 969 mana)
+Your previous Overflux Power Orb was removed!
+You selected the Sighted power for your Accessory Bag!
+✆ RING... 
+✆ RING... RING... 
+✆ RING... RING... RING... 
+RARE DROP! Rampart Leggings (+215 ✯ Magic Find)
+Your profile was changed to: Lemon (Co-op)
+Switching to profile Lemon...
+You gained 19.8 Mining experience from minions!
+You crafted a Tier II Redstone Minion! That's a new one!
+ Craft 8 more unique Minions to unlock your 7th Minion slot!
+You can only place a maximum of 6 minions!
+Whoa! Slow down there!
+This ability is on cooldown for 5s.
+You need to have visited this island at least once before fast traveling to it!
+You already have the maximum amount of items ready for salvage!
+Couldn't warp you! Try again later. (PLAYER_TRANSFER_COOLDOWN)
+There was an error with the auction house! (AUCTION_EXPIRED_OR_NOT_FOUND)
+You have already requested a server! Please wait a bit.
+You may only use this command after 4s on the server!
+Unknown destination! Check the Fast Travel menu to view options!
+Finding player...
+Sending a visit request...
+Request join for Dungeon Hub #26 (mini31AF)...
+Request join for Hub mini196AM...
+DAVID: You reached Milestone 1 in Salt Hunts!
+[WATCHDOG ANNOUNCEMENT]
+Watchdog has banned 7,724 players in the last 7 days.
+Staff have banned an additional 10,502 in the last 7 days.
+Blacklisted modifications are a bannable offense!
+SALT: Salty, much?
+SALT: Yikes, salty...
+Your Auto Recombobulator recombobulated Pure Zombie Soldier Helmet!
+
+RNG METER
+You have already selected this drop!
+You set your Catacombs (F6) RNG Meter to drop Precursor Eye!
+You set your Catacombs (F6) RNG Meter to drop Recombobulator 3000!
+You set your Catacombs (F6) RNG Meter to drop Giant's Sword!
+You set your Catacombs (F7) RNG Meter to drop Shadow Warp!
+You set your Catacombs (F7) RNG Meter to drop Necron's Handle!
+You set your Experimentation Table RNG Meter to drop Severed Pincer!
+You set your Experimentation Table RNG Meter to drop Protection VII!
+
+EVENT SPECIFIC
+ORINGO
+Oringo has brought his Traveling Zoo shop in town!
+Acquire exclusive pets! Visit Oringo at the hub plaza, in front of the Flower House!
+The Traveling Zoo is visiting the SkyBlock Hub!
+CLICK HERE to shop for exotic pets!
+Oringo brought exotic pets for sale at the hub plaza, in front of the Flower House!
+MINING FIESTA is now underway! Equip your pickaxe and head to the mines!
+De-listing your group...
+Queueing your party...
+SPOOKY! A Trick or Treat Chest has appeared!
+You picked up all items from your item stash!
+From stash: Master Skull - Tier 3
+From stash: Fuming Potato Book
+MEGA BAT! A Mega Bat has spawned somewhere on the island! Each hit gives Candy! Happy hunting!
+SPOOKY FESTIVAL The event is active! Kill mobs to collect Candy, which can be traded in for cool items!
+A Diamond Goblin has spawned!
+Your Pickaxe ability is on cooldown for 58s.
+God Potion expires in 60s
+You can hear cooperative chattering coming from town...
+The Better Together festival is active for 20 minutes!
+God Potion expires in 10s
+God Potion has expired!
+God Potion expires in 1s
+ ⚑ The Better Together event starts in 20 seconds!
+ This is a passive event! It's happening everywhere in the Crystal Hollows!
+Your Mining Speed Boost has expired!
+Mining Speed Boost is now available!
+You used your Mining Speed Boost Pickaxe Ability!
+Your Auspicious Titanium Drill DR-X655 has 25% fuel remaining!
+FISHING FESTIVAL The festival is now underway! Break out your fishing rods and watch out for sharks!
+The Town Board has new quests available!
+This ability is disabled while guesting!
+MINING FIESTA has concluded! Put your pickaxe down and haul your ores home!
+_NoNitro launched a Bat Firework in the Village. It's dropping candies for everyone!
+
+BAZAAR
+[Bazaar] The Buy Orders for this item changed too much!
+[Bazaar] Seems like a volatile market!
+Checking escrow for recent transaction...
+[Bazaar] You don't have anything to sell!
+[Bazaar] No items could be matched to buyers!
+
+DUNGEONS:
+⚠ The Laser Guardian is charging up their Focus Beam! ⚠
+⚡ WARNING! The Chaos Guardian is preparing to use Discharge! Move away! ⚡
+⚠ The Laser Guardian is charging up their Focus Beam! ⚠
+Your Explosive Shot hit 1 enemy for 949,689.1 damage.
+A Wither Key was picked up!
+
+KUUDRA
+You don't have enough Reputation!
+
+FARMING
+
+MINING
