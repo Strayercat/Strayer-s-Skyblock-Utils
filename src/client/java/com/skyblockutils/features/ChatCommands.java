@@ -29,6 +29,7 @@ public class ChatCommands {
             sendMessageInChannel("Tps: " + String.format("%.1f", ModFunctions.tps), messageChannel);
         if (messageContent.equalsIgnoreCase("!ping"))
             sendMessageInChannel("Ping: " + ModFunctions.ping, messageChannel);
+        if(messageContent.equalsIgnoreCase("!fps")) sendMessageInChannel("Fps: ".concat(String.valueOf(MinecraftClient.getInstance().getCurrentFps())), messageChannel);
 
         // Silly messages
         List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist", "sus");

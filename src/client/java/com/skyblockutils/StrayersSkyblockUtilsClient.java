@@ -15,6 +15,7 @@ import com.skyblockutils.mixin.client.ClientPlayNetworkHandlerAccessor;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.WaypointRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -23,6 +24,7 @@ import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.network.PingMeasurer;
 import net.minecraft.util.Identifier;
 
@@ -48,6 +50,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (guiGraphics, deltaTracker) ->
                 SsuHud.onHudRender(guiGraphics, SideBarUtils.getSideBarInfo("location"))
         );
+
+        WorldRenderEvents.END_MAIN.register(WaypointRenderer::render);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             OnScreenNotification.tick();

@@ -6,6 +6,7 @@ import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.GlowingPlayers;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
+import com.skyblockutils.utils.MarkCoordinates;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -128,6 +129,21 @@ public class ModCommands {
                             context.getSource().sendFeedback(Text.literal("§6" + SideBarUtils.getSideBarInfo("location")));
                             return 1;
                         }))
+                        .then(ClientCommandManager.literal("coordinates")
+                                .then(ClientCommandManager.literal("add").executes(context -> {
+                                    MarkCoordinates.addCoordinates();
+                                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("Coordinates added"));
+                                    return 1;
+                                }))
+                                .then(ClientCommandManager.literal("log").executes(context -> {
+                                    MarkCoordinates.logCoordinatesList();
+                                    return 1;
+                                }))
+                                .then(ClientCommandManager.literal("clear").executes(context -> {
+                                    MarkCoordinates.clearCoordinates();
+                                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("Coordinates cleared"));
+                                    return 1;
+                                })))
                 );
 
         dispatcher.register(command);

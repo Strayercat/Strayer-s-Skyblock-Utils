@@ -42,6 +42,8 @@ public class ModConfig {
     public boolean hudPartyInfo;
     public boolean hudPartyInfoInDungeons;
     public boolean hudIslandFunFact;
+    public boolean displayGlaciteWaypoints;
+    public GlaciteWaypoints glaciteWaypoints;
 
     private final Map<String, Boolean> chatFilters = new HashMap<>();
     private List<GlowingPlayer> glowingPlayers = new ArrayList<>();
@@ -58,6 +60,18 @@ public class ModConfig {
 
     public void removeGlowingPlayer(String username) {
         this.glowingPlayers.removeIf(p -> p.username.equalsIgnoreCase(username));
+    }
+
+    public enum GlaciteWaypoints {
+        UMBER("Umber"),
+        TUNGSTEN("Tungsten"),
+        BOTH("Umber & Tungsten");
+
+        private final String name;
+        GlaciteWaypoints(String name) { this.name = name; }
+
+        @Override
+        public String toString() { return name; }
     }
 
     private ModConfig() {
@@ -97,6 +111,8 @@ public class ModConfig {
                 INSTANCE.hudPartyInfoInDungeons = loadedData.hudPartyInfoInDungeons;
                 INSTANCE.coordinatesSendLocation = loadedData.coordinatesSendLocation;
                 INSTANCE.hudIslandFunFact = loadedData.hudIslandFunFact;
+                INSTANCE.glaciteWaypoints = loadedData.glaciteWaypoints;
+                INSTANCE.displayGlaciteWaypoints = loadedData.displayGlaciteWaypoints;
 
                 if (loadedData.chatFilters != null) {
                     for (Map.Entry<String, Boolean> entry : loadedData.chatFilters.entrySet()) {
@@ -141,6 +157,8 @@ public class ModConfig {
             data.coordinatesSendLocation = INSTANCE.coordinatesSendLocation;
             data.glowingPlayers = INSTANCE.glowingPlayers;
             data.hudIslandFunFact = INSTANCE.hudIslandFunFact;
+            data.glaciteWaypoints = INSTANCE.glaciteWaypoints;
+            data.displayGlaciteWaypoints = INSTANCE.displayGlaciteWaypoints;
 
             GSON.toJson(data, writer);
         } catch (IOException ignored) {
@@ -179,6 +197,8 @@ public class ModConfig {
         public boolean hudPartyInfoInDungeons = false;
         public boolean hudIslandFunFact = true;
         public boolean coordinatesSendLocation = true;
+        public boolean displayGlaciteWaypoints = true;
+        public GlaciteWaypoints glaciteWaypoints = GlaciteWaypoints.BOTH;
 
         public Map<String, Boolean> chatFilters;
         public List<GlowingPlayer> glowingPlayers;
