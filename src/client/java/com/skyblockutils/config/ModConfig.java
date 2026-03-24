@@ -3,7 +3,7 @@ package com.skyblockutils.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.skyblockutils.features.GlowingPlayers.GlowingPlayer;
-import com.skyblockutils.features.chatFilters.ChatFilterDefinitions;
+import com.skyblockutils.features.chat.ChatFilterDefinitions;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.FileReader;

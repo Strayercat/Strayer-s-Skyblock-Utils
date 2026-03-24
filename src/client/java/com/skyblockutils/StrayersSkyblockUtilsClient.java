@@ -3,7 +3,10 @@ package com.skyblockutils;
 import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
-import com.skyblockutils.features.chatFilters.ChatFilter;
+import com.skyblockutils.features.chat.ChatCommands;
+import com.skyblockutils.features.chat.ChatFilter;
+import com.skyblockutils.features.chat.FancyEmotes;
+import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.SsuHud;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
@@ -89,12 +92,12 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             DowntimeTracker.trackDowntime(cleanMessage);
             DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);
-            DungeonPartyCommands.autoRejoin(cleanMessage);
+            AutoRejoin.autoRejoin(cleanMessage);
             ChatCommands.handleCommands(cleanMessage);
             PartyCommands.handlePartyCommands(cleanMessage);
             PartyInfo.handlePartyMessages(cleanMessage);
         });
 
-        ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::modifiedChat);
+        ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);
     }
 }

@@ -2,6 +2,7 @@ package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
 import com.skyblockutils.features.party.PartyInfo;
@@ -215,8 +216,8 @@ public class SsuHud {
             lines.add(HudLine.of("Requested by: " + DowntimeTracker.requesterUsername, COLOR_LINE));
         }
 
-        lines.add(HudLine.of("Floor Auto-Rejoin: " + (DungeonPartyCommands.autoRejoinEnabled ? "On" : "Off"), COLOR_LINE));
-        lines.add(HudLine.of("Current floor: " + DungeonPartyCommands.currentFloor, COLOR_LINE));
+        lines.add(HudLine.of("Floor Auto-Rejoin: " + (AutoRejoin.autoRejoinEnabled ? "On" : "Off"), COLOR_LINE));
+        lines.add(HudLine.of("Current floor: " + AutoRejoin.currentFloor, COLOR_LINE));
     }
 
     private static List<HudLine> wrapText(String text, int maxWidth, int color) {

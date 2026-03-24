@@ -4,6 +4,7 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.AutoFish;
 import com.skyblockutils.features.CorlTimer;
 import com.skyblockutils.features.SsuHud;
+import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
 import com.skyblockutils.features.party.PartyListParser;
@@ -43,10 +44,10 @@ public class ModFunctions {
 
             PartyListParser.onJoinCommandHandled = false;
 
-            DungeonPartyCommands.resetDungeonPartyCommands();
+            AutoRejoin.resetAutoRejoin();
+            DowntimeTracker.resetDowntimeTracker();
             CorlTimer.resetCorlTimer();
             AutoFish.resetAutoFish();
-            DowntimeTracker.resetDowntimeTracker();
         }
     }
 

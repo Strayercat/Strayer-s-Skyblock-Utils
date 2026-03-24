@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.GlowingPlayers;
-import com.skyblockutils.features.dungeons.DungeonPartyCommands;
+import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.utils.MarkCoordinates;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
@@ -16,35 +16,41 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class ModCommands {
     @SuppressWarnings("unused")
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         var command = ClientCommandManager.literal("ssu")
                 .then(ClientCommandManager.literal("autorejoin")
-                        .then(ClientCommandManager.literal("on").executes(context -> {
-                            if (DungeonPartyCommands.autoRejoinEnabled) {
-                                context.getSource().sendFeedback(Text.literal("§6[SSU] §cAuto-rejoin is already on"));
-                            } else {
-                                DungeonPartyCommands.resetDungeonPartyCommands();
-                                DungeonPartyCommands.autoRejoinEnabled = true;
-                                context.getSource().sendFeedback(Text.literal("§6[SSU] §aAuto-rejoin enabled"));
-                                ModConfig.save();
-                            }
-                            return 1;
-                        }))
-                        .then(ClientCommandManager.literal("off").executes(context -> {
-                            if (DungeonPartyCommands.autoRejoinEnabled) {
-                                DungeonPartyCommands.autoRejoinEnabled = false;
-                                DungeonPartyCommands.currentFloorJoinCommand = "";
-                                DungeonPartyCommands.currentFloor = "";
-                                context.getSource().sendFeedback(Text.literal("§6[SSU] §cAuto-rejoin disabled"));
-                                ModConfig.save();
-                            } else {
-                                context.getSource().sendFeedback(Text.literal("§6[SSU] §cAuto-rejoin is already off"));
-                            }
-                            return 1;
-                        })))
+                        .then(ClientCommandManager.argument("floor", StringArgumentType.string())
+                                .suggests((ctx, builder) -> {
+                                    String remaining = builder.getRemaining().toLowerCase();
+                                    Stream.of("off","m1","m2","m3","m4","m5","m6","m7","f1","f2","f3","f4","f5","f6","f7")
+                                            .filter(f -> f.startsWith(remaining))
+                                            .forEach(builder::suggest);
+                                    return builder.buildFuture();
+                                })
+                                .executes(context -> {
+                                    String floor = StringArgumentType.getString(context, "floor");
+                                    if (floor.equals("off")) {
+                                        AutoRejoin.autoRejoinEnabled = false;
+                                        AutoRejoin.currentFloor = "";
+                                        context.getSource().sendFeedback(Text.literal("§6[SSU] §cAuto-rejoin disabled"));
+                                        ModConfig.save();
+                                    } else if (floor.matches("^[mf][1-7]$")) {
+                                        AutoRejoin.autoRejoinEnabled = true;
+                                        AutoRejoin.currentFloor = floor.toUpperCase();
+                                        context.getSource().sendFeedback(Text.literal("§6[SSU] §aAuto-rejoin enabled for " + floor.toUpperCase()));
+                                        ModConfig.save();
+                                    } else {
+                                        context.getSource().sendFeedback(Text.literal("§6[SSU] §cInvalid floor! Use m1-m7 or f1-f7, or off to disable"));
+                                        return 0;
+                                    }
+                                    return 1;
+                                })
+                        )
+                )
                 .then(ClientCommandManager.literal("config").executes(context -> {
                     ClothConfigHandler.configScreenRequested = true;
                     return 1;

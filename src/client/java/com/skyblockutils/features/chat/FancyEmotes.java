@@ -1,7 +1,7 @@
-package com.skyblockutils.features;
+package com.skyblockutils.features.chat;
 
-public class ChatModifications {
-    public static String modifiedChat(String message) {
+public class FancyEmotes {
+    public static String fancyEmotes(String message) {
         return message.replace("<3", "❤")
                 .replace("\\o/", "¯\\_(ツ)_/¯")
                 .replace("o/", "( ﾟ◡ﾟ)/")

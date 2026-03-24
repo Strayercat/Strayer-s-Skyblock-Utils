@@ -1,6 +1,6 @@
 package com.skyblockutils.config;
 
-import com.skyblockutils.features.chatFilters.ChatFilterDefinitions;
+import com.skyblockutils.features.chat.ChatFilterDefinitions;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;

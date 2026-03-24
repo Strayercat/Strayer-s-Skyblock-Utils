@@ -1,4 +1,4 @@
-package com.skyblockutils.features;
+package com.skyblockutils.features.chat;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
