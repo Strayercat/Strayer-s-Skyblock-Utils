@@ -109,82 +109,89 @@ public class NpcFinder {
         allSkyblockNpcs.put("Hoppity|Hub", new Npc("Hoppity", "Hub", new BlockPos(-9, 72, -56))); //TODO
 
 // The Barn
-        allSkyblockNpcs.put("Farmhand|The Barn", new Npc("Farmhand", "The Barn", new BlockPos(144, 73, -240)));
-        allSkyblockNpcs.put("Windmill Operator|The Barn", new Npc("Windmill Operator", "The Barn", new BlockPos(98, 89, -283)));
+        allSkyblockNpcs.put("Farmhand|The Barn", new Npc("Farmhand", "The Barn", new BlockPos(144, 74, -241)));
+        allSkyblockNpcs.put("Windmill Operator|The Barn", new Npc("Windmill Operator", "The Barn", new BlockPos(98, 90, -283)));
 
 // Mushroom Desert
-        allSkyblockNpcs.put("Beth|Mushroom Desert", new Npc("Beth", "Mushroom Desert", new BlockPos(163, 77, -359)));
-        allSkyblockNpcs.put("Mason|Mushroom Desert", new Npc("Mason", "Mushroom Desert", new BlockPos(177, 77, -356)));
+        allSkyblockNpcs.put("Beth|Mushroom Desert", new Npc("Beth", "Mushroom Desert", new BlockPos(163, 78, -359)));
+        allSkyblockNpcs.put("Mason|Mushroom Desert", new Npc("Mason", "Mushroom Desert", new BlockPos(177, 78, -356)));
         allSkyblockNpcs.put("Friendly Hiker|Mushroom Desert", new Npc("Friendly Hiker", "Mushroom Desert", new BlockPos(181, 77, -381)));
-        allSkyblockNpcs.put("Hungry Hiker|Mushroom Desert", new Npc("Hungry Hiker", "Mushroom Desert", new BlockPos(269, 48, -480)));
-        allSkyblockNpcs.put("Treasure Hunter|Mushroom Desert", new Npc("Treasure Hunter", "Mushroom Desert", new BlockPos(200, 92, -436)));
-        allSkyblockNpcs.put("Shepherd|Mushroom Desert", new Npc("Shepherd", "Mushroom Desert", new BlockPos(388, 85, -372)));
-        allSkyblockNpcs.put("Jake|Mushroom Desert", new Npc("Jake", "Mushroom Desert", new BlockPos(261, 184, -565)));
-        allSkyblockNpcs.put("Hunter Ava|Mushroom Desert", new Npc("Hunter Ava", "Mushroom Desert", new BlockPos(319, 102, -470)));
-        allSkyblockNpcs.put("Tammy|Mushroom Desert", new Npc("Tammy", "Mushroom Desert", new BlockPos(284, 104, -545)));
-        allSkyblockNpcs.put("Tony|Mushroom Desert", new Npc("Tony", "Mushroom Desert", new BlockPos(278, 104, -544)));
-        allSkyblockNpcs.put("Trevor|Mushroom Desert", new Npc("Trevor", "Mushroom Desert", new BlockPos(281, 104, -543)));
-        allSkyblockNpcs.put("Farmer Jon|Mushroom Desert", new Npc("Farmer Jon", "Mushroom Desert", new BlockPos(167, 91, -598)));
+        allSkyblockNpcs.put("Hungry Hiker|Mushroom Desert", new Npc("Hungry Hiker", "Mushroom Desert", new BlockPos(269, 49, -481)));
+        allSkyblockNpcs.put("Treasure Hunter|Mushroom Desert", new Npc("Treasure Hunter", "Mushroom Desert", new BlockPos(200, 93, -438)));
+        allSkyblockNpcs.put("Shepherd|Mushroom Desert", new Npc("Shepherd", "Mushroom Desert", new BlockPos(388, 86, -373)));
+        allSkyblockNpcs.put("Jake|Mushroom Desert", new Npc("Jake", "Mushroom Desert", new BlockPos(261, 185, -566)));
+        allSkyblockNpcs.put("Hunter Ava|Mushroom Desert", new Npc("Hunter Ava", "Mushroom Desert", new BlockPos(319, 103, -471)));
+        allSkyblockNpcs.put("Tammy|Mushroom Desert", new Npc("Tammy", "Mushroom Desert", new BlockPos(284, 105, -545)));
+        allSkyblockNpcs.put("Tony|Mushroom Desert", new Npc("Tony", "Mushroom Desert", new BlockPos(278, 105, -545)));
+        allSkyblockNpcs.put("Trevor|Mushroom Desert", new Npc("Trevor", "Mushroom Desert", new BlockPos(281, 105, -543)));
+        allSkyblockNpcs.put("Talbot|Mushroom Desert", new Npc("Talbot", "Mushroom Desert", new BlockPos(285, 105, -549)));
+        allSkyblockNpcs.put("Farmer Jon|Mushroom Desert", new Npc("Farmer Jon", "Mushroom Desert", new BlockPos(167, 92, -599)));
+        allSkyblockNpcs.put("Moby|Mushroom Desert", new Npc("Moby", "Mushroom Desert", new BlockPos(205, 44, -500)));
 
 // Gold Mine
-        allSkyblockNpcs.put("Gold Forger|Gold Mine", new Npc("Gold Forger", "Gold Mine", new BlockPos(-27, 74, -294)));
-        allSkyblockNpcs.put("Iron Forger|Gold Mine", new Npc("Iron Forger", "Gold Mine", new BlockPos(-1, 75, -307)));
-        allSkyblockNpcs.put("Rusty|Gold Mine", new Npc("Rusty", "Gold Mine", new BlockPos(-19, 78, -325)));
-        allSkyblockNpcs.put("Lazy Miner|Gold Mine", new Npc("Lazy Miner", "Gold Mine", new BlockPos(-11, 78, -337)));
+        allSkyblockNpcs.put("Gold Forger|Gold Mine", new Npc("Gold Forger", "Gold Mine", new BlockPos(-28, 75, -295)));
+        allSkyblockNpcs.put("Iron Forger|Gold Mine", new Npc("Iron Forger", "Gold Mine", new BlockPos(-2, 76, -308)));
+        allSkyblockNpcs.put("Rusty|Gold Mine", new Npc("Rusty", "Gold Mine", new BlockPos(-21, 79, -326)));
+        allSkyblockNpcs.put("Lazy Miner|Gold Mine", new Npc("Lazy Miner", "Gold Mine", new BlockPos(-12, 79, -338)));
+        allSkyblockNpcs.put("Blacksmith|Gold Mine", new Npc("Blacksmith", "Gold Mine", new BlockPos(-40, 78, -300)));
 
 // Deep Caverns
-        allSkyblockNpcs.put("Walter|Deep Caverns", new Npc("Walter", "Deep Caverns", new BlockPos(191, 56, -35)));
-        allSkyblockNpcs.put("Lapis Miner|Deep Caverns", new Npc("Lapis Miner", "Deep Caverns", new BlockPos(-11, 120, 35)));
-        allSkyblockNpcs.put("Redstone Miner|Deep Caverns", new Npc("Redstone Miner", "Deep Caverns", new BlockPos(25, 104, 16)));
-        allSkyblockNpcs.put("Rhys|Deep Caverns", new Npc("Rhys", "Deep Caverns", new BlockPos(3, 112, 14)));
-        allSkyblockNpcs.put("Lift Operator|Deep Caverns", new Npc("Lift Operator", "Deep Caverns", new BlockPos(45, 150, 15)));
+        allSkyblockNpcs.put("Walter|Deep Caverns", new Npc("Walter", "Deep Caverns", new BlockPos(18, 157, -37)));
+        allSkyblockNpcs.put("Lapis Miner|Deep Caverns", new Npc("Lapis Miner", "Deep Caverns", new BlockPos(-11, 121, 35)));
+        allSkyblockNpcs.put("Redstone Miner|Deep Caverns", new Npc("Redstone Miner", "Deep Caverns", new BlockPos(24, 105, 16)));
+        allSkyblockNpcs.put("Rhys|Deep Caverns", new Npc("Rhys", "Deep Caverns", new BlockPos(31, 13, 14)));
+        allSkyblockNpcs.put("Lift Operator|Deep Caverns", new Npc("Lift Operator", "Deep Caverns", new BlockPos(45, 151, 15)));
 
 // Dwarven Mines
-        allSkyblockNpcs.put("Rhys|Dwarven Mines", new Npc("Rhys", "Dwarven Mines", new BlockPos(-37, 200, -117)));
-        allSkyblockNpcs.put("Bulvar|Dwarven Mines", new Npc("Bulvar", "Dwarven Mines", new BlockPos(-15, 201, -98)));
-        allSkyblockNpcs.put("Bubu|Dwarven Mines", new Npc("Bubu", "Dwarven Mines", new BlockPos(-10, 201, -103)));
-        allSkyblockNpcs.put("Blacksmith|Dwarven Mines", new Npc("Blacksmith", "Dwarven Mines", new BlockPos(-6, 201, -154)));
-        allSkyblockNpcs.put("Old Man Garry|Dwarven Mines", new Npc("Old Man Garry", "Dwarven Mines", new BlockPos(5, 200, -109)));
-        allSkyblockNpcs.put("Banker Broadjaw|Dwarven Mines", new Npc("Banker Broadjaw", "Dwarven Mines", new BlockPos(13, 201, -148)));
-        allSkyblockNpcs.put("Bednom|Dwarven Mines", new Npc("Bednom", "Dwarven Mines", new BlockPos(-30, 214, -89)));
-        allSkyblockNpcs.put("Tarwen|Dwarven Mines", new Npc("Tarwen", "Dwarven Mines", new BlockPos(34, 202, -141)));
-        allSkyblockNpcs.put("Hornum|Dwarven Mines", new Npc("Hornum", "Dwarven Mines", new BlockPos(35, 202, -146)));
-        allSkyblockNpcs.put("Gimley|Dwarven Mines", new Npc("Gimley", "Dwarven Mines", new BlockPos(28, 202, -149)));
-        allSkyblockNpcs.put("Sargwyn|Dwarven Mines", new Npc("Sargwyn", "Dwarven Mines", new BlockPos(35, 202, -150)));
-        allSkyblockNpcs.put("Kings|Dwarven Mines", new Npc("Kings", "Dwarven Mines", new BlockPos(129, 196, 196)));
-        allSkyblockNpcs.put("Tornora|Dwarven Mines", new Npc("Tornora", "Dwarven Mines", new BlockPos(135, 196, 166)));
-        allSkyblockNpcs.put("Queen Mismyla|Dwarven Mines", new Npc("Queen Mismyla", "Dwarven Mines", new BlockPos(126, 195, 195)));
-        allSkyblockNpcs.put("Royal Resident|Dwarven Mines", new Npc("Royal Resident", "Dwarven Mines", new BlockPos(62, 204, 200)));
-        allSkyblockNpcs.put("Fetchur|Dwarven Mines", new Npc("Fetchur", "Dwarven Mines", new BlockPos(84, 224, -117)));
-        allSkyblockNpcs.put("Gwendolyn|Dwarven Mines", new Npc("Gwendolyn", "Dwarven Mines", new BlockPos(88, 198, -98)));
-        allSkyblockNpcs.put("Geo|Dwarven Mines", new Npc("Geo", "Dwarven Mines", new BlockPos(87, 199, -115)));
-        allSkyblockNpcs.put("Lumina|Dwarven Mines", new Npc("Lumina", "Dwarven Mines", new BlockPos(77, 199, -110)));
-        allSkyblockNpcs.put("Fragilis|Dwarven Mines", new Npc("Fragilis", "Dwarven Mines", new BlockPos(88, 199, -108)));
-        allSkyblockNpcs.put("Station Master|Dwarven Mines", new Npc("Station Master", "Dwarven Mines", new BlockPos(38, 201, -87)));
+        allSkyblockNpcs.put("Rhys|Dwarven Mines", new Npc("Rhys", "Dwarven Mines", new BlockPos(-38, 201, -119)));
+        allSkyblockNpcs.put("Bulvar|Dwarven Mines", new Npc("Bulvar", "Dwarven Mines", new BlockPos(-16, 202, -99)));
+        allSkyblockNpcs.put("Bubu|Dwarven Mines", new Npc("Bubu", "Dwarven Mines", new BlockPos(-11, 202, -104)));
+        allSkyblockNpcs.put("Blacksmith|Dwarven Mines", new Npc("Blacksmith", "Dwarven Mines", new BlockPos(-7, 202, -155)));
+        allSkyblockNpcs.put("Old Man Garry|Dwarven Mines", new Npc("Old Man Garry", "Dwarven Mines", new BlockPos(5, 201, -110)));
+        allSkyblockNpcs.put("Banker Broadjaw|Dwarven Mines", new Npc("Banker Broadjaw", "Dwarven Mines", new BlockPos(13, 202, -149)));
+        allSkyblockNpcs.put("Bednom|Dwarven Mines", new Npc("Bednom", "Dwarven Mines", new BlockPos(-31, 215, -90)));
+        allSkyblockNpcs.put("Bomin|Dwarven Mines", new Npc("Bomin", "Dwarven Mines", new BlockPos(26, 204, -145)));
+        allSkyblockNpcs.put("Tarwen|Dwarven Mines", new Npc("Tarwen", "Dwarven Mines", new BlockPos(33, 203, -140)));
+        allSkyblockNpcs.put("Hornum|Dwarven Mines", new Npc("Hornum", "Dwarven Mines", new BlockPos(35, 203, -149)));
+        allSkyblockNpcs.put("Gimley|Dwarven Mines", new Npc("Gimley", "Dwarven Mines", new BlockPos(29, 203, -152)));
+        allSkyblockNpcs.put("Sargwyn|Dwarven Mines", new Npc("Sargwyn", "Dwarven Mines", new BlockPos(37, 203, -151)));
+        allSkyblockNpcs.put("Brynmor|Dwarven Mines", new Npc("Brynmor", "Dwarven Mines", new BlockPos(31, 203, -155)));
+        allSkyblockNpcs.put("Kings|Dwarven Mines", new Npc("Kings", "Dwarven Mines", new BlockPos(129, 197, 196)));
+        allSkyblockNpcs.put("Tornora|Dwarven Mines", new Npc("Tornora", "Dwarven Mines", new BlockPos(136, 197, 167)));
+        allSkyblockNpcs.put("Queen Mismyla|Dwarven Mines", new Npc("Queen Mismyla", "Dwarven Mines", new BlockPos(126, 196, 195)));
+        allSkyblockNpcs.put("Royal Resident|Dwarven Mines", new Npc("Royal Resident", "Dwarven Mines", new BlockPos(62, 205, 200)));
+        allSkyblockNpcs.put("Fetchur|Dwarven Mines", new Npc("Fetchur", "Dwarven Mines", new BlockPos(84, 225, -119)));
+        allSkyblockNpcs.put("Gwendolyn|Dwarven Mines", new Npc("Gwendolyn", "Dwarven Mines", new BlockPos(88, 199, -99)));
+        allSkyblockNpcs.put("Geo|Dwarven Mines", new Npc("Geo", "Dwarven Mines", new BlockPos(87, 200, -116)));
+        allSkyblockNpcs.put("Lumina|Dwarven Mines", new Npc("Lumina", "Dwarven Mines", new BlockPos(77, 200, -111)));
+        allSkyblockNpcs.put("Fragilis|Dwarven Mines", new Npc("Fragilis", "Dwarven Mines", new BlockPos(88, 200, -109)));
+        allSkyblockNpcs.put("Station Master|Dwarven Mines", new Npc("Station Master", "Dwarven Mines", new BlockPos(38, 202, -86)));
         allSkyblockNpcs.put("Ticket Master|Dwarven Mines", new Npc("Ticket Master", "Dwarven Mines", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Dirt Guy|Dwarven Mines", new Npc("Dirt Guy", "Dwarven Mines", new BlockPos(43, 108, 174)));
-        allSkyblockNpcs.put("Dalbrek|Dwarven Mines", new Npc("Dalbrek", "Dwarven Mines", new BlockPos(191, 216, 153)));
-        allSkyblockNpcs.put("Puzzler|Dwarven Mines", new Npc("Puzzler", "Dwarven Mines", new BlockPos(181, 196, 135)));
-        allSkyblockNpcs.put("Tal Ker|Dwarven Mines", new Npc("Tal Ker", "Dwarven Mines", new BlockPos(192, 196, 104)));
-        allSkyblockNpcs.put("Bylma|Dwarven Mines", new Npc("Bylma", "Dwarven Mines", new BlockPos(-9, 128, 59)));
-        allSkyblockNpcs.put("Emissary Carlton|Dwarven Mines", new Npc("Emissary Carlton", "Dwarven Mines", new BlockPos(-72, 153, -10)));
-        allSkyblockNpcs.put("Emissary Ceanna|Dwarven Mines", new Npc("Emissary Ceanna", "Dwarven Mines", new BlockPos(42, 134, 22)));
-        allSkyblockNpcs.put("Emissary Wilson|Dwarven Mines", new Npc("Emissary Wilson", "Dwarven Mines", new BlockPos(17, 150, 31)));
-        allSkyblockNpcs.put("Emissary Lilith|Dwarven Mines", new Npc("Emissary Lilith", "Dwarven Mines", new BlockPos(58, 198, -8)));
-        allSkyblockNpcs.put("Emissary Fraiser|Dwarven Mines", new Npc("Emissary Fraiser", "Dwarven Mines", new BlockPos(-132, 174, -50)));
-        allSkyblockNpcs.put("Emissary Eliza|Dwarven Mines", new Npc("Emissary Eliza", "Dwarven Mines", new BlockPos(-37, 200, -131)));
-        allSkyblockNpcs.put("Emissary Braum|Dwarven Mines", new Npc("Emissary Braum", "Dwarven Mines", new BlockPos(89, 198, -92)));
+        allSkyblockNpcs.put("Dirt Guy|Dwarven Mines", new Npc("Dirt Guy", "Dwarven Mines", new BlockPos(43, 109, 174)));
+        allSkyblockNpcs.put("Dalbrek|Dwarven Mines", new Npc("Dalbrek", "Dwarven Mines", new BlockPos(191, 217, 153)));
+        allSkyblockNpcs.put("Puzzler|Dwarven Mines", new Npc("Puzzler", "Dwarven Mines", new BlockPos(181, 197, 135)));
+        allSkyblockNpcs.put("Tal Ker|Dwarven Mines", new Npc("Tal Ker", "Dwarven Mines", new BlockPos(193, 197, 205)));
+        allSkyblockNpcs.put("Bylma|Dwarven Mines", new Npc("Bylma", "Dwarven Mines", new BlockPos(-10, 129, 59)));
+        allSkyblockNpcs.put("Emissary Carlton|Dwarven Mines", new Npc("Emissary Carlton", "Dwarven Mines", new BlockPos(-73, 154, -11)));
+        allSkyblockNpcs.put("Emissary Ceanna|Dwarven Mines", new Npc("Emissary Ceanna", "Dwarven Mines", new BlockPos(42, 135, 22)));
+        allSkyblockNpcs.put("Emissary Wilson|Dwarven Mines", new Npc("Emissary Wilson", "Dwarven Mines", new BlockPos(171, 151, 31)));
+        allSkyblockNpcs.put("Emissary Lilith|Dwarven Mines", new Npc("Emissary Lilith", "Dwarven Mines", new BlockPos(58, 199, -9)));
+        allSkyblockNpcs.put("Emissary Fraiser|Dwarven Mines", new Npc("Emissary Fraiser", "Dwarven Mines", new BlockPos(-133, 175, -51)));
+        allSkyblockNpcs.put("Emissary Eliza|Dwarven Mines", new Npc("Emissary Eliza", "Dwarven Mines", new BlockPos(-38, 201, -132)));
+        allSkyblockNpcs.put("Emissary Braum|Dwarven Mines", new Npc("Emissary Braum", "Dwarven Mines", new BlockPos(89, 199, -93)));
         allSkyblockNpcs.put("Malmar|Dwarven Mines", new Npc("Malmar", "Dwarven Mines", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Silnar|Dwarven Mines", new Npc("Silnar", "Dwarven Mines", new BlockPos(53, 141, 19)));
-        allSkyblockNpcs.put("Fred|Dwarven Mines", new Npc("Fred", "Dwarven Mines", new BlockPos(-2, 148, -68)));
-        allSkyblockNpcs.put("Jotraeline Greatforge|Dwarven Mines", new Npc("Jotraeline Greatforge", "Dwarven Mines", new BlockPos(-6, 145, -18)));
+        allSkyblockNpcs.put("Silnar|Dwarven Mines", new Npc("Silnar", "Dwarven Mines", new BlockPos(53, 142, 19)));
+        allSkyblockNpcs.put("Fred|Dwarven Mines", new Npc("Fred", "Dwarven Mines", new BlockPos(-3, 150, -69)));
+        allSkyblockNpcs.put("Jotraeline Greatforge|Dwarven Mines", new Npc("Jotraeline Greatforge", "Dwarven Mines", new BlockPos(-7, 146, -19)));
         allSkyblockNpcs.put("Dulin|Dwarven Mines", new Npc("Dulin", "Dwarven Mines", new BlockPos(79, 187, 128)));
-        allSkyblockNpcs.put("Cold Enjoyer|Dwarven Mines", new Npc("Cold Enjoyer", "Dwarven Mines", new BlockPos(-15, 137, 217)));
+        allSkyblockNpcs.put("Cold Enjoyer|Dwarven Mines", new Npc("Cold Enjoyer", "Dwarven Mines", new BlockPos(-16, 138, 217)));
         allSkyblockNpcs.put("Sor'Hen|Dwarven Mines", new Npc("Sor'Hen", "Dwarven Mines", new BlockPos(0, 121, 225)));
-        allSkyblockNpcs.put("Scardius|Dwarven Mines", new Npc("Scardius", "Dwarven Mines", new BlockPos(-16, 121, 232)));
-        allSkyblockNpcs.put("Plinius|Dwarven Mines", new Npc("Plinius", "Dwarven Mines", new BlockPos(10, 121, 245)));
-        allSkyblockNpcs.put("Emissary Lissandra|Dwarven Mines", new Npc("Emissary Lissandra", "Dwarven Mines", new BlockPos(2, 121, 237)));
-        allSkyblockNpcs.put("Dr. Stone|Dwarven Mines", new Npc("Dr. Stone", "Dwarven Mines", new BlockPos(28, 120, 238)));
+        allSkyblockNpcs.put("Scardius|Dwarven Mines", new Npc("Scardius", "Dwarven Mines", new BlockPos(-17, 122, 232)));
+        allSkyblockNpcs.put("Plinius|Dwarven Mines", new Npc("Plinius", "Dwarven Mines", new BlockPos(10, 122, 236)));
+        allSkyblockNpcs.put("Emissary Lissandra|Dwarven Mines", new Npc("Emissary Lissandra", "Dwarven Mines", new BlockPos(2, 122, 237)));
+        allSkyblockNpcs.put("Dr. Stone|Dwarven Mines", new Npc("Dr. Stone", "Dwarven Mines", new BlockPos(28, 121, 238)));
+        allSkyblockNpcs.put("Lift Operator|Dwarven Mines", new Npc("Lift Operator", "Dwarven Mines", new BlockPos(-80, 201, -124)));
+        allSkyblockNpcs.put("Matigold|Dwarven Mines", new Npc("Marigold", "Dwarven Mines", new BlockPos(181, 151, 60)));
 
 // Crystal Hollows
         allSkyblockNpcs.put("King Yolkar|Crystal Hollows", new Npc("King Yolkar", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
@@ -195,29 +202,38 @@ public class NpcFinder {
         allSkyblockNpcs.put("Xalx|Crystal Hollows", new Npc("Xalx", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
         allSkyblockNpcs.put("Three Bears|Crystal Hollows", new Npc("Three Bears", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
         allSkyblockNpcs.put("Odawa|Crystal Hollows", new Npc("Odawa", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Geonathan Greatforge|Crystal Hollows", new Npc("Geonathan Greatforge", "Crystal Hollows", new BlockPos(530, 106, 556)));
-        allSkyblockNpcs.put("Emissary Sisko|Crystal Hollows", new Npc("Emissary Sisko", "Crystal Hollows", new BlockPos(495, 106, 556)));
-        allSkyblockNpcs.put("Gemma|Crystal Hollows", new Npc("Gemma", "Crystal Hollows", new BlockPos(475, 106, 513)));
+        allSkyblockNpcs.put("Geonathan Greatforge|Crystal Hollows", new Npc("Geonathan Greatforge", "Crystal Hollows", new BlockPos(530, 107, 556)));
+        allSkyblockNpcs.put("Emissary Sisko|Crystal Hollows", new Npc("Emissary Sisko", "Crystal Hollows", new BlockPos(495, 107, 556)));
+        allSkyblockNpcs.put("Gemma|Crystal Hollows", new Npc("Gemma", "Crystal Hollows", new BlockPos(475, 107, 513)));
         allSkyblockNpcs.put("Chunk|Crystal Hollows", new Npc("Chunk", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
 
 // Spider's Den
-        allSkyblockNpcs.put("Haymitch|Spider's Den", new Npc("Haymitch", "Spider's Den", new BlockPos(-202, 84, -240)));
-        allSkyblockNpcs.put("Rick|Spider's Den", new Npc("Rick", "Spider's Den", new BlockPos(-250, 70, -324)));
-        allSkyblockNpcs.put("Grandma Wolf|Spider's Den", new Npc("Grandma Wolf", "Spider's Den", new BlockPos(-282, 121, -191)));
-        allSkyblockNpcs.put("Shaggy|Spider's Den", new Npc("Shaggy", "Spider's Den", new BlockPos(-278, 121, -182)));
-        allSkyblockNpcs.put("Bramass Beastslayer|Spider's Den", new Npc("Bramass Beastslayer", "Spider's Den", new BlockPos(-271, 113, -196)));
-        allSkyblockNpcs.put("Archaeologist|Spider's Den", new Npc("Archaeologist", "Spider's Den", new BlockPos(-360, 111, -290)));
-        allSkyblockNpcs.put("Spider Tamer|Spider's Den", new Npc("Spider Tamer", "Spider's Den", new BlockPos(62, -194, -298)));
+        allSkyblockNpcs.put("Haymitch|Spider's Den", new Npc("Haymitch", "Spider's Den", new BlockPos(-203, 83, -237)));
+        allSkyblockNpcs.put("Rick|Spider's Den", new Npc("Rick", "Spider's Den", new BlockPos(-265, 72, -324)));
+        allSkyblockNpcs.put("Grandma Wolf|Spider's Den", new Npc("Grandma Wolf", "Spider's Den", new BlockPos(-282, 123, -191)));
+        allSkyblockNpcs.put("Shaggy|Spider's Den", new Npc("Shaggy", "Spider's Den", new BlockPos(-279, 122, -183)));
+        allSkyblockNpcs.put("Bramass Beastslayer|Spider's Den", new Npc("Bramass Beastslayer", "Spider's Den", new BlockPos(-272, 114, -197)));
+        allSkyblockNpcs.put("Archaeologist|Spider's Den", new Npc("Archaeologist", "Spider's Den", new BlockPos(-361, 112, -291)));
+        allSkyblockNpcs.put("Spider Tamer|Spider's Den", new Npc("Spider Tamer", "Spider's Den", new BlockPos(-299, 62, -195)));
 
 // The End
-        allSkyblockNpcs.put("Pearl Dealer|The End", new Npc("Pearl Dealer", "The End", new BlockPos(-504, 101, -284)));
+        allSkyblockNpcs.put("Pearl Dealer|The End", new Npc("Pearl Dealer", "The End", new BlockPos(-505, 102, -285)));
         allSkyblockNpcs.put("Gregory|The End", new Npc("Gregory", "The End", new BlockPos(-607, 22, -284)));
-        allSkyblockNpcs.put("Guber|The End", new Npc("Guber", "The End", new BlockPos(-494, 121, -241)));
-        allSkyblockNpcs.put("Lone Adventurer|The End", new Npc("Lone Adventurer", "The End", new BlockPos(-524, 101, -275)));
-        allSkyblockNpcs.put("Tyzzo|The End", new Npc("Tyzzo", "The End", new BlockPos(-597, 5, -272)));
+        allSkyblockNpcs.put("Guber|The End", new Npc("Guber", "The End", new BlockPos(-495, 122, -242)));
+        allSkyblockNpcs.put("Lone Adventurer|The End", new Npc("Lone Adventurer", "The End", new BlockPos(-589, 23, -271)));
+        allSkyblockNpcs.put("Tyzzo|The End", new Npc("Tyzzo", "The End", new BlockPos(-597, 6, -272)));
 
 // Crimson Isle
-        allSkyblockNpcs.put("Elle|Crimson Isle", new Npc("Elle", "Crimson Isle", new BlockPos(-31, 196, -405)));
+        allSkyblockNpcs.put("Elle|Crimson Isle", new Npc("Elle", "Crimson Isle", new BlockPos(-365, 81, -477)));
+        allSkyblockNpcs.put("Desperate Engineer|Crimson Isle", new Npc("Desperate Engineer", "Crimson Isle", new BlockPos(-290, 128, -982)));
+        allSkyblockNpcs.put("Crag|Crimson Isle", new Npc("Crag", "Crimson Isle", new BlockPos(-371, 115, -1043)));
+        allSkyblockNpcs.put("Vesuvius|Crimson Isle", new Npc("Vesuvius", "Crimson Isle", new BlockPos(-381, 116, -1031)));
+        allSkyblockNpcs.put("Vulcan|Crimson Isle", new Npc("Vulcan", "Crimson Isle", new BlockPos(-363, 116, -1032)));
+        allSkyblockNpcs.put("Odger|Crimson Isle", new Npc("Odger", "Crimson Isle", new BlockPos(-374, 208, -811)));
+        allSkyblockNpcs.put("Mage Emissary|Crimson Isle", new Npc("Mage Emissary", "Crimson Isle", new BlockPos(-132, 90, -723)));
+        allSkyblockNpcs.put("Barbarian Emissary|Crimson Isle", new Npc("Barbarian Emissary", "Crimson Isle", new BlockPos(-581, 99, -711)));
+        allSkyblockNpcs.put("Blacksmith|Crimson Isle", new Npc("Blacksmith", "Crimson Isle", new BlockPos(-83, 93, -735)));
+        allSkyblockNpcs.put("Udel|Crimson Isle", new Npc("Udel", "Crimson Isle", new BlockPos(-79, 109, -788)));
 
 // The Park
         allSkyblockNpcs.put("Charlie|The Park", new Npc("Charlie", "The Park", new BlockPos(-285, 82, -16)));
