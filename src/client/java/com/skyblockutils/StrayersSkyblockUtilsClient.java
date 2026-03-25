@@ -57,6 +57,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         WorldRenderEvents.END_MAIN.register(context -> {
             GlaciteTunnelsWaypoints.onWorldRender(context);
+            NpcFinder.onWorldRender(context);
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

@@ -1,9 +1,9 @@
 package com.skyblockutils.features;
 
+import com.skyblockutils.ModFunctions;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.item.FishingRodItem;
-import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 
 import java.util.UUID;
@@ -24,7 +24,7 @@ public class AutoFish {
         if (!autoFishEnabled || client.player == null || client.interactionManager == null || client.world == null)
             return;
         if (!(client.player.getMainHandStack().getItem() instanceof FishingRodItem)) {
-            client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §cToggled off"));
+            ModFunctions.displayMessageWithHeader(("§cAutofish toggled off"));
             resetAutoFish();
             return;
         }
@@ -70,14 +70,14 @@ public class AutoFish {
         if (!autoFishEnabled) {
             if (client.player.getMainHandStack().getItem() instanceof FishingRodItem) {
                 autoFishEnabled = true;
-                client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §aToggled on"));
+                ModFunctions.displayMessageWithHeader("§aAutofish toggled on");
             } else {
-                client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §cYou must hold a fishing rod in your main hand to use Autofish"));
+                ModFunctions.displayMessageWithHeader("§cYou must hold a fishing rod in your main hand to use Autofish");
             }
         } else {
             resetAutoFish();
             if (client.player.fishHook != null) client.interactionManager.interactItem(client.player, Hand.MAIN_HAND);
-            client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §cToggled off"));
+            ModFunctions.displayMessageWithHeader("§cAutofish toggled off");
         }
     }
 

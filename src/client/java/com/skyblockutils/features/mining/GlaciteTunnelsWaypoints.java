@@ -92,6 +92,8 @@ public class GlaciteTunnelsWaypoints {
                 })
                 .toList();
 
-        WaypointRenderer.render(context, filtered, 75);
+        for (WaypointRenderer.Waypoint waypoint: filtered) {
+            WaypointRenderer.render(context, waypoint, 75);
+        }
     }
 }

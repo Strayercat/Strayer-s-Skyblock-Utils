@@ -12,8 +12,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.List;
-
 public class WaypointRenderer {
     public enum WaypointStyle {
         TEXT, BADGE
@@ -25,7 +23,7 @@ public class WaypointRenderer {
         }
     }
 
-    public static void render(WorldRenderContext context, List<Waypoint> waypoints, double maxDistance) {
+    public static void render(WorldRenderContext context, Waypoint waypoint, double maxDistance) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world == null || client.player == null) return;
 
@@ -36,15 +34,13 @@ public class WaypointRenderer {
 
         double effectiveMax = maxDistance < 0 ? Double.MAX_VALUE : maxDistance;
 
-        for (Waypoint waypoint : waypoints) {
-            Vec3d center = Vec3d.ofCenter(waypoint.pos());
-            double distance = cameraPos.distanceTo(center);
-            if (distance > effectiveMax) continue;
+        Vec3d center = Vec3d.ofCenter(waypoint.pos());
+        double distance = cameraPos.distanceTo(center);
+        if (distance > effectiveMax) return;
 
-            switch (waypoint.style()) {
-                case TEXT -> renderText(waypoint, distance, cameraPos, camera, font, immediate);
-                case BADGE -> renderBadge(waypoint, distance, cameraPos, camera, font, immediate);
-            }
+        switch (waypoint.style()) {
+            case TEXT -> renderText(waypoint, distance, cameraPos, camera, font, immediate);
+            case BADGE -> renderBadge(waypoint, distance, cameraPos, camera, font, immediate);
         }
     }
 
@@ -101,14 +97,14 @@ public class WaypointRenderer {
         var buf = immediate.getBuffer(BADGE_BACKGROUND);
 
         buf.vertex(pose, -badgeW, -badgeH, 0).color(bgColor);
-        buf.vertex(pose,  badgeW, -badgeH, 0).color(bgColor);
-        buf.vertex(pose,  badgeW, 0, 0).color(bgColor);
+        buf.vertex(pose, badgeW, -badgeH, 0).color(bgColor);
+        buf.vertex(pose, badgeW, 0, 0).color(bgColor);
         buf.vertex(pose, -badgeW, 0, 0).color(bgColor);
 
         buf.vertex(pose, -badgeW, 0, 0).color(bgColor);
-        buf.vertex(pose,  badgeW, 0, 0).color(bgColor);
-        buf.vertex(pose,  0, tipH, 0).color(bgColor);
-        buf.vertex(pose,  0, tipH, 0).color(bgColor);
+        buf.vertex(pose, badgeW, 0, 0).color(bgColor);
+        buf.vertex(pose, 0, tipH, 0).color(bgColor);
+        buf.vertex(pose, 0, tipH, 0).color(bgColor);
 
         immediate.draw();
 

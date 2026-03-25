@@ -6,10 +6,12 @@ import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.utils.FunFacts;
+import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +38,6 @@ public class SsuHud {
     private static final int COLOR_TITLE = 0xFFFFFFFF;
     private static final int COLOR_SUBTITLE = 0xFFAAAAAA;
     private static final int COLOR_LINE = 0xFFAAFFAA;
-    private static final int COLOR_HEADER = 0xFF66FF66;
     private static final int COLOR_OUTLINE = 0xFF00AA00;
     private static final int COLOR_BG = 0xAA000000;
     private static final int COLOR_DIVIDER = 0xFF00AA00;
@@ -47,13 +48,17 @@ public class SsuHud {
         showBossBar = !visible;
     }
 
-    private record HudLine(String text, int color, boolean isDivider) {
+    private record HudLine(String text, int color, boolean isDivider, Text richText) {
         static HudLine of(String text, int color) {
-            return new HudLine(text, color, false);
+            return new HudLine(text, color, false, null);
+        }
+
+        static HudLine rich(Text text) {
+            return new HudLine("", 0, false, text);
         }
 
         static HudLine divider() {
-            return new HudLine("", COLOR_DIVIDER, true);
+            return new HudLine("", COLOR_DIVIDER, true, null);
         }
     }
 
@@ -92,7 +97,11 @@ public class SsuHud {
                 context.fill(unscaledRenderX + 4, lineY, unscaledRenderX + BASE_HUD_WIDTH - 4, lineY + 1, COLOR_DIVIDER);
                 unscaledRenderY += BASE_DIVIDER_HEIGHT;
             } else {
-                context.drawTextWithShadow(client.textRenderer, line.text(), unscaledRenderX + 5, unscaledRenderY, line.color());
+                if (line.richText() != null) {
+                    context.drawTextWithShadow(client.textRenderer, line.richText(), unscaledRenderX + 5, unscaledRenderY, 0xFFFFFFFF);
+                } else {
+                    context.drawTextWithShadow(client.textRenderer, line.text(), unscaledRenderX + 5, unscaledRenderY, line.color());
+                }
                 unscaledRenderY += BASE_LINE_HEIGHT;
             }
         }
@@ -110,7 +119,7 @@ public class SsuHud {
 
     private static @NotNull List<HudLine> getHudLines(MinecraftClient client, String location) {
         List<HudLine> lines = new ArrayList<>();
-        lines.add(HudLine.of("STRAYER'S SKYBLOCK UTILS", COLOR_HEADER));
+        lines.add(HudLine.rich(SSU.FULL_NAME));
         addDivider(lines);
 
         boolean anyGeneralInfo = false;
