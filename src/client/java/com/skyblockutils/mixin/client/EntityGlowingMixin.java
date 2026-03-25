@@ -16,9 +16,6 @@ public abstract class EntityGlowingMixin {
         Entity entity = (Entity) (Object) this;
 
         if (entity instanceof PlayerEntity) {
-            // Log the IDs to the console so we can see the mismatch
-            // System.out.println("Checking: " + entity.getUuidAsString());
-
             boolean shouldGlow = ModConfig.INSTANCE.getGlowingPlayers().stream()
                     .anyMatch(gp -> gp.getUuid().toString().equalsIgnoreCase(entity.getUuid().toString()));
 

@@ -3,3 +3,4 @@ run/
 build/
 .idea/
 gradle/
+chats.txt

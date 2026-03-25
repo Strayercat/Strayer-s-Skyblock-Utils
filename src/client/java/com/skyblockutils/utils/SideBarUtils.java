@@ -16,13 +16,12 @@ public class SideBarUtils {
 
     public static MinecraftClient client = MinecraftClient.getInstance();
     public static String getSideBarInfo(String info) {
-        if (client.world == null) return ""; // Return empty instead of null
+        if (client.world == null) return "";
 
         var scoreboard = client.world.getScoreboard();
         var sidebar = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
         if (sidebar == null) return "";
 
-        // Reset variables so old data doesn't persist from previous areas
         date = "";
         time = "";
         location = "";
@@ -44,10 +43,8 @@ public class SideBarUtils {
             lineText = lineText.replaceAll("(?i)§.", "").trim(); // Case-insensitive regex for safety
 
             if (lineText.contains("⏣")) location = lineText;
-            // ... (Your other regex checks)
         }
 
-        // Use yield or simple return with a fallback to empty string
         return switch (info) {
             case "date" -> date;
             case "time" -> time;

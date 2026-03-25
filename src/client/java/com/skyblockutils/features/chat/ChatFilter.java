@@ -1,4 +1,4 @@
-package com.skyblockutils.features.chatFilters;
+package com.skyblockutils.features.chat;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.StrayersSkyblockUtilsClient;

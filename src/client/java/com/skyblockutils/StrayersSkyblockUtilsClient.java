@@ -3,10 +3,15 @@ package com.skyblockutils;
 import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
-import com.skyblockutils.features.chatFilters.ChatFilter;
+import com.skyblockutils.features.chat.ChatCommands;
+import com.skyblockutils.features.chat.ChatFilter;
+import com.skyblockutils.features.chat.FancyEmotes;
+import com.skyblockutils.features.dungeons.AutoRejoin;
+import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.SsuHud;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
+import com.skyblockutils.features.mining.GlaciteTunnelsWaypoints;
 import com.skyblockutils.features.party.PartyCommands;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.features.party.PartyInviteNotifications;
@@ -15,7 +20,6 @@ import com.skyblockutils.mixin.client.ClientPlayNetworkHandlerAccessor;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
-import com.skyblockutils.utils.WaypointRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -51,7 +55,10 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
                 SsuHud.onHudRender(guiGraphics, SideBarUtils.getSideBarInfo("location"))
         );
 
-        WorldRenderEvents.END_MAIN.register(WaypointRenderer::render);
+        WorldRenderEvents.END_MAIN.register(context -> {
+            GlaciteTunnelsWaypoints.onWorldRender(context);
+            NpcFinder.onWorldRender(context);
+        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             OnScreenNotification.tick();
@@ -89,12 +96,12 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             DowntimeTracker.trackDowntime(cleanMessage);
             DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);
-            DungeonPartyCommands.autoRejoin(cleanMessage);
+            AutoRejoin.autoRejoin(cleanMessage);
             ChatCommands.handleCommands(cleanMessage);
             PartyCommands.handlePartyCommands(cleanMessage);
             PartyInfo.handlePartyMessages(cleanMessage);
         });
 
-        ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::modifiedChat);
+        ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);
     }
 }

@@ -28,7 +28,7 @@ public class ModKeyBindings {
 
     public static final KeyBinding RUN_Z_FUNCTION_KEY =
             KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                    "key.ssu.dungeonHud",
+                    "key.ssu.hud",
                     InputUtil.Type.KEYSYM,
                     GLFW.GLFW_KEY_Z,
                     ssuCategory

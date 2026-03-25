@@ -1,9 +1,9 @@
 package com.skyblockutils.features;
 
+import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.PlayerLookup;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
 
 import java.util.Map;
 import java.util.UUID;
@@ -55,7 +55,7 @@ public class GlowingPlayers {
 
     public static void add(String username, int color) {
         if (isPlayerGlowing(username)) {
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §c" + username + " is already glowing!"));
+            ModFunctions.displayMessageWithHeader("§c" + username + " is already glowing!");
             return;
         }
 
@@ -65,10 +65,10 @@ public class GlowingPlayers {
                 client.execute(() -> {
                     if (uuid != null) {
                         ModConfig.INSTANCE.addGlowingPlayer(new GlowingPlayer(username, uuid, color));
-                        client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §a" + username + " is now glowing!"));
+                        ModFunctions.displayMessageWithHeader("§a" + username + " is now glowing!");
                         ModConfig.save();
                     } else {
-                        client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §cPlayer " + username + " not found :c"));
+                        ModFunctions.displayMessageWithHeader("§cPlayer " + username + " not found :c");
                     }
                 })
         );
@@ -76,12 +76,12 @@ public class GlowingPlayers {
 
     public static void remove(String username) {
         if (!isPlayerGlowing(username)) {
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §c" + username + " already wasn't glowing"));
+            ModFunctions.displayMessageWithHeader("§c" + username + " already wasn't glowing");
             return;
         }
 
         ModConfig.INSTANCE.removeGlowingPlayer(username);
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §a" + username + " is no longer glowing"));
+        ModFunctions.displayMessageWithHeader("§a" + username + " is no longer glowing");
         ModConfig.save();
     }
 

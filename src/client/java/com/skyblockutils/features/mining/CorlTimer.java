@@ -1,10 +1,9 @@
-package com.skyblockutils.features;
+package com.skyblockutils.features.mining;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.entity.Entity;
@@ -64,10 +63,10 @@ public class CorlTimer {
         }
     }
 
-    public static void toggleCorlTimer(net.minecraft.client.MinecraftClient client) {
+    public static void toggleCorlTimer() {
         if (corlTimerEnabled) {
             corlTimerEnabled = false;
-            client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §cToggled off"));
+            ModFunctions.displayMessageWithHeader("§cCorleone Timer toggled off");
         } else {
             String currentLocation = SideBarUtils.getSideBarInfo("location");
             List<String> allowedLocations = List.of("⏣ Mithril Deposits", "⏣ Precursor Remnants", "⏣ Jungle", "⏣ Goblin Holdout", "⏣ Crystal Nucleus", "⏣ Magma Fields");
@@ -76,12 +75,12 @@ public class CorlTimer {
             System.out.println(currentLocation);
             System.out.println(allowedLocations);
             if (!allowedLocations.contains(currentLocation)) {
-                client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §cYou must be in the Crystal Hollows to use Corleone Timer"));
+                ModFunctions.displayMessageWithHeader("§cYou must be in the Crystal Hollows to use Corleone Timer");
                 return;
             }
 
             corlTimerEnabled = true;
-            client.inGameHud.getChatHud().addMessage(Text.literal("§6[SSU] §aToggled on"));
+            ModFunctions.displayMessageWithHeader("§aCorleone Timer toggled on");
         }
     }
 
