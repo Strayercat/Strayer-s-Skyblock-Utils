@@ -9,6 +9,7 @@ import com.skyblockutils.features.NpcFinder;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.utils.MarkCoordinates;
 import com.skyblockutils.utils.OnScreenNotification;
+import com.skyblockutils.utils.PlayerLookup;
 import com.skyblockutils.utils.SideBarUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -72,7 +73,7 @@ public class ModCommands {
                                         })
                                         .executes(context -> {
                                             String name = StringArgumentType.getString(context, "username");
-                                            GlowingPlayers.add(name, 0xFFAA00);
+                                            PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> GlowingPlayers.add(formattedName, 0xFFAA00));
                                             return 1;
                                         })
                                         .then(ClientCommandManager.argument("color", StringArgumentType.string())

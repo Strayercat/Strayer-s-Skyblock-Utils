@@ -36,7 +36,7 @@ public class ClothConfigHandler {
     }
 
     // General Settings
-    private static void buildGeneralCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
+    public static void buildGeneralCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory general = builder.getOrCreateCategory(Text.literal("General Settings"));
 
         general.addEntry(eb.startBooleanToggle(Text.literal("Party Invite Notifications"), ModConfig.INSTANCE.partyInviteNotifications)
@@ -106,7 +106,7 @@ public class ClothConfigHandler {
     }
 
     // HUD Settings
-    private static void buildHudCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
+    public static void buildHudCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory hud = builder.getOrCreateCategory(Text.literal("HUD Settings"));
 
         // Core
@@ -178,7 +178,7 @@ public class ClothConfigHandler {
     }
 
     // Chat Filters
-    private static void buildChatFiltersCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
+    public static void buildChatFiltersCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(Text.literal("Chat Filters"));
 
         category.addEntry(eb.startBooleanToggle(Text.literal("Chat Filters Enabled"), ModConfig.INSTANCE.chatFiltersEnabled)

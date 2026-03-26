@@ -142,7 +142,6 @@ public class ModConfig {
             INSTANCE.glowingPlayers = loaded.glowingPlayers != null ? new ArrayList<>(loaded.glowingPlayers) : new ArrayList<>();
 
             loaded.chatFilters.forEach(INSTANCE::setChatFilter);
-
         } catch (IOException ignored) {
         }
 

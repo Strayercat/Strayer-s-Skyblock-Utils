@@ -407,8 +407,8 @@ public class ChatFilterDefinitions {
         seaCreatures.addSubCategory(spooky);
 
         FilterCategory winter = new FilterCategory("Winter", "Winter fishing creatures");
-        winter.addEntry(new FilterEntry("fishingFrozenSteve", "Frozen Steve", "Filter Frozen Steve messages", "^Frozen Steve fell into the pond long ago, never to resurface\\.\\.\\. until now!$"));
-        winter.addEntry(new FilterEntry("fishingSnowman", "Snowman", "Filter Snowman messages", "^Its a Snowman! It looks harmless\\.$"));
+        winter.addEntry(new FilterEntry("fishingFrozenSteve", "Frozen Steve", "Filter Frozen Steve messages", "^Frozen Steve fell into the pond long ago, never to resurface\\.\\.\\.until now!$"));
+        winter.addEntry(new FilterEntry("fishingSnowman", "Snowman", "Filter Snowman messages", "^It's a snowman! He looks harmless\\.$"));
         winter.addEntry(new FilterEntry("fishingGrinch", "Grinch", "Filter Grinch messages", "^The Grinch stole Jerry's Gifts\\.\\.\\.get them back!$"));
         winter.addEntry(new FilterEntry("fishingNutcracker", "Nutcracker", "Filter Nutcracker messages", "^You found a forgotten Nutcracker laying beneath the ice\\.$"));
         winter.addEntry(new FilterEntry("fishingUnknownCreature", "Unknown Creature", "Filter Unknown Creature messages", "^What is this creature!\\?$"));
@@ -502,3 +502,6 @@ public class ChatFilterDefinitions {
         }
     }
 }
+
+// WOAH! A Reindrake was summoned from the depths!
+// DEFEATED! A Reindrake was slain and dropped all its loot!
