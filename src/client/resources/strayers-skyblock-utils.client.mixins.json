@@ -9,6 +9,7 @@
     "ClientPlayNetworkHandlerAccessor",
     "EntityColorMixin",
     "EntityGlowingMixin",
+    "GameRendererMixin",
     "GuiAccessor",
     "InGameHudMixin",
     "MouseMixin",

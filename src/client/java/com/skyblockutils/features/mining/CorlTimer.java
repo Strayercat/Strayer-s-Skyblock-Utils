@@ -68,13 +68,7 @@ public class CorlTimer {
             corlTimerEnabled = false;
             ModFunctions.displayMessageWithHeader("§cCorleone Timer toggled off");
         } else {
-            String currentLocation = SideBarUtils.getSideBarInfo("location");
-            List<String> allowedLocations = List.of("⏣ Mithril Deposits", "⏣ Precursor Remnants", "⏣ Jungle", "⏣ Goblin Holdout", "⏣ Crystal Nucleus", "⏣ Magma Fields");
-
-            System.out.println(allowedLocations.contains(currentLocation));
-            System.out.println(currentLocation);
-            System.out.println(allowedLocations);
-            if (!allowedLocations.contains(currentLocation)) {
+            if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows")) {
                 ModFunctions.displayMessageWithHeader("§cYou must be in the Crystal Hollows to use Corleone Timer");
                 return;
             }

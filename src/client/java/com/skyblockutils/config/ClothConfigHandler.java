@@ -8,6 +8,7 @@ import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class ClothConfigHandler {
     public static boolean configScreenRequested = false;
@@ -15,6 +16,8 @@ public class ClothConfigHandler {
     public static Screen createConfigScreen(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
+                .setTransparentBackground(false)
+                .setDefaultBackgroundTexture(Identifier.of("skyblockutils", "textures/config/background.png"))
                 .setTitle(Text.literal("Strayer's Skyblock Utils (SSU) Config"))
                 .setSavingRunnable(ModConfig::save);
 
@@ -55,6 +58,10 @@ public class ClothConfigHandler {
         general.addEntry(eb.startBooleanToggle(Text.literal("Chat Commands"), ModConfig.INSTANCE.chatCommands)
                 .setDefaultValue(true).setTooltip(Text.literal("Whether or not to enable !gay !furry !sus and such commands"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.chatCommands = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Text.literal("Ragebait button"), true)
+                .setDefaultValue(true).setTooltip(Text.literal("No matter how much you toggle it, whenever you come back it'll always be true"))
+                .build());
 
         general.addEntry(buildDungeonsSubcategory(eb).build());
         general.addEntry(buildMiningSubcategory(eb).build());
@@ -122,6 +129,10 @@ public class ClothConfigHandler {
         stats.add(eb.startBooleanToggle(Text.literal("Show FPS"), ModConfig.INSTANCE.hudFps)
                 .setDefaultValue(true).setTooltip(Text.literal("Show your current FPS"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudFps = v).build());
+
+        stats.add(eb.startBooleanToggle(Text.literal("Show Coordinates"), ModConfig.INSTANCE.hudCoords)
+                .setDefaultValue(true).setTooltip(Text.literal("Show your current coordinates"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.hudCoords = v).build());
 
         hud.addEntry(stats.build());
 

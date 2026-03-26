@@ -42,6 +42,7 @@ public class ModConfig {
     public boolean hudPing = true;
     public boolean hudTps = true;
     public boolean hudFps = true;
+    public boolean hudCoords = true;
     public boolean sideBarInHud = false;
     public boolean hudPartyInfo = true;
     public boolean hudPartyInfoInDungeons = false;
@@ -130,6 +131,7 @@ public class ModConfig {
             INSTANCE.hudPing = loaded.hudPing;
             INSTANCE.hudTps = loaded.hudTps;
             INSTANCE.hudFps = loaded.hudFps;
+            INSTANCE.hudCoords = loaded.hudCoords;
             INSTANCE.sideBarInHud = loaded.sideBarInHud;
             INSTANCE.hudPartyInfo = loaded.hudPartyInfo;
             INSTANCE.hudPartyInfoInDungeons = loaded.hudPartyInfoInDungeons;

@@ -19,12 +19,19 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Chat filter toggles (Incomplete)
 - Printing coordinates to chat via keybinds
 - Fancy emotes (o/ into ( ﾟ◡ﾟ)/ and such)
+
 ### Misc
 - A customizable contextual hud
 - Glowing players via /ssu glowingPlayers
 - Custom party invite notifications
 - Auto Hoppity eggs
+- Zoom
+- Chat peek
 </details>
+
+## Dependencies
+- Cloth Config Api - Mandatory
+- Mod Menu - Recommended
 
 ## REPORTING ISSUES
 Please keep in mind that this is the first mod I develop and release and I am still just getting used to the Minecraft modding environment. Just like anyone in my position, I'm bound to make mistakes, introduce bugs or make your game crash :p. If you find a bug, please let me know so I can release a fix ASAP.

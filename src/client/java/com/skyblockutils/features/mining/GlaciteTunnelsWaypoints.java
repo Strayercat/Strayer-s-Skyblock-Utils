@@ -81,7 +81,7 @@ public class GlaciteTunnelsWaypoints {
     public static void onWorldRender(WorldRenderContext context) {
         if (!ModConfig.INSTANCE.displayGlaciteWaypoints) return;
 
-        String loc = SideBarUtils.getSideBarInfo("location");
+        String loc = SideBarUtils.location;
         if (!loc.equals("⏣ Glacite Tunnels") && !loc.equals("⏣ Dwarven Base Camp")) return;
 
         List<WaypointRenderer.Waypoint> filtered = GLACITE_WAYPOINTS.stream()

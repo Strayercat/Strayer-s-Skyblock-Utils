@@ -236,31 +236,30 @@ public class NpcFinder {
         allSkyblockNpcs.put("Udel|Crimson Isle", new Npc("Udel", "Crimson Isle", new BlockPos(-79, 109, -788)));
 
 // The Park
-        allSkyblockNpcs.put("Charlie|The Park", new Npc("Charlie", "The Park", new BlockPos(-285, 82, -16)));
-        allSkyblockNpcs.put("Vanessa|The Park", new Npc("Vanessa", "The Park", new BlockPos(-311, 83, -70)));
-        allSkyblockNpcs.put("Gustave|The Park", new Npc("Gustave", "The Park", new BlockPos(-385, 89, 55)));
-        allSkyblockNpcs.put("Melancholic Viking|The Park", new Npc("Melancholic Viking", "The Park", new BlockPos(-359, 91, 76)));
-        allSkyblockNpcs.put("Ryan|The Park", new Npc("Ryan", "The Park", new BlockPos(-330, 103, -103)));
-        allSkyblockNpcs.put("Melody|The Park", new Npc("Melody", "The Park", new BlockPos(-398, 110, 34)));
-        allSkyblockNpcs.put("Master Tactician Funk|The Park", new Npc("Master Tactician Funk", "The Park", new BlockPos(-462, 110, -15)));
-        allSkyblockNpcs.put("Juliette|The Park", new Npc("Juliette", "The Park", new BlockPos(-476, 134, -116)));
-        allSkyblockNpcs.put("Romero|The Park", new Npc("Romero", "The Park", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Old Shaman Nyko|The Park", new Npc("Old Shaman Nyko", "The Park", new BlockPos(-379, 60, 36)));
+        allSkyblockNpcs.put("Charlie|The Park", new Npc("Charlie", "The Park", new BlockPos(-278, 81, -18)));
+        allSkyblockNpcs.put("Kelly|The Park", new Npc("Kelly", "The Park", new BlockPos(-351, 95, 33)));
+        allSkyblockNpcs.put("Molbert|The Park", new Npc("Molbert", "The Park", new BlockPos(-448, 121, -64)));
+        allSkyblockNpcs.put("Vanessa|The Park", new Npc("Vanessa", "The Park", new BlockPos(-305, 77, -80)));
+        allSkyblockNpcs.put("Gustave|The Park", new Npc("Gustave", "The Park", new BlockPos(-364, 90, 44)));
+        allSkyblockNpcs.put("Melancholic Viking|The Park", new Npc("Melancholic Viking", "The Park", new BlockPos(-336, 93, 73)));
+        allSkyblockNpcs.put("Ryan|The Park", new Npc("Ryan", "The Park", new BlockPos(-365, 103, -91)));
+        allSkyblockNpcs.put("Melody|The Park", new Npc("Melody", "The Park", new BlockPos(-412, 110, 71)));
+        allSkyblockNpcs.put("Master Tactician Funk|The Park", new Npc("Master Tactician Funk", "The Park", new BlockPos(-453, 111, 29)));
+        allSkyblockNpcs.put("Juliette|The Park", new Npc("Juliette", "The Park", new BlockPos(-416, 131, -122)));
+        allSkyblockNpcs.put("Old Shaman Nyko|The Park", new Npc("Old Shaman Nyko", "The Park", new BlockPos(-371, 85, -65)));
 
 // Dungeon Hub
-        allSkyblockNpcs.put("Malik|Dungeon Hub", new Npc("Malik", "Dungeon Hub", new BlockPos(-80, 56, -119)));
-        allSkyblockNpcs.put("Mort|Dungeon Hub", new Npc("Mort", "Dungeon Hub", new BlockPos(-88, 55, -128)));
-        allSkyblockNpcs.put("Ophelia|Dungeon Hub", new Npc("Ophelia", "Dungeon Hub", new BlockPos(-85, 55, -139)));
-        allSkyblockNpcs.put("Hub Selector|Dungeon Hub", new Npc("Hub Selector", "Dungeon Hub", new BlockPos(-37, 118, 10)));
-        allSkyblockNpcs.put("Guildford|Dungeon Hub", new Npc("Guildford", "Dungeon Hub", new BlockPos(-18, 86, 4)));
-        allSkyblockNpcs.put("Tomioka|Dungeon Hub", new Npc("Tomioka", "Dungeon Hub", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Duncan|Dungeon Hub", new Npc("Duncan", "Dungeon Hub", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Winona|Dungeon Hub", new Npc("Winona", "Dungeon Hub", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Trinity|Dungeon Hub", new Npc("Trinity", "Dungeon Hub", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Wizard|Dungeon Hub", new Npc("Wizard", "Dungeon Hub", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Zodd|Dungeon Hub", new Npc("Zodd", "Dungeon Hub", new BlockPos(20000, 20000, 20000)));
+        allSkyblockNpcs.put("Malik|Dungeon Hub", new Npc("Malik", "Dungeon Hub", new BlockPos(-50, 120, 10)));
+        allSkyblockNpcs.put("Mort|Dungeon Hub", new Npc("Mort", "Dungeon Hub", new BlockPos(-62, 124, 0)));
+        allSkyblockNpcs.put("Ophelia|Dungeon Hub", new Npc("Ophelia", "Dungeon Hub", new BlockPos(-50, 120, -10)));
+        allSkyblockNpcs.put("Hub Selector|Dungeon Hub", new Npc("Hub Selector", "Dungeon Hub", new BlockPos(-35, 120, 9)));
+        allSkyblockNpcs.put("Guildford|Dungeon Hub", new Npc("Guildford", "Dungeon Hub", new BlockPos(-19, 87, 4)));
+        allSkyblockNpcs.put("Croesus|Dungeon Hub", new Npc("Croesus", "Dungeon Hub", new BlockPos(-28, 120, 35)));
+        allSkyblockNpcs.put("Adventurer Saul|Dungeon Hub", new Npc("Adventurer Saul", "Dungeon Hub", new BlockPos(-55, 120, -4)));
+        allSkyblockNpcs.put("Crag|Dungeon Hub", new Npc("Crag", "Dungeon Hub", new BlockPos(-48, 122, -25)));
+        allSkyblockNpcs.put("Vulcan|Dungeon Hub", new Npc("Vulcan", "Dungeon Hub", new BlockPos(-46, 121, -28)));
 
-// Jerry's Workshop
+// Jerry's Workshop TODO
         allSkyblockNpcs.put("St. Jerry|Jerry's Workshop", new Npc("St. Jerry", "Jerry's Workshop", new BlockPos(-22, 76, 92)));
         allSkyblockNpcs.put("Sherry|Jerry's Workshop", new Npc("Sherry", "Jerry's Workshop", new BlockPos(97, 69, 9)));
         allSkyblockNpcs.put("Gulliver|Jerry's Workshop", new Npc("Gulliver", "Jerry's Workshop", new BlockPos(69, 105, 33)));
@@ -270,92 +269,74 @@ public class NpcFinder {
         allSkyblockNpcs.put("Banker Barry|Jerry's Workshop", new Npc("Banker Barry", "Jerry's Workshop", new BlockPos(20, 77, 44)));
 
 // Rift
-        allSkyblockNpcs.put("Alatar|Rift", new Npc("Alatar", "Rift", new BlockPos(-46, 116, 70)));
-        allSkyblockNpcs.put("Wizard|Rift", new Npc("Wizard", "Rift", new BlockPos(-48, 122, 77)));
-        allSkyblockNpcs.put("Wizardman|Rift", new Npc("Wizardman", "Rift", new BlockPos(-45, 90, 70)));
-        allSkyblockNpcs.put("Elise|Rift", new Npc("Elise", "Rift", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Enigma|Rift", new Npc("Enigma", "Rift", new BlockPos(20000, 20000, 20000)));
+        allSkyblockNpcs.put("Alatar|Rift", new Npc("Alatar", "Rift", new BlockPos(-47, 117, 70)));
+        allSkyblockNpcs.put("Wizard|Rift", new Npc("Wizard", "Rift", new BlockPos(-48, 123, 77)));
+        allSkyblockNpcs.put("Wizardman|Rift", new Npc("Wizardman", "Rift", new BlockPos(-46, 91, 79)));
         allSkyblockNpcs.put("Motes Grubber|Rift", new Npc("Motes Grubber", "Rift", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Argofay Bughunter|Rift", new Npc("Argofay Bughunter", "Rift", new BlockPos(-85, 108, 97)));
-        allSkyblockNpcs.put("Argofay Bugshopper|Rift", new Npc("Argofay Bugshopper", "Rift", new BlockPos(-95, 110, 95)));
-        allSkyblockNpcs.put("Argofay Serialbather|Rift", new Npc("Argofay Serialbather", "Rift", new BlockPos(-139, 119, 115)));
-        allSkyblockNpcs.put("Argofay Sonfather|Rift", new Npc("Argofay Sonfather", "Rift", new BlockPos(-96, 100, 156)));
-        allSkyblockNpcs.put("Argofay Threebrother|Rift", new Npc("Argofay Threebrother", "Rift", new BlockPos(-93, 76, 108)));
-        allSkyblockNpcs.put("Argofay Trafficker|Rift", new Npc("Argofay Trafficker", "Rift", new BlockPos(-92, 90, 106)));
-        allSkyblockNpcs.put("Argofay Trailblazer|Rift", new Npc("Argofay Trailblazer", "Rift", new BlockPos(-97, 66, 147)));
-        allSkyblockNpcs.put("Argofay Treemerger|Rift", new Npc("Argofay Treemerger", "Rift", new BlockPos(-144, 93, 139)));
-        allSkyblockNpcs.put("Argofay Tencounter|Rift", new Npc("Argofay Tencounter", "Rift", new BlockPos(-93, 100, 95)));
-        allSkyblockNpcs.put("Hound|Rift", new Npc("Hound", "Rift", new BlockPos(-69, 66, 147)));
-        allSkyblockNpcs.put("Inverted Sirius|Rift", new Npc("Inverted Sirius", "Rift", new BlockPos(-96, 75, 190)));
-        allSkyblockNpcs.put("Jacquelle|Rift", new Npc("Jacquelle", "Rift", new BlockPos(-122, 120, 137)));
-        allSkyblockNpcs.put("Kiermet|Rift", new Npc("Kiermet", "Rift", new BlockPos(-135, 67, 158)));
-        allSkyblockNpcs.put("Ribbit|Rift", new Npc("Ribbit", "Rift", new BlockPos(-137, 67, 159)));
-        allSkyblockNpcs.put("Tel Kar|Rift", new Npc("Tel Kar", "Rift", new BlockPos(-113, 69, 62)));
-        allSkyblockNpcs.put("Alabaster|Rift", new Npc("Alabaster", "Rift", new BlockPos(-130, 74, 166)));
-        allSkyblockNpcs.put("Arora|Rift", new Npc("Arora", "Rift", new BlockPos(-129, 73, 169)));
-        allSkyblockNpcs.put("Ashera|Rift", new Npc("Ashera", "Rift", new BlockPos(-130, 74, 169)));
-        allSkyblockNpcs.put("Chester|Rift", new Npc("Chester", "Rift", new BlockPos(-130, 74, 173)));
-        allSkyblockNpcs.put("Dackinoru|Rift", new Npc("Dackinoru", "Rift", new BlockPos(-118, 74, 172)));
-        allSkyblockNpcs.put("Fafnir|Rift", new Npc("Fafnir", "Rift", new BlockPos(-127, 74, 172)));
-        allSkyblockNpcs.put("Garlacius|Rift", new Npc("Garlacius", "Rift", new BlockPos(-128, 80, 170)));
-        allSkyblockNpcs.put("Lazarus|Rift", new Npc("Lazarus", "Rift", new BlockPos(-127, 80, 166)));
-        allSkyblockNpcs.put("Seskel|Rift", new Npc("Seskel", "Rift", new BlockPos(-129, 73, 164)));
-        allSkyblockNpcs.put("Shifted|Rift", new Npc("Shifted", "Rift", new BlockPos(-120, 73, 174)));
-        allSkyblockNpcs.put("Tybalt|Rift", new Npc("Tybalt", "Rift", new BlockPos(-129, 79, 169)));
-        allSkyblockNpcs.put("Vreike|Rift", new Npc("Vreike", "Rift", new BlockPos(-124, 74, 172)));
-        allSkyblockNpcs.put("Porhtal|Rift", new Npc("Porhtal", "Rift", new BlockPos(-158, 70, 162)));
-        allSkyblockNpcs.put("Unbound Explorer|Rift", new Npc("Unbound Explorer", "Rift", new BlockPos(-29, 72, 316)));
-        allSkyblockNpcs.put("Dr. Edwin|Rift", new Npc("Dr. Edwin", "Rift", new BlockPos(-80, 73, 10)));
-        allSkyblockNpcs.put("Dr. Phear|Rift", new Npc("Dr. Phear", "Rift", new BlockPos(-146, 36, 27)));
-        allSkyblockNpcs.put("Mushroom Guy|Rift", new Npc("Mushroom Guy", "Rift", new BlockPos(-178, 75, 12)));
-        allSkyblockNpcs.put("Kay|Rift", new Npc("Kay", "Rift", new BlockPos(-191, 68, 59)));
-        allSkyblockNpcs.put("Reed|Rift", new Npc("Reed", "Rift", new BlockPos(-212, 72, 60)));
-        allSkyblockNpcs.put("Roy|Rift", new Npc("Roy", "Rift", new BlockPos(-205, 75, 49)));
-        allSkyblockNpcs.put("Alchemist|Rift", new Npc("Alchemist", "Rift", new BlockPos(-50, 70, -66)));
-        allSkyblockNpcs.put("Chef|Rift", new Npc("Chef", "Rift", new BlockPos(-103, 72, -104)));
-        allSkyblockNpcs.put("Cosmo|Rift", new Npc("Cosmo", "Rift", new BlockPos(-67, 70, -92)));
-        allSkyblockNpcs.put("Finplex|Rift", new Npc("Finplex", "Rift", new BlockPos(-57, 68, -82)));
+        allSkyblockNpcs.put("Argofay Bughunter|Rift", new Npc("Argofay Bughunter", "Rift", new BlockPos(-85, 109, 96)));
+        allSkyblockNpcs.put("Argofay Bugshopper|Rift", new Npc("Argofay Bugshopper", "Rift", new BlockPos(-96, 111, 95)));
+        allSkyblockNpcs.put("Argofay Serialbather|Rift", new Npc("Argofay Serialbather", "Rift", new BlockPos(-138, 120, 115)));
+        allSkyblockNpcs.put("Argofay Sonfather|Rift", new Npc("Argofay Sonfather", "Rift", new BlockPos(-96, 101, 156)));
+        allSkyblockNpcs.put("Argofay Threebrother|Rift", new Npc("Argofay Threebrother", "Rift", new BlockPos(-93, 77, 108)));
+        allSkyblockNpcs.put("Argofay Trafficker|Rift", new Npc("Argofay Trafficker", "Rift", new BlockPos(-92, 91, 106)));
+        allSkyblockNpcs.put("Argofay Trailblazer|Rift", new Npc("Argofay Trailblazer", "Rift", new BlockPos(-98, 67, 147)));
+        allSkyblockNpcs.put("Argofay Treemerger|Rift", new Npc("Argofay Treemerger", "Rift", new BlockPos(-146, 94, 139)));
+        allSkyblockNpcs.put("Argofay Tencounter|Rift", new Npc("Argofay Tencounter", "Rift", new BlockPos(-94, 100, 95)));
+        allSkyblockNpcs.put("Hound|Rift", new Npc("Hound", "Rift", new BlockPos(-70, 67, 147)));
+        allSkyblockNpcs.put("Inverted Sirius|Rift", new Npc("Inverted Sirius", "Rift", new BlockPos(-97, 76, 190)));
+        allSkyblockNpcs.put("Jacquelle|Rift", new Npc("Jacquelle", "Rift", new BlockPos(-122, 121, 137)));
+        allSkyblockNpcs.put("Kiermet|Rift", new Npc("Kiermet", "Rift", new BlockPos(-135, 68, 157)));
+        allSkyblockNpcs.put("Ribbit|Rift", new Npc("Ribbit", "Rift", new BlockPos(-137, 68, 158)));
+        allSkyblockNpcs.put("Tel Kar|Rift", new Npc("Tel Kar", "Rift", new BlockPos(-114, 70, 62)));
+        allSkyblockNpcs.put("Alabaster|Rift", new Npc("Alabaster", "Rift", new BlockPos(-131, 74, 166)));
+        allSkyblockNpcs.put("Arora|Rift", new Npc("Arora", "Rift", new BlockPos(-129, 74, 168)));
+        allSkyblockNpcs.put("Ashera|Rift", new Npc("Ashera", "Rift", new BlockPos(-131, 74, 169)));
+        allSkyblockNpcs.put("Chester|Rift", new Npc("Chester", "Rift", new BlockPos(-131, 74, 173)));
+        allSkyblockNpcs.put("Dackinoru|Rift", new Npc("Dackinoru", "Rift", new BlockPos(-119, 74, 172)));
+        allSkyblockNpcs.put("Fafnir|Rift", new Npc("Fafnir", "Rift", new BlockPos(-128, 74, 172)));
+        allSkyblockNpcs.put("Garlacius|Rift", new Npc("Garlacius", "Rift", new BlockPos(-129, 80, 170)));
+        allSkyblockNpcs.put("Lazarus|Rift", new Npc("Lazarus", "Rift", new BlockPos(-128, 80, 166)));
+        allSkyblockNpcs.put("Seskel|Rift", new Npc("Seskel", "Rift", new BlockPos(-129, 74, 164)));
+        allSkyblockNpcs.put("Shifted|Rift", new Npc("Shifted", "Rift", new BlockPos(-121, 74, 174)));
+        allSkyblockNpcs.put("Tybalt|Rift", new Npc("Tybalt", "Rift", new BlockPos(-130, 79, 168)));
+        allSkyblockNpcs.put("Vreike|Rift", new Npc("Vreike", "Rift", new BlockPos(-125, 74, 172)));
+        allSkyblockNpcs.put("Porhtal|Rift", new Npc("Porhtal", "Rift", new BlockPos(-158, 71, 161)));
+        allSkyblockNpcs.put("Unbound Explorer|Rift", new Npc("Unbound Explorer", "Rift", new BlockPos(-29, 73, 315)));
+        allSkyblockNpcs.put("Dr. Edwin|Rift", new Npc("Dr. Edwin", "Rift", new BlockPos(-80, 74, 9)));
+        allSkyblockNpcs.put("Dr. Phear|Rift", new Npc("Dr. Phear", "Rift", new BlockPos(-147, 37, 27)));
+        allSkyblockNpcs.put("Mushroom Guy|Rift", new Npc("Mushroom Guy", "Rift", new BlockPos(-179, 75, 12)));
+        allSkyblockNpcs.put("Kay|Rift", new Npc("Kay", "Rift", new BlockPos(-192, 69, 58)));
+        allSkyblockNpcs.put("Reed|Rift", new Npc("Reed", "Rift", new BlockPos(-213, 73, 60)));
+        allSkyblockNpcs.put("Roy|Rift", new Npc("Roy", "Rift", new BlockPos(-205, 76, 49)));
+        allSkyblockNpcs.put("Alchemist|Rift", new Npc("Alchemist", "Rift", new BlockPos(-50, 71, -66)));
+        allSkyblockNpcs.put("Chef|Rift", new Npc("Chef", "Rift", new BlockPos(-103, 73, -105)));
+        allSkyblockNpcs.put("Cosmo|Rift", new Npc("Cosmo", "Rift", new BlockPos(-67, 71, -93)));
+        allSkyblockNpcs.put("Finplex|Rift", new Npc("Finplex", "Rift", new BlockPos(-58, 69, -83)));
         allSkyblockNpcs.put("Grandma|Rift", new Npc("Grandma", "Rift", new BlockPos(-71, 65, -60)));
-        allSkyblockNpcs.put("Gunther|Rift", new Npc("Gunther", "Rift", new BlockPos(-69, 71, -62)));
-        allSkyblockNpcs.put("Joey McPizza|Rift", new Npc("Joey McPizza", "Rift", new BlockPos(-106, 72, -103)));
-        allSkyblockNpcs.put("Plumber Joe|Rift", new Npc("Plumber Joe", "Rift", new BlockPos(-62, 70, -78)));
-        allSkyblockNpcs.put("Skylark|Rift", new Npc("Skylark", "Rift", new BlockPos(-72, 71, -115)));
-        allSkyblockNpcs.put("Sorcerer Okron|Rift", new Npc("Sorcerer Okron", "Rift", new BlockPos(-71, 81, -111)));
-        allSkyblockNpcs.put("Unhinged Kloon|Rift", new Npc("Unhinged Kloon", "Rift", new BlockPos(-56, 79, -13)));
-        allSkyblockNpcs.put("Yoshua|Rift", new Npc("Yoshua", "Rift", new BlockPos(-69, 71, -118)));
-        allSkyblockNpcs.put("Dr. Emmett|Rift", new Npc("Dr. Emmett", "Rift", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Disinfestor|Rift", new Npc("Disinfestor", "Rift", new BlockPos(-38, 71, -103)));
-        allSkyblockNpcs.put("Kat|Rift", new Npc("Kat", "Rift", new BlockPos(-62, 70, -78)));
-        allSkyblockNpcs.put("Shania|Rift", new Npc("Shania", "Rift", new BlockPos(-48, 72, -161)));
-        allSkyblockNpcs.put("Cowboy Nick|Rift", new Npc("Cowboy Nick", "Rift", new BlockPos(-13, 70, -7)));
-        allSkyblockNpcs.put("Cryptosis|Rift", new Npc("Cryptosis", "Rift", new BlockPos(28, 71, -77)));
-        allSkyblockNpcs.put("Marcia|Rift", new Npc("Marcia", "Rift", new BlockPos(3, 71, -11)));
-        allSkyblockNpcs.put("Nene|Rift", new Npc("Nene", "Rift", new BlockPos(24, 88, -91)));
-        allSkyblockNpcs.put("Roger|Rift", new Npc("Roger", "Rift", new BlockPos(-3, 70, -44)));
-        allSkyblockNpcs.put("Detransfigured Seraphine|Rift", new Npc("Detransfigured Seraphine", "Rift", new BlockPos(-17, 71, -101)));
-        allSkyblockNpcs.put("Creed|Rift", new Npc("Creed", "Rift", new BlockPos(-48, 122, 77)));
-        allSkyblockNpcs.put("Dust|Rift", new Npc("Dust", "Rift", new BlockPos(-48, 122, 77)));
-        allSkyblockNpcs.put("Frankie|Rift", new Npc("Frankie", "Rift", new BlockPos(-48, 122, 77)));
-        allSkyblockNpcs.put("Harriette|Rift", new Npc("Harriette", "Rift", new BlockPos(-48, 122, 77)));
-        allSkyblockNpcs.put("Soma|Rift", new Npc("Soma", "Rift", new BlockPos(-48, 122, 77)));
-        allSkyblockNpcs.put("Stain|Rift", new Npc("Stain", "Rift", new BlockPos(-48, 122, 77)));
-        allSkyblockNpcs.put("Violetta|Rift", new Npc("Violetta", "Rift", new BlockPos(-48, 122, 77)));
-        allSkyblockNpcs.put("Barry|Rift", new Npc("Barry", "Rift", new BlockPos(-46, 54, -143)));
+        allSkyblockNpcs.put("Gunther|Rift", new Npc("Gunther", "Rift", new BlockPos(-69, 72, -62)));
+        allSkyblockNpcs.put("Joey McPizza|Rift", new Npc("Joey McPizza", "Rift", new BlockPos(-106, 73, -103)));
+        allSkyblockNpcs.put("Plumber Joe|Rift", new Npc("Plumber Joe", "Rift", new BlockPos(-62, 71, -78)));
+        allSkyblockNpcs.put("Skylark|Rift", new Npc("Skylark", "Rift", new BlockPos(-72, 72, -116)));
+        allSkyblockNpcs.put("Sorcerer Okron|Rift", new Npc("Sorcerer Okron", "Rift", new BlockPos(-71, 82, -111)));
+        allSkyblockNpcs.put("Unhinged Kloon|Rift", new Npc("Unhinged Kloon", "Rift", new BlockPos(-57, 80, -14)));
+        allSkyblockNpcs.put("Yoshua|Rift", new Npc("Yoshua", "Rift", new BlockPos(-70, 72, -118)));
+        allSkyblockNpcs.put("Kat|Rift", new Npc("Kat", "Rift", new BlockPos(-35, 71, -91)));
+        allSkyblockNpcs.put("Shania|Rift", new Npc("Shania", "Rift", new BlockPos(-48, 73, -161)));
+        allSkyblockNpcs.put("Cowboy Nick|Rift", new Npc("Cowboy Nick", "Rift", new BlockPos(-13, 71, -8)));
+        allSkyblockNpcs.put("Marcia|Rift", new Npc("Marcia", "Rift", new BlockPos(2, 72, -11)));
+        allSkyblockNpcs.put("Nene|Rift", new Npc("Nene", "Rift", new BlockPos(23, 88, -91)));
+        allSkyblockNpcs.put("Roger|Rift", new Npc("Roger", "Rift", new BlockPos(-3, 71, -44)));
+        allSkyblockNpcs.put("Detransfigured Seraphine|Rift", new Npc("Detransfigured Seraphine", "Rift", new BlockPos(-17, 72, -102)));
+        allSkyblockNpcs.put("Barry|Rift", new Npc("Barry", "Rift", new BlockPos(-46, 55, -143)));
         allSkyblockNpcs.put("Joliet|Rift", new Npc("Joliet", "Rift", new BlockPos(-32, 64, -43)));
-        allSkyblockNpcs.put("Seymour|Rift", new Npc("Seymour", "Rift", new BlockPos(-27, 71, -45)));
-        allSkyblockNpcs.put("Taylor|Rift", new Npc("Taylor", "Rift", new BlockPos(-32, 71, -39)));
-        allSkyblockNpcs.put("Ramero|Rift", new Npc("Ramero", "Rift", new BlockPos(-49, 68, -39)));
-        allSkyblockNpcs.put("Detective Amog|Rift", new Npc("Detective Amog", "Rift", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Jerry|Rift", new Npc("Jerry", "Rift", new BlockPos(-86, 20, 4)));
-        allSkyblockNpcs.put("Lonely Ävaeìkx|Rift", new Npc("Lonely Ävaeìkx", "Rift", new BlockPos(20000, 20000, 20000)));
-        allSkyblockNpcs.put("Damia|Rift", new Npc("Damia", "Rift", new BlockPos(31, 72, -95)));
-        allSkyblockNpcs.put("Blacksmith|Rift", new Npc("Blacksmith", "Rift", new BlockPos(-2, 68, -142)));
-        allSkyblockNpcs.put("Master Tactician Fink|Rift", new Npc("Master Tactician Fink", "Rift", new BlockPos(-191, 72, -57)));
-        allSkyblockNpcs.put("Mole|Rift", new Npc("Mole", "Rift", new BlockPos(-160, 97, -76)));
-        allSkyblockNpcs.put("Deer|Rift", new Npc("Deer", "Rift", new BlockPos(139, 70, -12)));
-        allSkyblockNpcs.put("Phaser|Rift", new Npc("Phaser", "Rift", new BlockPos(60, 70, -89)));
-        allSkyblockNpcs.put("Maddox the Slayer|Rift", new Npc("Maddox the Slayer", "Rift", new BlockPos(205, 77, 45)));
-        allSkyblockNpcs.put("Fairylosopher|Rift", new Npc("Fairylosopher", "Rift", new BlockPos(20000, 20000, 20000)));
+        allSkyblockNpcs.put("Seymour|Rift", new Npc("Seymour", "Rift", new BlockPos(-27, 72, -45)));
+        allSkyblockNpcs.put("Taylor|Rift", new Npc("Taylor", "Rift", new BlockPos(-33, 72, -39)));
+        allSkyblockNpcs.put("Damia|Rift", new Npc("Damia", "Rift", new BlockPos(30, 73, -95)));
+        allSkyblockNpcs.put("Blacksmith|Rift", new Npc("Blacksmith", "Rift", new BlockPos(-2, 69, -143)));
+        allSkyblockNpcs.put("Mole|Rift", new Npc("Mole", "Rift", new BlockPos(-160, 98, -76)));
+        allSkyblockNpcs.put("Deer|Rift", new Npc("Deer", "Rift", new BlockPos(139, 71, -12)));
+        allSkyblockNpcs.put("Phaser|Rift", new Npc("Phaser", "Rift", new BlockPos(59, 71, -89)));
+        allSkyblockNpcs.put("Maddox the Slayer|Rift", new Npc("Maddox the Slayer", "Rift", new BlockPos(204, 78, 44)));
     }
 
     private static final Map<String, Npc> pendingCallbacks = new HashMap<>();
@@ -364,8 +345,9 @@ public class NpcFinder {
         Npc npc = pendingCallbacks.remove(id);
         if (npc == null) return;
 
-        String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.getSideBarInfo("location"));
+        String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
         if (!npc.location().equals(currentLocation)) {
+            System.out.println(currentLocation);
             ModFunctions.displayMessageWithHeader("§cYou need to be in §eThe " + npc.location() + " §cto display this waypoint.");
             return;
         }
@@ -386,7 +368,7 @@ public class NpcFinder {
 
     public static void onWorldRender(WorldRenderContext context) {
         if (MinecraftClient.getInstance().player == null) return;
-        String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.getSideBarInfo("location"));
+        String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
 
         toBeMarked.removeIf(npc ->
                 MinecraftClient.getInstance().player.getBlockPos().isWithinDistance(Vec3d.ofCenter(npc.coordinates()), 5.0)
@@ -410,7 +392,7 @@ public class NpcFinder {
 
         MutableText message = Text.empty()
                 .append(SSU.NAME)
-                .append(Text.literal(npcName + " can be found in these locations:\n"));
+                .append(Text.literal(matches.getFirst().name + " can be found in these locations:\n"));
 
         for (int i = 0; i < matches.size(); i++) {
             Npc match = matches.get(i);

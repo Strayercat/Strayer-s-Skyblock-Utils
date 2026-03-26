@@ -12,6 +12,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,6 +42,9 @@ public class SsuHud {
     private static final int COLOR_OUTLINE = 0xFF00AA00;
     private static final int COLOR_BG = 0xAA000000;
     private static final int COLOR_DIVIDER = 0xFF00AA00;
+    private static final int COLOR_MOTES = 0xFFAA00FF;
+    private static final int COLOR_PURSE = 0xFFFFB500;
+    private static final int COLOR_BITS = 0xFF66EEFF;
 
     public static void setVisible(boolean visible) {
         if (!ModConfig.INSTANCE.hudEnabled) return;
@@ -148,6 +152,14 @@ public class SsuHud {
             anyGeneralInfo = true;
         }
 
+        if (ModConfig.INSTANCE.hudCoords) {
+            if (client.player == null) return lines;
+            lines.add(HudLine.rich(Text.literal("X: ").formatted(Formatting.DARK_GREEN).append(Text.literal(String.valueOf((int) client.player.getX())).formatted(Formatting.WHITE)).append(" ")
+                    .append(Text.literal("Y: ").formatted(Formatting.DARK_GREEN)).append(Text.literal(String.valueOf((int) client.player.getY())).formatted(Formatting.WHITE)).append(" ")
+                    .append(Text.literal("Z: ").formatted(Formatting.DARK_GREEN)).append(Text.literal(String.valueOf((int) client.player.getZ())).formatted(Formatting.WHITE))
+            ));
+        }
+
         if (ModConfig.INSTANCE.sideBarInHud) {
             addSidebarSection(lines, anyGeneralInfo);
             anyGeneralInfo = true;
@@ -170,7 +182,7 @@ public class SsuHud {
         if (location.equals("⏣ Your Island") && ModConfig.INSTANCE.hudIslandFunFact) {
             if (!funFactHandled) funFact = FunFacts.funFacts.get((int) (Math.random() * FunFacts.funFacts.size()));
             if (anyGeneralInfo) addDivider(lines);
-            lines.addAll(wrapText("Fun fact: " + funFact, (int) (BASE_HUD_WIDTH * scale) - 10, COLOR_LINE));
+            lines.addAll(wrapText("Fun fact: " + funFact));
             funFactHandled = true;
         }
 
@@ -185,17 +197,23 @@ public class SsuHud {
         if (preceded) addDivider(lines);
         lines.add(HudLine.of("Scoreboard Info", COLOR_TITLE));
 
-        String date = SideBarUtils.getSideBarInfo("date");
-        String time = SideBarUtils.getSideBarInfo("time");
-        String sbLoc = SideBarUtils.getSideBarInfo("location");
-        String purse = SideBarUtils.getSideBarInfo("purse");
-        String bits = SideBarUtils.getSideBarInfo("bits");
+        String motes = SideBarUtils.motes;
+        String date = SideBarUtils.date;
+        String time = SideBarUtils.time;
+        String sbLoc = SideBarUtils.location;
+        String purse = SideBarUtils.purse;
+        String bits = SideBarUtils.bits;
 
-        if (date != null) lines.add(HudLine.of(date, COLOR_LINE));
-        if (time != null) lines.add(HudLine.of(time, COLOR_LINE));
-        if (sbLoc != null) lines.add(HudLine.of(sbLoc, COLOR_LINE));
-        if (purse != null) lines.add(HudLine.of("Purse: " + purse, COLOR_LINE));
-        if (bits != null) lines.add(HudLine.of("Bits: " + bits, COLOR_LINE));
+        if (ModFunctions.mapLocationToGeneralArea(sbLoc).equals("Rift")) {
+            if (sbLoc != null) lines.add(HudLine.of(sbLoc, COLOR_LINE));
+            if (motes != null) lines.add(HudLine.of("Motes: " + motes, COLOR_MOTES));
+        } else {
+            if (date != null) lines.add(HudLine.of(date, COLOR_LINE));
+            if (time != null) lines.add(HudLine.of(time, COLOR_LINE));
+            if (sbLoc != null) lines.add(HudLine.of(sbLoc, COLOR_LINE));
+            if (purse != null) lines.add(HudLine.of("Purse: " + purse, COLOR_PURSE));
+            if (bits != null) lines.add(HudLine.of("Bits: " + bits, COLOR_BITS));
+        }
     }
 
     private static void addPartySection(List<HudLine> lines, boolean preceded) {
@@ -212,7 +230,7 @@ public class SsuHud {
         lines.add(HudLine.of("Members:", COLOR_SUBTITLE));
 
         String memberList = PartyInfo.members.toString().replace("[", "").replace("]", "");
-        lines.addAll(wrapText(memberList, (int) (BASE_HUD_WIDTH * scale) - 10, COLOR_LINE));
+        lines.addAll(wrapText(memberList));
     }
 
     private static void addDungeonSection(List<HudLine> lines, boolean preceded) {
@@ -226,7 +244,7 @@ public class SsuHud {
         if (AutoRejoin.autoRejoinEnabled) lines.add(HudLine.of("Current floor: " + AutoRejoin.currentFloor, COLOR_LINE));
     }
 
-    private static List<HudLine> wrapText(String text, int maxWidth, int color){
+    private static List<HudLine> wrapText(String text){
         MinecraftClient client = MinecraftClient.getInstance();
         List<HudLine> wrappedLines = new ArrayList<>();
         String[] words = text.split(" ");
@@ -234,8 +252,8 @@ public class SsuHud {
 
         for (String word : words) {
             String testLine = currentLine.isEmpty() ? word : currentLine + " " + word;
-            if (client.textRenderer.getWidth(testLine) > maxWidth && !currentLine.isEmpty()) {
-                wrappedLines.add(HudLine.of(currentLine.toString(), color));
+            if (client.textRenderer.getWidth(testLine) > 190 && !currentLine.isEmpty()) {
+                wrappedLines.add(HudLine.of(currentLine.toString(), SsuHud.COLOR_LINE));
                 currentLine = new StringBuilder(word);
             } else {
                 currentLine = new StringBuilder(testLine);
@@ -243,7 +261,7 @@ public class SsuHud {
         }
 
         if (!currentLine.isEmpty()) {
-            wrappedLines.add(HudLine.of(currentLine.toString(), color));
+            wrappedLines.add(HudLine.of(currentLine.toString(), SsuHud.COLOR_LINE));
         }
 
         return wrappedLines;

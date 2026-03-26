@@ -52,7 +52,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ModFunctions.connectionEventDataReset("Leave"));
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (guiGraphics, deltaTracker) ->
-                SsuHud.onHudRender(guiGraphics, SideBarUtils.getSideBarInfo("location"))
+                SsuHud.onHudRender(guiGraphics, SideBarUtils.location)
         );
 
         WorldRenderEvents.END_MAIN.register(context -> {
@@ -63,6 +63,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             OnScreenNotification.tick();
             ClothConfigHandler.handleConfigScreen(client);
+            ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
 
             if (client.getNetworkHandler() != null) {
                 PingMeasurer pingMeasurer = ((ClientPlayNetworkHandlerAccessor) client.getNetworkHandler()).getPingMeasurer();
@@ -78,8 +79,9 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
             AutoFish.autoFish(client);
             CorlTimer.corlTimerTick(client);
-            ModFunctions.handleKeybinds(client);
+            ModFunctions.handleSkyblockExclusiveKeybinds(client);
             PartyListParser.handleOnJoinCommand();
+            SideBarUtils.updateSidebarInfo();
         });
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {

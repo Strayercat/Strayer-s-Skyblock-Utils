@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 public class ModKeyBindings {
     public static Category ssuCategory = Category.create(Identifier.tryParse("ssu"));
 
-    public static final KeyBinding RUN_T_FUNCTION_KEY =
+    public static final KeyBinding CORLEONE_TIMER_KEY =
             KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     "key.ssu.corlTimer",
                     InputUtil.Type.KEYSYM,
@@ -18,7 +18,7 @@ public class ModKeyBindings {
                     ssuCategory
             ));
 
-    public static final KeyBinding RUN_R_FUNCTION_KEY =
+    public static final KeyBinding AUTOFISH_KEY =
             KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     "key.ssu.autofish",
                     InputUtil.Type.KEYSYM,
@@ -26,7 +26,7 @@ public class ModKeyBindings {
                     ssuCategory
             ));
 
-    public static final KeyBinding RUN_Z_FUNCTION_KEY =
+    public static final KeyBinding HUD_KEY =
             KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     "key.ssu.hud",
                     InputUtil.Type.KEYSYM,
@@ -34,11 +34,27 @@ public class ModKeyBindings {
                     ssuCategory
             ));
 
-    public static final KeyBinding RUN_HOME_FUNCTION_KEY =
+    public static final KeyBinding PRINT_COORDINATES_KEY =
             KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     "key.ssu.sendCoordinates",
                     InputUtil.Type.KEYSYM,
                     GLFW.GLFW_KEY_HOME,
+                    ssuCategory
+            ));
+
+    public static final KeyBinding CHAT_PEEK_KEY =
+            KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                    "key.ssu.chatPeek",
+                    InputUtil.Type.KEYSYM,
+                    GLFW.GLFW_KEY_LEFT_ALT,
+                    ssuCategory
+            ));
+
+    public static final KeyBinding ZOOM_KEY =
+            KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                    "key.ssu.zoom",
+                    InputUtil.Type.KEYSYM,
+                    GLFW.GLFW_KEY_C,
                     ssuCategory
             ));
 

@@ -137,7 +137,7 @@ public class ModCommands {
                             return 1;
                         }))
                         .then(ClientCommandManager.literal("location").executes(context -> {
-                            context.getSource().sendFeedback(Text.literal("§6" + SideBarUtils.getSideBarInfo("location")));
+                            context.getSource().sendFeedback(Text.literal("§6" + SideBarUtils.location));
                             return 1;
                         }))
                         .then(ClientCommandManager.literal("coordinates")

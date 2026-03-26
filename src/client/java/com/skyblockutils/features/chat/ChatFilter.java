@@ -37,7 +37,7 @@ public class ChatFilter {
                             continue;
                         }
                     } else {
-                        String location = SideBarUtils.getSideBarInfo("location");
+                        String location = SideBarUtils.location;
                         if (location == null || !location.contains(filter.requiredLocation)) {
                             continue;
                         }

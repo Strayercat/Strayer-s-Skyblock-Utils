@@ -29,37 +29,32 @@ public class ModFunctions {
 
     public static void connectionEventDataReset(String type) {
         if (type.equals("Join")) {
-            playerWelcomedToIsland = false;
-
             GuiBlocker.shouldHideScreen = false;
-            PartyListParser.onJoinCommandHandled = false;
-            SsuHud.funFactHandled = false;
-
-            DowntimeTracker.resetDowntimeTracker();
-            CorlTimer.resetCorlTimer();
-            AutoFish.resetAutoFish();
-            NpcFinder.clearToBeMarked();
         } else {
             StrayersSkyblockUtilsClient.isInSkyblock = false;
-            playerWelcomedToIsland = false;
-            SsuHud.funFactHandled = false;
-
-            PartyListParser.onJoinCommandHandled = false;
-
             AutoRejoin.resetAutoRejoin();
-            DowntimeTracker.resetDowntimeTracker();
-            CorlTimer.resetCorlTimer();
-            AutoFish.resetAutoFish();
-            NpcFinder.clearToBeMarked();
         }
+
+        playerWelcomedToIsland = false;
+        SsuHud.funFactHandled = false;
+        PartyListParser.onJoinCommandHandled = false;
+
+        DowntimeTracker.resetDowntimeTracker();
+        CorlTimer.resetCorlTimer();
+        AutoFish.resetAutoFish();
+        NpcFinder.clearToBeMarked();
+        SideBarUtils.resetSidebarInfo();
     }
 
-    public static void handleKeybinds(MinecraftClient client) {
-        while (ModKeyBindings.RUN_T_FUNCTION_KEY.wasPressed()) CorlTimer.toggleCorlTimer();
-        while (ModKeyBindings.RUN_R_FUNCTION_KEY.wasPressed()) AutoFish.toggleAutoFish(client);
-        while (ModKeyBindings.RUN_HOME_FUNCTION_KEY.wasPressed())
+    public static void handleSkyblockExclusiveKeybinds(MinecraftClient client) {
+        while (ModKeyBindings.CORLEONE_TIMER_KEY.wasPressed()) CorlTimer.toggleCorlTimer();
+        while (ModKeyBindings.AUTOFISH_KEY.wasPressed()) AutoFish.toggleAutoFish(client);
+        SsuHud.setVisible(ModKeyBindings.HUD_KEY.isPressed());
+    }
+
+    public static void handleNonSkyblockExclusiveKeybinds(MinecraftClient client) {
+        while (ModKeyBindings.PRINT_COORDINATES_KEY.wasPressed())
             sendCoordinates(client, ModConfig.INSTANCE.coordinatesSendLocation ? "withLocation" : "");
-        SsuHud.setVisible(ModKeyBindings.RUN_Z_FUNCTION_KEY.isPressed());
     }
 
     public static int getPing(MinecraftClient client) {
@@ -81,7 +76,7 @@ public class ModFunctions {
                 + " z:" + (int) client.player.getZ();
 
         String coordinatesMessage = (arguments.contains("withLocation")
-                ? SideBarUtils.getSideBarInfo("location") + " | "
+                ? SideBarUtils.location.isEmpty() ? "" : SideBarUtils.location + " | "
                 : "") + coordinates;
 
         client.getNetworkHandler().sendChatMessage(coordinatesMessage);
@@ -112,7 +107,7 @@ public class ModFunctions {
     }
 
     public static Boolean isInDungeons(net.minecraft.client.MinecraftClient client) {
-        String location = SideBarUtils.getSideBarInfo("location");
+        String location = SideBarUtils.location;
         boolean isInCatacombs = location != null && location.contains("The Catacombs");
         boolean hasF3Boss = ((BossHealthOverlayAccessor) client.inGameHud.getBossBarHud())
                 .getEvents().values().stream().findFirst()

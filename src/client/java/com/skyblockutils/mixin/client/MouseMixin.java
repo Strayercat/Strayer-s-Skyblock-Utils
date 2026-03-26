@@ -1,6 +1,8 @@
 package com.skyblockutils.mixin.client;
 
+import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.utils.OnScreenNotification;
+import com.skyblockutils.utils.ZoomState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.input.MouseInput;
@@ -23,6 +25,22 @@ public class MouseMixin {
                 double mouseY = Mouse.scaleY(win, client.mouse.getY());
                 OnScreenNotification.handleNotificationClicks((int) mouseX, (int) mouseY, input.button());
             }
+        }
+    }
+
+    @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)
+    private void onScroll(long window, double horizontal, double vertical, CallbackInfo ci) {
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        if (ModKeyBindings.CHAT_PEEK_KEY.isPressed() && client.currentScreen == null) {
+            client.inGameHud.getChatHud().scroll((int) (vertical * 7));
+            ci.cancel();
+            return;
+        }
+
+        if (ZoomState.isZooming) {
+            ZoomState.scroll(vertical);
+            ci.cancel();
         }
     }
 }
