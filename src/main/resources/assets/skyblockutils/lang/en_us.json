@@ -3,5 +3,7 @@
   "key.ssu.autofish": "Toggle Autofish",
   "key.ssu.corlTimer": "Toggle Corleone Timer",
   "key.ssu.hud": "Show SSU HUD",
-  "key.ssu.sendCoordinates": "Send coordinates in chat"
+  "key.ssu.sendCoordinates": "Send coordinates in chat",
+  "key.ssu.chatPeek": "Chat Peek",
+  "key.ssu.zoom": "Zoom"
 }

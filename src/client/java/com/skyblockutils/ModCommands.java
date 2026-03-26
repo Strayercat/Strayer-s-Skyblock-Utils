@@ -77,7 +77,10 @@ public class ModCommands {
                                         })
                                         .then(ClientCommandManager.argument("color", StringArgumentType.string())
                                                 .suggests((ctx, builder) -> {
-                                                    GlowingPlayers.MINECRAFT_COLORS.keySet().forEach(builder::suggest);
+                                                    String remaining = builder.getRemaining().toLowerCase();
+                                                    GlowingPlayers.MINECRAFT_COLORS.keySet().stream()
+                                                            .filter(color -> color.toLowerCase().startsWith(remaining))
+                                                            .forEach(builder::suggest);
                                                     return builder.buildFuture();
                                                 })
                                                 .executes(context -> {
@@ -94,7 +97,11 @@ public class ModCommands {
                         .then(ClientCommandManager.literal("remove")
                                 .then(ClientCommandManager.argument("username", StringArgumentType.string())
                                         .suggests((ctx, builder) -> {
-                                            ModConfig.INSTANCE.getGlowingPlayers().forEach(gp -> builder.suggest(gp.getUsername()));
+                                            String remaining = builder.getRemaining().toLowerCase();
+                                            ModConfig.INSTANCE.getGlowingPlayers().stream()
+                                                    .map(gp -> gp.username)
+                                                    .filter(name -> name.toLowerCase().startsWith(remaining))
+                                                    .forEach(builder::suggest);
                                             return builder.buildFuture();
                                         })
                                         .executes(context -> {
