@@ -42,7 +42,7 @@ public class ModFunctions {
         DowntimeTracker.resetDowntimeTracker();
         CorlTimer.resetCorlTimer();
         AutoFish.resetAutoFish();
-        NpcFinder.clearToBeMarked();
+        NpcFinder.clear();
         SideBarUtils.resetSidebarInfo();
     }
 

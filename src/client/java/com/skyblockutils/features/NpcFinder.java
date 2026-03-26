@@ -362,8 +362,9 @@ public class NpcFinder {
         toBeMarked.add(npc);
     }
 
-    public static void clearToBeMarked() {
+    public static void clear() {
         toBeMarked.clear();
+        pendingCallbacks.clear();
     }
 
     public static void onWorldRender(WorldRenderContext context) {

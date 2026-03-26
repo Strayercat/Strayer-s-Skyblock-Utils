@@ -2,12 +2,14 @@ package com.skyblockutils.utils;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
@@ -75,7 +77,6 @@ public class WaypointRenderer {
     private static final RenderLayer BADGE_BACKGROUND = RenderLayer.of(
             "waypoint_badge_background",
             RenderSetup.builder(BADGE_PIPELINE)
-                    .translucent()
                     .build()
     );
 
@@ -89,12 +90,32 @@ public class WaypointRenderer {
         int g = (waypoint.color() >> 8) & 0xFF;
         int b = waypoint.color() & 0xFF;
         int bgColor = (0xCC << 24) | (r << 16) | (g << 8) | b;
+        int outlineColor = (0xCC << 24);
 
         int badgeW = 7;
         int badgeH = 14;
         int tipH = 5;
+        int o = 1;
 
-        var buf = immediate.getBuffer(BADGE_BACKGROUND);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buf;
+
+        buf = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+
+        buf.vertex(pose, -badgeW - o, -badgeH - o, 0).color(outlineColor);
+        buf.vertex(pose, badgeW + o, -badgeH - o, 0).color(outlineColor);
+        buf.vertex(pose, badgeW + o, o, 0).color(outlineColor);
+        buf.vertex(pose, -badgeW - o, o, 0).color(outlineColor);
+
+        buf.vertex(pose, -badgeW - o, o, 0).color(outlineColor);
+        buf.vertex(pose, badgeW + o, o, 0).color(outlineColor);
+        buf.vertex(pose, 0, tipH + o, 0).color(outlineColor);
+        buf.vertex(pose, 0, tipH + o, 0).color(outlineColor);
+
+        BADGE_BACKGROUND.draw(buf.end());
+        tessellator.clear();
+
+        buf = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
         buf.vertex(pose, -badgeW, -badgeH, 0).color(bgColor);
         buf.vertex(pose, badgeW, -badgeH, 0).color(bgColor);
@@ -106,12 +127,13 @@ public class WaypointRenderer {
         buf.vertex(pose, 0, tipH, 0).color(bgColor);
         buf.vertex(pose, 0, tipH, 0).color(bgColor);
 
-        immediate.draw();
+        BADGE_BACKGROUND.draw(buf.end());
+        tessellator.clear();
 
         String letter = String.valueOf(waypoint.badgeLetter());
         font.draw(
-                net.minecraft.text.Text.literal(letter).asOrderedText(),
-                -font.getWidth(letter) / 2f, -badgeH + (badgeH - font.fontHeight) / 2f + 2,
+                Text.literal(letter).asOrderedText(),
+                -font.getWidth(letter) / 2f, -badgeH / 2f - font.fontHeight / 2f + 2,
                 0xFFFFFFFF, false, pose, immediate, TextRenderer.TextLayerType.SEE_THROUGH, 0, 0xF000F0
         );
 
