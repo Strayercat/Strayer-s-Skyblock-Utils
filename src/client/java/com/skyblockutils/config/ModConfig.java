@@ -28,6 +28,7 @@ public class ModConfig {
     public boolean autoHoppityEggs = false;
     public boolean coordinatesSendLocation = true;
     public boolean chatCommands = true;
+    public boolean partyGlow = true;
 
     // Dungeons
     public boolean downtimeTracker = true;
@@ -114,13 +115,13 @@ public class ModConfig {
             ModConfig loaded = GSON.fromJson(reader, ModConfig.class);
             if (loaded == null) return;
 
-            // Copy all primitive/object fields
             INSTANCE.chatFiltersEnabled = loaded.chatFiltersEnabled;
             INSTANCE.partyInviteNotifications = loaded.partyInviteNotifications;
             INSTANCE.fancyEmotes = loaded.fancyEmotes;
             INSTANCE.autoHoppityEggs = loaded.autoHoppityEggs;
             INSTANCE.coordinatesSendLocation = loaded.coordinatesSendLocation;
             INSTANCE.chatCommands = loaded.chatCommands;
+            INSTANCE.partyGlow = loaded.partyGlow;
             INSTANCE.downtimeTracker = loaded.downtimeTracker;
             INSTANCE.dungeonPartyCommands = loaded.dungeonPartyCommands;
             INSTANCE.autoRejoinReminders = loaded.autoRejoinReminders;

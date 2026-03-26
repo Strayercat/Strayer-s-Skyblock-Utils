@@ -59,6 +59,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Text.literal("Whether or not to enable !gay !furry !sus and such commands"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.chatCommands = v).build());
 
+        general.addEntry(eb.startBooleanToggle(Text.literal("Party Glow"), ModConfig.INSTANCE.partyGlow)
+                .setDefaultValue(true).setTooltip(Text.literal("Whether or not party members should automatically glow"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.partyGlow = v).build());
+
         general.addEntry(eb.startBooleanToggle(Text.literal("Ragebait button"), true)
                 .setDefaultValue(true).setTooltip(Text.literal("No matter how much you toggle it, whenever you come back it'll always be true"))
                 .build());

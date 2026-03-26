@@ -1,8 +1,10 @@
 package com.skyblockutils.features.party;
 
+import com.skyblockutils.utils.PlayerLookup;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class PartyListParser {
 
@@ -28,6 +30,7 @@ public class PartyListParser {
             } else {
                 reading = false;
                 parseBuffer();
+                getMemberUuids();
                 expectingPartyList = false;
             }
             return false;
@@ -91,6 +94,25 @@ public class PartyListParser {
             }
         }
         return names;
+    }
+
+    private static void getMemberUuids() {
+        PartyInfo.memberUuids.clear();
+
+        List<CompletableFuture<UUID>> futures = new ArrayList<>();
+        for (String member : PartyInfo.members) {
+            futures.add(PlayerLookup.getUuidOffline(member));
+        }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> {
+                    for (CompletableFuture<UUID> future : futures) {
+                        UUID uuid = future.join();
+                        if (uuid != null) {
+                            PartyInfo.memberUuids.add(uuid);
+                        }
+                    }
+                });
     }
 
     private static void resetPartyInfo() {

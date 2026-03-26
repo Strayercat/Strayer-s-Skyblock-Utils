@@ -100,6 +100,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("The Handler|Hub", new Npc("The Handler", "Hub", new BlockPos(40, 73, 1)));
         allSkyblockNpcs.put("Vincent|Hub", new Npc("Vincent", "Hub", new BlockPos(79, 75, 53)));
         allSkyblockNpcs.put("Biblio|Hub", new Npc("Biblio", "Hub", new BlockPos(8, 80, 10)));
+        allSkyblockNpcs.put("Jerry|Hub", new Npc("Jerry", "Hub", new BlockPos(-33, 70, 7))); //TODO
         allSkyblockNpcs.put("Baker|Hub", new Npc("Baker", "Hub", new BlockPos(8, 71, -95))); //TODO
         allSkyblockNpcs.put("Bingo|Hub", new Npc("Bingo", "Hub", new BlockPos(2, 70, -92))); //TODO
         allSkyblockNpcs.put("Alixer|Hub", new Npc("Alixer", "Hub", new BlockPos(0, 70, -93))); //TODO
@@ -234,6 +235,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Barbarian Emissary|Crimson Isle", new Npc("Barbarian Emissary", "Crimson Isle", new BlockPos(-581, 99, -711)));
         allSkyblockNpcs.put("Blacksmith|Crimson Isle", new Npc("Blacksmith", "Crimson Isle", new BlockPos(-83, 93, -735)));
         allSkyblockNpcs.put("Udel|Crimson Isle", new Npc("Udel", "Crimson Isle", new BlockPos(-79, 109, -788)));
+        allSkyblockNpcs.put("Aranya|Crimson Isle", new Npc("Aranya", "Crimson Isle", new BlockPos(-322, 153, -1007)));
 
 // The Park
         allSkyblockNpcs.put("Charlie|The Park", new Npc("Charlie", "The Park", new BlockPos(-278, 81, -18)));
@@ -259,14 +261,15 @@ public class NpcFinder {
         allSkyblockNpcs.put("Crag|Dungeon Hub", new Npc("Crag", "Dungeon Hub", new BlockPos(-48, 122, -25)));
         allSkyblockNpcs.put("Vulcan|Dungeon Hub", new Npc("Vulcan", "Dungeon Hub", new BlockPos(-46, 121, -28)));
 
-// Jerry's Workshop TODO
-        allSkyblockNpcs.put("St. Jerry|Jerry's Workshop", new Npc("St. Jerry", "Jerry's Workshop", new BlockPos(-22, 76, 92)));
-        allSkyblockNpcs.put("Sherry|Jerry's Workshop", new Npc("Sherry", "Jerry's Workshop", new BlockPos(97, 69, 9)));
-        allSkyblockNpcs.put("Gulliver|Jerry's Workshop", new Npc("Gulliver", "Jerry's Workshop", new BlockPos(69, 105, 33)));
-        allSkyblockNpcs.put("Frosty|Jerry's Workshop", new Npc("Frosty", "Jerry's Workshop", new BlockPos(-17, 69, 2)));
-        allSkyblockNpcs.put("Gary|Jerry's Workshop", new Npc("Gary", "Jerry's Workshop", new BlockPos(53, 103, 56)));
-        allSkyblockNpcs.put("Terry|Jerry's Workshop", new Npc("Terry", "Jerry's Workshop", new BlockPos(-9, 27, 8)));
-        allSkyblockNpcs.put("Banker Barry|Jerry's Workshop", new Npc("Banker Barry", "Jerry's Workshop", new BlockPos(20, 77, 44)));
+// Jerry's Workshop
+        allSkyblockNpcs.put("St. Jerry|Jerry's Workshop", new Npc("St. Jerry", "Jerry's Workshop", new BlockPos(-22, 77, 92)));
+        allSkyblockNpcs.put("Sherry|Jerry's Workshop", new Npc("Sherry", "Jerry's Workshop", new BlockPos(7, 77, 95)));
+        allSkyblockNpcs.put("Gulliver|Jerry's Workshop", new Npc("Gulliver", "Jerry's Workshop", new BlockPos(68, 106, 33)));
+        allSkyblockNpcs.put("Frosty|Jerry's Workshop", new Npc("Frosty", "Jerry's Workshop", new BlockPos(-1,77, 92)));
+        allSkyblockNpcs.put("Gary|Jerry's Workshop", new Npc("Gary", "Jerry's Workshop", new BlockPos(53, 104, 56)));
+        allSkyblockNpcs.put("Terry|Jerry's Workshop", new Npc("Terry", "Jerry's Workshop", new BlockPos(-92, 79, 25)));
+        allSkyblockNpcs.put("Banker Barry|Jerry's Workshop", new Npc("Banker Barry", "Jerry's Workshop", new BlockPos(20, 78, 44)));
+        allSkyblockNpcs.put("Einary|Jerry's Workshop", new Npc("Einary", "Jerry's Workshop", new BlockPos(-16, 77, 63)));
 
 // Rift
         allSkyblockNpcs.put("Alatar|Rift", new Npc("Alatar", "Rift", new BlockPos(-47, 117, 70)));

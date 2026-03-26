@@ -1,6 +1,7 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.party.PartyInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,6 +21,15 @@ public abstract class EntityGlowingMixin {
                     .anyMatch(gp -> gp.getUuid().toString().equalsIgnoreCase(entity.getUuid().toString()));
 
             if (shouldGlow) {
+                cir.setReturnValue(true);
+            }
+
+            if (!ModConfig.INSTANCE.partyGlow) return;
+
+            boolean shouldGlowParty = PartyInfo.memberUuids.stream()
+                    .anyMatch(uuid -> uuid.equals(entity.getUuid()));
+
+            if (shouldGlowParty) {
                 cir.setReturnValue(true);
             }
         }

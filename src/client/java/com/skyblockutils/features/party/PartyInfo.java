@@ -5,6 +5,7 @@ import net.minecraft.client.MinecraftClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,7 @@ public class PartyInfo {
     public static boolean isInParty = false;
     public static String leader = MinecraftClient.getInstance().getSession().getUsername();
     public static List<String> members = new ArrayList<>();
+    public static List<UUID> memberUuids = new ArrayList<>();
 
     public static void handlePartyMessages(String message) {
         if (message.contains(":")) return;
@@ -25,6 +27,7 @@ public class PartyInfo {
             isInParty = false;
             leader = null;
             members.clear();
+            memberUuids.clear();
         }
 
         if (message.contains("has left the party") ||
