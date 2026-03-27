@@ -42,8 +42,14 @@ public class ClothConfigHandler {
     public static void buildGeneralCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory general = builder.getOrCreateCategory(Text.literal("General Settings"));
 
-        general.addEntry(eb.startEnumSelector(Text.literal("Color Style"), ModStyle.ColorStyle.class, ModConfig.INSTANCE.colorStyle)
-                .setDefaultValue(ModStyle.ColorStyle.ORIGINAL).setTooltip(Text.literal("The color style SSU will use"))
+        general.addEntry(eb.startEnumSelector(Text.literal("Mod Color Style"), ModStyle.ColorStyle.class, ModConfig.INSTANCE.colorStyle)
+                .setDefaultValue(ModStyle.ColorStyle.ORIGINAL)
+                .setEnumNameProvider(value -> {
+                    ModStyle.ColorStyle style = (ModStyle.ColorStyle) value;
+                    int rgb = style.getColor(ModStyle.ColorType.MAIN);
+                    String name = style.name().charAt(0) + style.name().substring(1).toLowerCase();
+                    return Text.literal(name).withColor(rgb);
+                })
                 .setSaveConsumer(v -> ModConfig.INSTANCE.colorStyle = v).requireRestart().build());
 
         general.addEntry(eb.startBooleanToggle(Text.literal("Party Invite Notifications"), ModConfig.INSTANCE.partyInviteNotifications)
@@ -74,10 +80,6 @@ public class ClothConfigHandler {
                 .setDefaultValue(false).setTooltip(Text.literal("Whether or not to show coordinates in the custom sidebar"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.sidebarCoords = v).build());
 
-        general.addEntry(new CustomEntry()
-                .addButton(Text.literal("Glowing Players GUI"), 120, CustomEntry.Alignment.LEFT, () ->
-                                GlowingPlayersGui.configScreenRequested = true
-                        , Text.literal("Open the glowing players config GUI")));
 
         general.addEntry(eb.startBooleanToggle(Text.literal("Party Glow"), ModConfig.INSTANCE.partyGlow)
                 .setDefaultValue(true).setTooltip(Text.literal("Whether or not party members should automatically glow"))
@@ -86,6 +88,11 @@ public class ClothConfigHandler {
         general.addEntry(eb.startBooleanToggle(Text.literal("Ragebait button"), true)
                 .setDefaultValue(true).setTooltip(Text.literal("No matter how much you toggle it, whenever you come back it'll always be true"))
                 .build());
+
+        general.addEntry(new CustomEntry()
+                .addButton(Text.literal("Glowing Players GUI"), 120, CustomEntry.Alignment.LEFT, () ->
+                                GlowingPlayersGui.configScreenRequested = true
+                        , Text.literal("Open the glowing players config GUI")));
 
         general.addEntry(buildDungeonsSubcategory(eb).build());
         general.addEntry(buildMiningSubcategory(eb).build());

@@ -1,6 +1,8 @@
 package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
+import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.WaypointRenderer;
@@ -342,6 +344,9 @@ public class NpcFinder {
         allSkyblockNpcs.put("Maddox the Slayer|Rift", new Npc("Maddox the Slayer", "Rift", new BlockPos(204, 78, 44)));
     }
 
+    public static int COLOR_WAYPOINT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.WAYPOINT);
+    public static int COLOR_MAIN = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
+
     private static final Map<String, Npc> pendingCallbacks = new HashMap<>();
 
     public static void handleCallback(String id) {
@@ -380,7 +385,7 @@ public class NpcFinder {
 
         for (Npc npc : toBeMarked) {
             if (npc.location().equals(currentLocation))
-                WaypointRenderer.render(context, new WaypointRenderer.Waypoint(npc.coordinates, npc.name, 0x4CFF00, WaypointRenderer.WaypointStyle.BADGE), -1);
+                WaypointRenderer.render(context, new WaypointRenderer.Waypoint(npc.coordinates, npc.name, COLOR_WAYPOINT, WaypointRenderer.WaypointStyle.BADGE), -1);
         }
     }
 
@@ -411,7 +416,7 @@ public class NpcFinder {
             if (i > 0) message.append(Text.literal("\n"));
 
             message.append(Text.literal("    - ").formatted(Formatting.GRAY))
-                    .append(Text.literal(match.location()).formatted(Formatting.DARK_GREEN))
+                    .append(Text.literal(match.location()).setStyle(Style.EMPTY.withColor(COLOR_MAIN)))
                     .append(match.coordinates.getX() == 20000
                             ? Text.literal(": Location varies").formatted(Formatting.DARK_GRAY, Formatting.ITALIC)
                             : Text.literal(": " + match.coordinates().getX() + " " +

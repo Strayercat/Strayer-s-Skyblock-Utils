@@ -16,7 +16,6 @@ import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.scoreboard.ScoreboardDisplaySlot;
 import net.minecraft.util.profiler.MultiValueDebugSampleLogImpl;
@@ -29,6 +28,8 @@ public class ModFunctions {
     public static long lastTimePingCalculated;
     public static int ping = 0;
     public static float tps = 0;
+
+    public static int COLOR_MAIN = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
 
     public static void connectionEventDataReset(String type) {
         if (type.equals("Join")) {
@@ -87,15 +88,13 @@ public class ModFunctions {
 
     public static Text getFormattedCoordinates() {
         MinecraftClient client = MinecraftClient.getInstance();
-        int xyzColor = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
-
         MutableText coordinatesText = Text.empty();
 
         if (client.player == null) return coordinatesText;
 
-        coordinatesText.append(Text.literal("X: ").setStyle(Style.EMPTY.withColor(xyzColor))).append(String.valueOf((int) client.player.getX()))
-                .append(Text.literal(" Y: ").setStyle(Style.EMPTY.withColor(xyzColor))).append(String.valueOf((int) client.player.getY()))
-                .append(Text.literal(" Z: ").setStyle(Style.EMPTY.withColor(xyzColor))).append(String.valueOf((int) client.player.getZ()));
+        coordinatesText.append(Text.literal("X: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getX()))
+                .append(Text.literal(" Y: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getY()))
+                .append(Text.literal(" Z: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getZ()));
 
         return coordinatesText;
     }
