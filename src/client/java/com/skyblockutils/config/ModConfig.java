@@ -3,8 +3,9 @@ package com.skyblockutils.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import com.skyblockutils.features.GlowingPlayers.GlowingPlayer;
+import com.skyblockutils.features.glowingPlayers.GlowingPlayers.GlowingPlayer;
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
+import com.skyblockutils.utils.ModStyle;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.FileReader;
@@ -22,12 +23,15 @@ public class ModConfig {
     public static final ModConfig INSTANCE = new ModConfig();
 
     // General
+    public ModStyle.ColorStyle colorStyle = ModStyle.ColorStyle.ORIGINAL;
     public boolean chatFiltersEnabled = true;
     public boolean partyInviteNotifications = true;
     public boolean fancyEmotes = true;
     public boolean autoHoppityEggs = false;
     public boolean coordinatesSendLocation = true;
     public boolean chatCommands = true;
+    public boolean customSidebar = true;
+    public boolean sidebarCoords = false;
     public boolean partyGlow = true;
 
     // Dungeons
@@ -115,12 +119,15 @@ public class ModConfig {
             ModConfig loaded = GSON.fromJson(reader, ModConfig.class);
             if (loaded == null) return;
 
+            INSTANCE.colorStyle = loaded.colorStyle != null ? loaded.colorStyle : ModStyle.ColorStyle.ORIGINAL;
             INSTANCE.chatFiltersEnabled = loaded.chatFiltersEnabled;
             INSTANCE.partyInviteNotifications = loaded.partyInviteNotifications;
             INSTANCE.fancyEmotes = loaded.fancyEmotes;
             INSTANCE.autoHoppityEggs = loaded.autoHoppityEggs;
             INSTANCE.coordinatesSendLocation = loaded.coordinatesSendLocation;
             INSTANCE.chatCommands = loaded.chatCommands;
+            INSTANCE.customSidebar = loaded.customSidebar;
+            INSTANCE.sidebarCoords = loaded.sidebarCoords;
             INSTANCE.partyGlow = loaded.partyGlow;
             INSTANCE.downtimeTracker = loaded.downtimeTracker;
             INSTANCE.dungeonPartyCommands = loaded.dungeonPartyCommands;

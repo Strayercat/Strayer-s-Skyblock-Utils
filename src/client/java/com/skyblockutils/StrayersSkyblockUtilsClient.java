@@ -7,6 +7,7 @@ import com.skyblockutils.features.chat.ChatCommands;
 import com.skyblockutils.features.chat.ChatFilter;
 import com.skyblockutils.features.chat.FancyEmotes;
 import com.skyblockutils.features.dungeons.AutoRejoin;
+import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.SsuHud;
@@ -51,9 +52,13 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ModFunctions.connectionEventDataReset("Leave"));
 
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (guiGraphics, deltaTracker) ->
-                SsuHud.onHudRender(guiGraphics, SideBarUtils.location)
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (context, deltaTracker) ->
+                SsuHud.onHudRender(context, SideBarUtils.location)
         );
+
+        HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.of("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, deltaTracker) -> {
+            if (isInSkyblock && ModConfig.INSTANCE.customSidebar) CustomSidebar.displayCustomSidebar(context);
+        });
 
         WorldRenderEvents.END_MAIN.register(context -> {
             GlaciteTunnelsWaypoints.onWorldRender(context);
@@ -63,6 +68,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             OnScreenNotification.tick();
             ClothConfigHandler.handleConfigScreen(client);
+            GlowingPlayersGui.handleConfigScreen(client);
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
 
             if (client.getNetworkHandler() != null) {

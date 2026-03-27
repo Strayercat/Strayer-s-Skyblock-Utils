@@ -11,9 +11,12 @@ import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.GuiAccessor;
 import com.skyblockutils.utils.GuiBlocker;
+import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.scoreboard.ScoreboardDisplaySlot;
 import net.minecraft.util.profiler.MultiValueDebugSampleLogImpl;
@@ -80,6 +83,21 @@ public class ModFunctions {
                 : "") + coordinates;
 
         client.getNetworkHandler().sendChatMessage(coordinatesMessage);
+    }
+
+    public static Text getFormattedCoordinates() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        int xyzColor = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
+
+        MutableText coordinatesText = Text.empty();
+
+        if (client.player == null) return coordinatesText;
+
+        coordinatesText.append(Text.literal("X: ").setStyle(Style.EMPTY.withColor(xyzColor))).append(String.valueOf((int) client.player.getX()))
+                .append(Text.literal(" Y: ").setStyle(Style.EMPTY.withColor(xyzColor))).append(String.valueOf((int) client.player.getY()))
+                .append(Text.literal(" Z: ").setStyle(Style.EMPTY.withColor(xyzColor))).append(String.valueOf((int) client.player.getZ()));
+
+        return coordinatesText;
     }
 
     public static void showTitle(net.minecraft.client.MinecraftClient client, String title, int displayTime) {

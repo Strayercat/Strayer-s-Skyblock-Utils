@@ -21,6 +21,6 @@ public class InGameHudMixin {
 
     @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
     private void hideSidebarMixin(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (ModConfig.INSTANCE.sideBarInHud && StrayersSkyblockUtilsClient.isInSkyblock) ci.cancel();
+        if ((ModConfig.INSTANCE.sideBarInHud || ModConfig.INSTANCE.customSidebar) && StrayersSkyblockUtilsClient.isInSkyblock) ci.cancel();
     }
 }

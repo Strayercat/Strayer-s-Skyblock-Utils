@@ -1,5 +1,6 @@
 package com.skyblockutils.utils;
 
+import com.skyblockutils.config.ModConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
@@ -73,7 +74,7 @@ public class OnScreenNotification {
             int bgColor = isHovered ? 0x2a2a2a : 0x1a1a1a;
             context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + notif.height, bgColor | alphaInt);
 
-            int borderColor = isHovered ? 0x00FF00 : 0x00AA00;
+            int borderColor = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
             context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + 2, borderColor | alphaInt);
 
             var titleLines = wrapText(notif.title);

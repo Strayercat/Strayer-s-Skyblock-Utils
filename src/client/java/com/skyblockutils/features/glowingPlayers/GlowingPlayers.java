@@ -1,7 +1,8 @@
-package com.skyblockutils.features;
+package com.skyblockutils.features.glowingPlayers;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.PlayerLookup;
 import net.minecraft.client.MinecraftClient;
 
@@ -53,9 +54,13 @@ public class GlowingPlayers {
             Map.entry("WHITE", 0xFFFFFF)
     );
 
-    public static void add(String username, int color) {
+    public static void add(String username, int color, boolean fromGui, Runnable onSuccess) {
         if (isPlayerGlowing(username)) {
-            ModFunctions.displayMessageWithHeader("§c" + username + " is already glowing!");
+            if (fromGui) {
+                OnScreenNotification.renderNotification("Already Glowing", username + " is already glowing!", 60);
+            } else {
+                ModFunctions.displayMessageWithHeader("§c" + username + " is already glowing!");
+            }
             return;
         }
 
@@ -67,8 +72,13 @@ public class GlowingPlayers {
                         ModConfig.INSTANCE.addGlowingPlayer(new GlowingPlayer(username, uuid, color));
                         ModFunctions.displayMessageWithHeader("§a" + username + " is now glowing!");
                         ModConfig.save();
+                        if (onSuccess != null) onSuccess.run();
                     } else {
-                        ModFunctions.displayMessageWithHeader("§cPlayer " + username + " not found :c");
+                        if (fromGui) {
+                            OnScreenNotification.renderNotification("Player Not Found", "\"" + username + "\" doesn't exist.", 100);
+                        } else {
+                            ModFunctions.displayMessageWithHeader("§cPlayer " + username + " not found :c");
+                        }
                     }
                 })
         );
@@ -87,6 +97,10 @@ public class GlowingPlayers {
 
     public static void clearAll() {
         ModConfig.INSTANCE.getGlowingPlayers().clear();
+        ModConfig.save();
+    }
+
+    public static void save() {
         ModConfig.save();
     }
 

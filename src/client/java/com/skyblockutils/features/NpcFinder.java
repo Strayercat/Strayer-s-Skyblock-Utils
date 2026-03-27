@@ -107,7 +107,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Oringo|Hub", new Npc("Oringo", "Hub", new BlockPos(-3, 70, -43))); //TODO
         allSkyblockNpcs.put("Fear Mongerer|Hub", new Npc("Fear Mongerer", "Hub", new BlockPos(-2, 70, -43))); //TODO
         allSkyblockNpcs.put("Tyashoi Alchemist|Hub", new Npc("Tyashoi Alchemist", "Hub", new BlockPos(41, 68, -55))); //TODO
-        allSkyblockNpcs.put("Hoppity|Hub", new Npc("Hoppity", "Hub", new BlockPos(-9, 72, -56))); //TODO
+        allSkyblockNpcs.put("Hoppity|Hub", new Npc("Hoppity", "Hub", new BlockPos(56, 71, -2)));
 
 // The Barn
         allSkyblockNpcs.put("Farmhand|The Barn", new Npc("Farmhand", "The Barn", new BlockPos(144, 74, -241)));

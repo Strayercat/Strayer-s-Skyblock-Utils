@@ -4,7 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
-import com.skyblockutils.features.GlowingPlayers;
+import com.skyblockutils.features.glowingPlayers.GlowingPlayers;
+import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.NpcFinder;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.utils.MarkCoordinates;
@@ -73,7 +74,7 @@ public class ModCommands {
                                         })
                                         .executes(context -> {
                                             String name = StringArgumentType.getString(context, "username");
-                                            PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> GlowingPlayers.add(formattedName, 0xFFAA00));
+                                            PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> GlowingPlayers.add(formattedName, 0xFFAA00, false, null));
                                             return 1;
                                         })
                                         .then(ClientCommandManager.argument("color", StringArgumentType.string())
@@ -89,7 +90,7 @@ public class ModCommands {
                                                     String colorName = StringArgumentType.getString(context, "color").toUpperCase();
                                                     int hex = GlowingPlayers.MINECRAFT_COLORS.getOrDefault(colorName, 0xFFAA00);
 
-                                                    GlowingPlayers.add(name, hex);
+                                                    GlowingPlayers.add(name, hex, false, null);
                                                     return 1;
                                                 })
                                         )
@@ -131,6 +132,12 @@ public class ModCommands {
                                         players.append(glowingPlayer.username).append(", ");
                                     }
                                     ModFunctions.displayMessageWithHeader("§rThese players are glowing: \n" + players);
+                                    return 1;
+                                })
+                        )
+                        .then(ClientCommandManager.literal("gui")
+                                .executes(context -> {
+                                    GlowingPlayersGui.configScreenRequested = true;
                                     return 1;
                                 })
                         )

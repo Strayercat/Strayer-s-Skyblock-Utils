@@ -1,6 +1,9 @@
 package com.skyblockutils.config;
 
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
+import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
+import com.skyblockutils.utils.CustomEntry;
+import com.skyblockutils.utils.ModStyle;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -17,7 +20,7 @@ public class ClothConfigHandler {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTransparentBackground(false)
-                .setDefaultBackgroundTexture(Identifier.of("skyblockutils", "textures/config/background.png"))
+                .setDefaultBackgroundTexture(Identifier.of("skyblockutils", "textures/gui/background.png"))
                 .setTitle(Text.literal("Strayer's Skyblock Utils (SSU) Config"))
                 .setSavingRunnable(ModConfig::save);
 
@@ -39,6 +42,10 @@ public class ClothConfigHandler {
     public static void buildGeneralCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory general = builder.getOrCreateCategory(Text.literal("General Settings"));
 
+        general.addEntry(eb.startEnumSelector(Text.literal("Color Style"), ModStyle.ColorStyle.class, ModConfig.INSTANCE.colorStyle)
+                .setDefaultValue(ModStyle.ColorStyle.ORIGINAL).setTooltip(Text.literal("The color style SSU will use"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.colorStyle = v).requireRestart().build());
+
         general.addEntry(eb.startBooleanToggle(Text.literal("Party Invite Notifications"), ModConfig.INSTANCE.partyInviteNotifications)
                 .setDefaultValue(true).setTooltip(Text.literal("Sends party invites as a notification instead of a chat message"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.partyInviteNotifications = v).build());
@@ -58,6 +65,19 @@ public class ClothConfigHandler {
         general.addEntry(eb.startBooleanToggle(Text.literal("Chat Commands"), ModConfig.INSTANCE.chatCommands)
                 .setDefaultValue(true).setTooltip(Text.literal("Whether or not to enable !gay !furry !sus and such commands"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.chatCommands = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Text.literal("Custom Sidebar"), ModConfig.INSTANCE.customSidebar)
+                .setDefaultValue(false).setTooltip(Text.literal("Whether or not to replace the vanilla scoreboard (sidebar) with a custom one"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.customSidebar = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Text.literal("Sidebar Coordinates"), ModConfig.INSTANCE.sidebarCoords)
+                .setDefaultValue(false).setTooltip(Text.literal("Whether or not to show coordinates in the custom sidebar"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.sidebarCoords = v).build());
+
+        general.addEntry(new CustomEntry()
+                .addButton(Text.literal("Glowing Players GUI"), 120, CustomEntry.Alignment.LEFT, () ->
+                                GlowingPlayersGui.configScreenRequested = true
+                        , Text.literal("Open the glowing players config GUI")));
 
         general.addEntry(eb.startBooleanToggle(Text.literal("Party Glow"), ModConfig.INSTANCE.partyGlow)
                 .setDefaultValue(true).setTooltip(Text.literal("Whether or not party members should automatically glow"))

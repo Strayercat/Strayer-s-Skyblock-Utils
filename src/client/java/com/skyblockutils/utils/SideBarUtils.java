@@ -54,7 +54,7 @@ public class SideBarUtils {
             } else {
                 if (lineText.matches("(Early |Late )?(Winter|Summer|Spring|Autumn) \\d+(st|nd|rd|th)")) date = lineText;
                 if (lineText.matches("\\d+:\\d+(am|pm) .")) time = lineText;
-                if (lineText.matches("(Piggy|Purse): [\\d,.]+")) {
+                if (lineText.matches("(Piggy|Purse): [\\d,.]+( \\(\\+\\d+\\))?")) {
                     String val = lineText.replaceFirst("(Piggy|Purse): ", "").trim();
                     if (!val.isEmpty()) purse = val;
                 }
@@ -64,6 +64,24 @@ public class SideBarUtils {
                 }
             }
         }
+    }
+
+    public static List<String> getSidebarLines() {
+        if (client.world == null) return List.of();
+
+        var scoreboard = client.world.getScoreboard();
+        var sidebar = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
+        if (sidebar == null) return List.of();
+
+        return scoreboard.getScoreboardEntries(sidebar).stream()
+                .sorted((a, b) -> b.value() - a.value())
+                .map(entry -> {
+                    Team team = scoreboard.getScoreHolderTeam(entry.owner());
+                    return team != null
+                            ? team.getPrefix().getString() + entry.owner() + team.getSuffix().getString()
+                            : entry.owner();
+                })
+                .toList();
     }
 
     public static void resetSidebarInfo() {
