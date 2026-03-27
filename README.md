@@ -31,6 +31,7 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Chat peek
 - Color styles
 - Custom sidebar
+- NPC locator via /ssu npcFinder
 </details>
 
 ## Dependencies
