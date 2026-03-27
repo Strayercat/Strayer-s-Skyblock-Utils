@@ -231,7 +231,7 @@ public class ModFunctions {
                  "⏣ Aristocrat Passage", "⏣ Barracks of Heroes", "⏣ Grand Library",
                  "⏣ Hanging Court", "⏣ Palace Bridge", "⏣ Royal Quarters",
                  "⏣ The Forge", "⏣ Forge Basin", "⏣ The Lift", "⏣ The Mist",
-                 "⏣ Upper Mines" -> "Dwarven Mines";
+                 "⏣ Upper Mines", "⏣ Lava Springs" -> "Dwarven Mines";
 
             // Crystal Hollows
             case "⏣ Crystal Hollows", "⏣ Crystal Nucleus", "⏣ Fairy Grotto",

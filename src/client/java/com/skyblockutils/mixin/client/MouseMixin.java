@@ -21,8 +21,8 @@ public class MouseMixin {
             MinecraftClient client = MinecraftClient.getInstance();
             Window win = client.getWindow();
             if (window == win.getHandle()) {
-                double mouseX = Mouse.scaleX(win, client.mouse.getX());
-                double mouseY = Mouse.scaleY(win, client.mouse.getY());
+                double mouseX = client.mouse.getScaledX(win);
+                double mouseY = client.mouse.getScaledY(win);
                 OnScreenNotification.handleNotificationClicks((int) mouseX, (int) mouseY, input.button());
             }
         }

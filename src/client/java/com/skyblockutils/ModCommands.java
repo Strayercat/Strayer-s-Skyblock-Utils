@@ -22,6 +22,22 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class ModCommands {
+
+    private static Stream<String> fuzzyMatch(Stream<String> candidates, String remaining) {
+        List<String> all = candidates.toList();
+        String lower = remaining.toLowerCase();
+
+        List<String> prefixMatches = all.stream()
+                .filter(s -> s.toLowerCase().startsWith(lower))
+                .toList();
+
+        List<String> containsOnlyMatches = all.stream()
+                .filter(s -> !s.toLowerCase().startsWith(lower) && s.toLowerCase().contains(lower))
+                .toList();
+
+        return Stream.concat(prefixMatches.stream(), containsOnlyMatches.stream());
+    }
+
     @SuppressWarnings("unused")
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         var command = ClientCommandManager.literal("ssu")
@@ -29,9 +45,10 @@ public class ModCommands {
                         .then(ClientCommandManager.argument("floor", StringArgumentType.string())
                                 .suggests((ctx, builder) -> {
                                     String remaining = builder.getRemaining().toLowerCase();
-                                    Stream.of("off", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "f1", "f2", "f3", "f4", "f5", "f6", "f7")
-                                            .filter(f -> f.startsWith(remaining))
-                                            .forEach(builder::suggest);
+                                    fuzzyMatch(
+                                            Stream.of("off", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "f1", "f2", "f3", "f4", "f5", "f6", "f7"),
+                                            remaining
+                                    ).forEach(builder::suggest);
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {
@@ -64,11 +81,12 @@ public class ModCommands {
                                         .suggests((ctx, builder) -> {
                                             var handler = MinecraftClient.getInstance().getNetworkHandler();
                                             if (handler != null) {
-                                                String remaining = builder.getRemaining().toLowerCase();
-                                                handler.getPlayerList().stream()
-                                                        .map(entry -> entry.getProfile().name())
-                                                        .filter(name -> name.toLowerCase().startsWith(remaining))
-                                                        .forEach(builder::suggest);
+                                                String remaining = builder.getRemaining();
+                                                fuzzyMatch(
+                                                        handler.getPlayerList().stream()
+                                                                .map(entry -> entry.getProfile().name()),
+                                                        remaining
+                                                ).forEach(builder::suggest);
                                             }
                                             return builder.buildFuture();
                                         })
@@ -79,10 +97,11 @@ public class ModCommands {
                                         })
                                         .then(ClientCommandManager.argument("color", StringArgumentType.string())
                                                 .suggests((ctx, builder) -> {
-                                                    String remaining = builder.getRemaining().toLowerCase();
-                                                    GlowingPlayers.MINECRAFT_COLORS.keySet().stream()
-                                                            .filter(color -> color.toLowerCase().startsWith(remaining))
-                                                            .forEach(builder::suggest);
+                                                    String remaining = builder.getRemaining();
+                                                    fuzzyMatch(
+                                                            GlowingPlayers.MINECRAFT_COLORS.keySet().stream(),
+                                                            remaining
+                                                    ).forEach(builder::suggest);
                                                     return builder.buildFuture();
                                                 })
                                                 .executes(context -> {
@@ -99,11 +118,12 @@ public class ModCommands {
                         .then(ClientCommandManager.literal("remove")
                                 .then(ClientCommandManager.argument("username", StringArgumentType.string())
                                         .suggests((ctx, builder) -> {
-                                            String remaining = builder.getRemaining().toLowerCase();
-                                            ModConfig.INSTANCE.getGlowingPlayers().stream()
-                                                    .map(gp -> gp.username)
-                                                    .filter(name -> name.toLowerCase().startsWith(remaining))
-                                                    .forEach(builder::suggest);
+                                            String remaining = builder.getRemaining();
+                                            fuzzyMatch(
+                                                    ModConfig.INSTANCE.getGlowingPlayers().stream()
+                                                            .map(gp -> gp.username),
+                                                    remaining
+                                            ).forEach(builder::suggest);
                                             return builder.buildFuture();
                                         })
                                         .executes(context -> {
@@ -173,12 +193,13 @@ public class ModCommands {
                 ).then(ClientCommandManager.literal("npcfinder")
                         .then(ClientCommandManager.argument("npc", StringArgumentType.greedyString())
                                 .suggests((ctx, builder) -> {
-                                    String remaining = builder.getRemaining().toLowerCase();
-                                    NpcFinder.allSkyblockNpcs.values().stream()
-                                            .map(NpcFinder.Npc::name)
-                                            .distinct()
-                                            .filter(name -> name.toLowerCase().startsWith(remaining))
-                                            .forEach(builder::suggest);
+                                    String remaining = builder.getRemaining();
+                                    fuzzyMatch(
+                                            NpcFinder.allSkyblockNpcs.values().stream()
+                                                    .map(NpcFinder.Npc::name)
+                                                    .distinct(),
+                                            remaining
+                                    ).forEach(builder::suggest);
                                     return builder.buildFuture();
                                 })
                                 .executes(context -> {

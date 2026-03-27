@@ -8,6 +8,7 @@ import net.minecraft.scoreboard.Team;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class SideBarUtils {
     public static String location = "";
@@ -16,6 +17,12 @@ public class SideBarUtils {
     public static String time = "";
     public static String purse = "";
     public static String bits = "";
+
+    private static final Pattern MOTES = Pattern.compile("Motes: [\\d,.]+");
+    private static final Pattern DATE = Pattern.compile("(Early |Late )?(Winter|Summer|Spring|Autumn) \\d+(st|nd|rd|th)");
+    private static final Pattern TIME = Pattern.compile("\\d+:\\d+(am|pm) .");
+    private static final Pattern PURSE = Pattern.compile("(Piggy|Purse): [\\d,.]+( \\(\\+\\d+\\))?");
+    private static final Pattern BITS = Pattern.compile("Bits: \\d+");
 
     public static MinecraftClient client = MinecraftClient.getInstance();
 
@@ -28,42 +35,41 @@ public class SideBarUtils {
 
         List<ScoreboardEntry> entries = new ArrayList<>(scoreboard.getScoreboardEntries(sidebar));
 
+        // First pass: location only
         for (ScoreboardEntry entry : entries) {
-            String playerName = entry.owner();
-            Team team = scoreboard.getScoreHolderTeam(playerName);
-            String lineText = team != null
-                    ? team.getPrefix().getString() + playerName + team.getSuffix().getString()
-                    : playerName;
-            lineText = lineText.replaceAll("(?i)§.", "").trim();
-            if (lineText.contains("⏣") || lineText.contains("ф")) location = lineText;
-        }
-
-        for (ScoreboardEntry entry : entries) {
-            String playerName = entry.owner();
-            Team team = scoreboard.getScoreHolderTeam(playerName);
-            String lineText = team != null
-                    ? team.getPrefix().getString() + playerName + team.getSuffix().getString()
-                    : playerName;
-            lineText = lineText.replaceAll("(?i)§.", "").trim();
-
-            if (ModFunctions.mapLocationToGeneralArea(location).equals("Rift")) {
-                if (lineText.matches("Motes: [\\d,.]+")) {
-                    String val = lineText.replaceFirst("Motes: ", "").trim();
-                    if (!val.isEmpty()) motes = val;
-                }
-            } else {
-                if (lineText.matches("(Early |Late )?(Winter|Summer|Spring|Autumn) \\d+(st|nd|rd|th)")) date = lineText;
-                if (lineText.matches("\\d+:\\d+(am|pm) .")) time = lineText;
-                if (lineText.matches("(Piggy|Purse): [\\d,.]+( \\(\\+\\d+\\))?")) {
-                    String val = lineText.replaceFirst("(Piggy|Purse): ", "").trim();
-                    if (!val.isEmpty()) purse = val;
-                }
-                if (lineText.matches("Bits: \\d+")) {
-                    String val = lineText.replaceFirst("Bits: ", "").trim();
-                    if (!val.isEmpty()) bits = val;
-                }
+            String lineText = stripFormatting(scoreboard.getScoreHolderTeam(entry.owner()), entry.owner());
+            if (lineText.contains("⏣") || lineText.contains("ф")) {
+                location = lineText;
+                break;
             }
         }
+
+        boolean inRift = ModFunctions.mapLocationToGeneralArea(location).equals("Rift");
+        int found = 0;
+        int target = inRift ? 1 : 4;
+
+        // Second pass: everything else
+        for (ScoreboardEntry entry : entries) {
+            if (found >= target) break;
+
+            String lineText = stripFormatting(scoreboard.getScoreHolderTeam(entry.owner()), entry.owner());
+
+            if (inRift) {
+                if (MOTES.matcher(lineText).matches()) { motes = lineText.replaceFirst("Motes: ", "").trim(); found++; }
+            } else {
+                if (DATE.matcher(lineText).matches()) { date = lineText; found++; }
+                else if (TIME.matcher(lineText).matches()) { time = lineText; found++; }
+                else if (PURSE.matcher(lineText).matches()) { purse = lineText.replaceFirst("(Piggy|Purse): ", "").trim(); found++; }
+                else if (BITS.matcher(lineText).matches()) { bits = lineText.replaceFirst("Bits: ", "").trim(); found++; }
+            }
+        }
+    }
+
+    private static String stripFormatting(Team team, String playerName) {
+        String raw = team != null
+                ? team.getPrefix().getString() + playerName + team.getSuffix().getString()
+                : playerName;
+        return raw.replaceAll("(?i)§.", "").trim();
     }
 
     public static List<String> getSidebarLines() {

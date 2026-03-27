@@ -218,6 +218,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Bramass Beastslayer|Spider's Den", new Npc("Bramass Beastslayer", "Spider's Den", new BlockPos(-272, 114, -197)));
         allSkyblockNpcs.put("Archaeologist|Spider's Den", new Npc("Archaeologist", "Spider's Den", new BlockPos(-361, 112, -291)));
         allSkyblockNpcs.put("Spider Tamer|Spider's Den", new Npc("Spider Tamer", "Spider's Den", new BlockPos(-299, 62, -195)));
+        // TODO ike and michael
 
 // The End
         allSkyblockNpcs.put("Pearl Dealer|The End", new Npc("Pearl Dealer", "The End", new BlockPos(-505, 102, -285)));
