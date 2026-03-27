@@ -19,14 +19,18 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Chat filter toggles (Incomplete)
 - Printing coordinates to chat via keybinds
 - Fancy emotes (o/ into ( ﾟ◡ﾟ)/ and such)
-
+### Glowing players
+- Glowing players via /ssu glowingPlayers
+- Config hud for editting glowing players
+- Automatic party members glow
 ### Misc
 - A customizable contextual hud
-- Glowing players via /ssu glowingPlayers
 - Custom party invite notifications
 - Auto Hoppity eggs
 - Zoom
 - Chat peek
+- Color styles
+- Custom sidebar
 </details>
 
 ## Dependencies
