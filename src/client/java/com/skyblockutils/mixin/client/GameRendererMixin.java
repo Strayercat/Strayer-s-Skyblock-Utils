@@ -1,8 +1,6 @@
 package com.skyblockutils.mixin.client;
 
-import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.utils.ZoomState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import org.joml.Matrix4f;
@@ -23,20 +21,8 @@ public class GameRendererMixin {
 
     @Inject(method = "getFov(Lnet/minecraft/client/render/Camera;FZ)F", at = @At("RETURN"), cancellable = true)
     private void modifyFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Float> cir) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        boolean isZooming = ModKeyBindings.ZOOM_KEY.isPressed();
-
-        if (isZooming) {
+        if (ZoomState.isZooming) {
             cir.setReturnValue(ZoomState.fov);
-            if (!ZoomState.isZooming) {
-                ZoomState.previousCinematic = client.options.smoothCameraEnabled;
-                client.options.smoothCameraEnabled = true;
-            }
-        } else if (ZoomState.isZooming) {
-            client.options.smoothCameraEnabled = ZoomState.previousCinematic;
-            ZoomState.reset();
         }
-
-        ZoomState.isZooming = isZooming;
     }
 }

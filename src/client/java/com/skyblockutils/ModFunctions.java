@@ -1,20 +1,14 @@
 package com.skyblockutils;
 
 import com.skyblockutils.config.ModConfig;
-import com.skyblockutils.features.AutoFish;
-import com.skyblockutils.features.NpcFinder;
-import com.skyblockutils.features.PuffTracker;
+import com.skyblockutils.features.*;
 import com.skyblockutils.features.mining.CorlTimer;
-import com.skyblockutils.features.SsuHud;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.GuiAccessor;
-import com.skyblockutils.utils.GuiBlocker;
-import com.skyblockutils.utils.ModStyle;
-import com.skyblockutils.utils.SSU;
-import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -50,13 +44,14 @@ public class ModFunctions {
         CorlTimer.resetCorlTimer();
         AutoFish.resetAutoFish();
         NpcFinder.clear();
-        SideBarUtils.resetSidebarInfo();
+        SideBarUtils.resetLocation();
     }
 
     public static void handleSkyblockExclusiveKeybinds(MinecraftClient client) {
         while (ModKeyBindings.CORLEONE_TIMER_KEY.wasPressed()) CorlTimer.toggleCorlTimer();
         while (ModKeyBindings.AUTOFISH_KEY.wasPressed()) AutoFish.toggleAutoFish(client);
         while (ModKeyBindings.PUFF_TIMER_KEY.wasPressed()) PuffTracker.togglePuffTimer();
+        if (ModKeyBindings.ZOOM_KEY.wasPressed()) Zoom.handleZoom(client);
         SsuHud.setVisible(ModKeyBindings.HUD_KEY.isPressed());
     }
 

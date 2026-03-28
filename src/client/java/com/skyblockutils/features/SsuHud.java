@@ -41,10 +41,6 @@ public class SsuHud {
     private static final int COLOR_TEXT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT);
     private static final int COLOR_MAIN = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
 
-    private static final int COLOR_MOTES = 0xFFAA00FF;
-    private static final int COLOR_PURSE = 0xFFFFB500;
-    private static final int COLOR_BITS = 0xFF66EEFF;
-
     public static void setVisible(boolean visible) {
         if (!ModConfig.INSTANCE.hudEnabled) return;
         isVisible = visible;
@@ -192,24 +188,16 @@ public class SsuHud {
 
     private static void addSidebarSection(List<HudLine> lines, boolean preceded) {
         if (preceded) addDivider(lines);
-        lines.add(HudLine.of("Scoreboard Info", COLOR_TITLE));
 
-        String motes = SideBarUtils.motes;
-        String date = SideBarUtils.date;
-        String time = SideBarUtils.time;
-        String sbLoc = SideBarUtils.location;
-        String purse = SideBarUtils.purse;
-        String bits = SideBarUtils.bits;
+        List<String> scoreboardLines = new java.util.ArrayList<>(SideBarUtils.getSidebarLines().stream()
+                .filter(line -> !line.replaceAll("(?i)§.", "").trim().isEmpty()
+                        && !line.replaceAll("§.", "").trim().matches("\\d{2}/\\d{2}/\\d{2} .*")
+                        && !line.replaceAll("§.", "").trim().matches("www.hypixel.net"))
+                .map(line -> line.trim())
+                .toList());
 
-        if (ModFunctions.mapLocationToGeneralArea(sbLoc).equals("Rift")) {
-            if (sbLoc != null) lines.add(HudLine.of(sbLoc, COLOR_TEXT));
-            if (motes != null) lines.add(HudLine.of("Motes: " + motes, COLOR_MOTES));
-        } else {
-            if (date != null) lines.add(HudLine.of(date, COLOR_TEXT));
-            if (time != null) lines.add(HudLine.of(time, COLOR_TEXT));
-            if (sbLoc != null) lines.add(HudLine.of(sbLoc, COLOR_TEXT));
-            if (purse != null) lines.add(HudLine.of("Purse: " + purse, COLOR_PURSE));
-            if (bits != null) lines.add(HudLine.of("Bits: " + bits, COLOR_BITS));
+        for (String line : scoreboardLines) {
+            lines.add(HudLine.of(line, 0xFFFFFFFF));
         }
     }
 
