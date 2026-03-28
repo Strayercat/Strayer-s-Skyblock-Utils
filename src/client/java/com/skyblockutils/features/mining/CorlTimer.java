@@ -1,9 +1,12 @@
 package com.skyblockutils.features.mining;
 
 import com.skyblockutils.ModFunctions;
+import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.entity.Entity;
@@ -44,7 +47,7 @@ public class CorlTimer {
                 scheduler.schedule(() -> {
                     if (client.world == null) return;
                     client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_PLING, 1.0F));
-                    ModFunctions.showTitle(client, "§6CORL", 20);
+                    ModFunctions.showTitle(client, Text.literal("CORL").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20);
                     waitTime = false;
                 }, 1, TimeUnit.MINUTES);
             }

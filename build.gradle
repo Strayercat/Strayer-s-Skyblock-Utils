@@ -2,7 +2,8 @@ plugins {
     id 'fabric-loom' version "${loom_version}"
 }
 
-version = project.mod_version + "+" + project.minecraft_version
+//version = project.mod_version + "+" + project.minecraft_version
+version = project.mod_version_dev + " Dev"
 
 base {
     archivesName = project.archives_base_name

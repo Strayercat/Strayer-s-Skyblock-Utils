@@ -58,5 +58,13 @@ public class ModKeyBindings {
                     ssuCategory
             ));
 
+    public static final KeyBinding PUFF_TIMER_KEY =
+            KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                    "key.ssu.puffTimer",
+                    InputUtil.Type.KEYSYM,
+                    GLFW.GLFW_KEY_Y,
+                    ssuCategory
+            ));
+
     public static void init() {}
 }

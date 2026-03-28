@@ -3,6 +3,7 @@ package com.skyblockutils;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.AutoFish;
 import com.skyblockutils.features.NpcFinder;
+import com.skyblockutils.features.PuffTracker;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.SsuHud;
 import com.skyblockutils.features.dungeons.AutoRejoin;
@@ -41,6 +42,8 @@ public class ModFunctions {
 
         playerWelcomedToIsland = false;
         SsuHud.funFactHandled = false;
+        CorlTimer.corlTimerEnabled = false;
+        PuffTracker.puffTrackerEnabled = false;
         PartyListParser.onJoinCommandHandled = false;
 
         DowntimeTracker.resetDowntimeTracker();
@@ -53,6 +56,7 @@ public class ModFunctions {
     public static void handleSkyblockExclusiveKeybinds(MinecraftClient client) {
         while (ModKeyBindings.CORLEONE_TIMER_KEY.wasPressed()) CorlTimer.toggleCorlTimer();
         while (ModKeyBindings.AUTOFISH_KEY.wasPressed()) AutoFish.toggleAutoFish(client);
+        while (ModKeyBindings.PUFF_TIMER_KEY.wasPressed()) PuffTracker.togglePuffTimer();
         SsuHud.setVisible(ModKeyBindings.HUD_KEY.isPressed());
     }
 
@@ -99,7 +103,7 @@ public class ModFunctions {
         return coordinatesText;
     }
 
-    public static void showTitle(net.minecraft.client.MinecraftClient client, String title, int displayTime) {
+    public static void showTitle(net.minecraft.client.MinecraftClient client, Text title, int displayTime) {
         if (client.player != null) {
             GuiAccessor guiAccessor = (GuiAccessor) client.inGameHud;
 
@@ -107,7 +111,7 @@ public class ModFunctions {
             guiAccessor.setTitleStayTime(displayTime);
             guiAccessor.setTitleFadeOutTime(10);
 
-            client.inGameHud.setTitle(Text.literal(title));
+            client.inGameHud.setTitle(title);
         }
     }
 

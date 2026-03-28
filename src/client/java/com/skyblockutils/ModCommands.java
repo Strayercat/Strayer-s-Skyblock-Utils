@@ -8,10 +8,7 @@ import com.skyblockutils.features.glowingPlayers.GlowingPlayers;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.NpcFinder;
 import com.skyblockutils.features.dungeons.AutoRejoin;
-import com.skyblockutils.utils.MarkCoordinates;
-import com.skyblockutils.utils.OnScreenNotification;
-import com.skyblockutils.utils.PlayerLookup;
-import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -189,7 +186,14 @@ public class ModCommands {
                                     MarkCoordinates.clearCoordinates();
                                     MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("Coordinates cleared"));
                                     return 1;
-                                })))
+                                }))
+                        )
+                        .then(ClientCommandManager.literal("title")
+                                .executes(context -> {
+                                    ModFunctions.showTitle(MinecraftClient.getInstance(),  Text.literal("TEST TITLE").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20);
+                                    return 1;
+                                })
+                        )
                 ).then(ClientCommandManager.literal("npcfinder")
                         .then(ClientCommandManager.argument("npc", StringArgumentType.greedyString())
                                 .suggests((ctx, builder) -> {
