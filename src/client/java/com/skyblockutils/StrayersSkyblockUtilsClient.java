@@ -91,15 +91,6 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             SideBarUtils.updateLocation();
         });
 
-        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
-            if (!isInSkyblock) return true;
-            String cleanMessage = message.getString().replaceAll("§.", "").trim();
-            boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
-            boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
-            boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
-            return chatFilter && partyMsgFilter && partyListMessages;
-        });
-
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (!isInSkyblock) return;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
@@ -109,6 +100,15 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ChatCommands.handleCommands(cleanMessage);
             PartyCommands.handlePartyCommands(cleanMessage);
             PartyInfo.handlePartyMessages(cleanMessage);
+        });
+
+        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
+            if (!isInSkyblock) return true;
+            String cleanMessage = message.getString().replaceAll("§.", "").trim();
+            boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
+            boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
+            boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
+            return chatFilter && partyMsgFilter && partyListMessages;
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);

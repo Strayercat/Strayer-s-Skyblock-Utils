@@ -51,13 +51,15 @@ public class ModFunctions {
         while (ModKeyBindings.CORLEONE_TIMER_KEY.wasPressed()) CorlTimer.toggleCorlTimer();
         while (ModKeyBindings.AUTOFISH_KEY.wasPressed()) AutoFish.toggleAutoFish(client);
         while (ModKeyBindings.PUFF_TIMER_KEY.wasPressed()) PuffTracker.togglePuffTimer();
-        if (ModKeyBindings.ZOOM_KEY.wasPressed()) Zoom.handleZoom(client);
         SsuHud.setVisible(ModKeyBindings.HUD_KEY.isPressed());
     }
 
     public static void handleNonSkyblockExclusiveKeybinds(MinecraftClient client) {
         while (ModKeyBindings.PRINT_COORDINATES_KEY.wasPressed())
             sendCoordinates(client, ModConfig.INSTANCE.coordinatesSendLocation ? "withLocation" : "");
+        boolean zoomPressed = ModKeyBindings.ZOOM_KEY.isPressed();
+        if (zoomPressed && !ZoomState.isZooming) Zoom.enter(client);
+        else if (!zoomPressed && ZoomState.isZooming) Zoom.exit(client);
     }
 
     public static int getPing(MinecraftClient client) {

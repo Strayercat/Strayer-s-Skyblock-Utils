@@ -58,12 +58,15 @@ public class CustomSidebar {
         drawSidebarText(context, client, x1, x2, barPosition + 1, y2 - barPosition + 1, 10);
 
         context.getMatrices().pushMatrix();
-        float imageScale = 0.13f;
-        int imageSize = (int)(418 * imageScale); // ~83px
-        context.getMatrices().translate(x1 + (float)(x2 - x1) / 2 - (float)imageSize / 2 - 10, y1 - imageSize + 31 * imageScale);
-        context.getMatrices().scale(imageScale, imageScale);
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, CAT_IMAGE, 0, 0, 0, 0, 418, 418, 418, 418);
-        context.getMatrices().popMatrix();
+        try {
+            float imageScale = 0.13f;
+            int imageSize = (int)(418 * imageScale);
+            context.getMatrices().translate(x1 + (float)(x2 - x1) / 2 - (float)imageSize / 2 - 10, y1 - imageSize + 31 * imageScale);
+            context.getMatrices().scale(imageScale, imageScale);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, CAT_IMAGE, 0, 0, 0, 0, 418, 418, 418, 418);
+        } finally {
+            context.getMatrices().popMatrix();
+        }
     }
 
     private static void drawCorner(DrawContext context, int cx, int cy, int r, int quadrant) {
@@ -77,11 +80,11 @@ public class CustomSidebar {
                         case 1:
                             if (x <= 0 && y >= 0)
                                 context.fill(drawX, drawY, drawX + 1, drawY + 1, COLOR_BACKGROUND);
-                            break; // BL
+                            break;
                         case 2:
                             if (x <= 0 && y <= 0)
                                 context.fill(drawX, drawY, drawX + 1, drawY + 1, COLOR_BACKGROUND);
-                            break; // TL
+                            break;
                     }
                 }
             }
@@ -137,7 +140,7 @@ public class CustomSidebar {
                 .max()
                 .orElse(0);
 
-        sideBarWidth = Math.max(110, maxTextWidth);
+        sideBarWidth = Math.max(110, maxTextWidth + 7);
 
         if (lines.isEmpty()) return;
 
@@ -150,10 +153,13 @@ public class CustomSidebar {
             int y = topPosition + verticalOffset + (i * maxSpacePerLine);
 
             context.getMatrices().pushMatrix();
-            context.getMatrices().translate(x, y);
-            context.getMatrices().scale(textScale, textScale);
-            context.drawTextWithShadow(client.textRenderer, lines.get(i), 0, 0, 0xFFFFFFFF);
-            context.getMatrices().popMatrix();
+            try {
+                context.getMatrices().translate(x, y);
+                context.getMatrices().scale(textScale, textScale);
+                context.drawTextWithShadow(client.textRenderer, lines.get(i), 0, 0, 0xFFFFFFFF);
+            } finally {
+                context.getMatrices().popMatrix();
+            }
         }
     }
 }
