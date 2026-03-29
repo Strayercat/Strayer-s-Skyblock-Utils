@@ -1,6 +1,7 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.ModKeyBindings;
+import com.skyblockutils.features.hud.ScreenshotManager;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.ZoomState;
 import net.minecraft.client.MinecraftClient;
@@ -24,6 +25,7 @@ public class MouseMixin {
                 double mouseX = client.mouse.getScaledX(win);
                 double mouseY = client.mouse.getScaledY(win);
                 OnScreenNotification.handleNotificationClicks((int) mouseX, (int) mouseY, input.button());
+                if (input.button() == 0) ScreenshotManager.onMouseClick(mouseX, mouseY);
             }
         }
     }

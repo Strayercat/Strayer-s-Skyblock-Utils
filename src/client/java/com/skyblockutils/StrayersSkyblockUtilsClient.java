@@ -8,9 +8,11 @@ import com.skyblockutils.features.chat.ChatFilter;
 import com.skyblockutils.features.chat.FancyEmotes;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
+import com.skyblockutils.features.hud.CustomSidebar;
+import com.skyblockutils.features.hud.ScreenshotManager;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
-import com.skyblockutils.features.SsuHud;
+import com.skyblockutils.features.hud.SsuHud;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
 import com.skyblockutils.features.mining.GlaciteTunnelsWaypoints;
 import com.skyblockutils.features.party.PartyCommands;
@@ -52,13 +54,13 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ModFunctions.connectionEventDataReset("Leave"));
 
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (context, deltaTracker) ->
-                SsuHud.onHudRender(context, SideBarUtils.location)
-        );
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.of("strayers-skyblock-utils", "ssu_hud"), (context, deltaTracker) -> SsuHud.onHudRender(context, SideBarUtils.location));
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.of("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, deltaTracker) -> {
             if (isInSkyblock && ModConfig.INSTANCE.customSidebar) CustomSidebar.displayCustomSidebar(context);
         });
+
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.of("strayers-skyblock-utils", "ssu_screenshot_manager"), (context, deltaTracker) -> ScreenshotManager.buildScreenshotHud(context));
 
         WorldRenderEvents.END_MAIN.register(context -> {
             GlaciteTunnelsWaypoints.onWorldRender(context);
@@ -70,6 +72,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ClothConfigHandler.handleConfigScreen(client);
             GlowingPlayersGui.handleConfigScreen(client);
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
+            ScreenshotManager.tick();
 
             if (client.getNetworkHandler() != null) {
                 PingMeasurer pingMeasurer = ((ClientPlayNetworkHandlerAccessor) client.getNetworkHandler()).getPingMeasurer();

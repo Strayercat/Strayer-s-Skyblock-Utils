@@ -1,4 +1,4 @@
-package com.skyblockutils.features;
+package com.skyblockutils.features.hud;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;

@@ -6,6 +6,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,5 +57,11 @@ public class ChatHudMixin {
 
         MinecraftClient mc = MinecraftClient.getInstance();
         OnScreenNotification.render(context, mc.getWindow().getScaledWidth(), mc.getWindow().getScaledHeight());
+    }
+
+    @Inject(method = "addMessage(Lnet/minecraft/text/Text;)V", at = @At("HEAD"), cancellable = true)
+    private void onAddMessage(Text message, CallbackInfo ci) {
+        String clean = message.getString().replaceAll("§.", "").trim();
+        if (clean.startsWith("Saved screenshot as")) ci.cancel();
     }
 }

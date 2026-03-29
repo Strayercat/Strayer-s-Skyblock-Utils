@@ -6,7 +6,7 @@ public class ModStyle {
     public static final int COLOR_BACKGROUND = 0xAA000000;
 
     public enum ColorType {
-        TITLE_START, TITLE_END, MAIN, TEXT, WAYPOINT
+        TITLE_START, TITLE_END, MAIN, TEXT, WAYPOINT, SCREENSHOT
     }
 
     public enum ColorStyle {
@@ -20,6 +20,7 @@ public class ModStyle {
                     case MAIN -> 0xFF00AA00;
                     case TEXT -> 0xFFAAFFAA;
                     case WAYPOINT -> 0x4CFF01;
+                    case SCREENSHOT -> 0xFF034B00;
                 };
                 case OCEAN -> switch (type) {
                     case TITLE_START -> 0x0077FF;
@@ -27,6 +28,7 @@ public class ModStyle {
                     case MAIN -> 0xFF0055AA;
                     case TEXT -> 0xFFAAEEFF;
                     case WAYPOINT -> 0x1EE3D7;
+                    case SCREENSHOT -> 0xFF002F73;
                 };
                 case SUNSET -> switch (type) {
                     case TITLE_START -> 0xFF6600;
@@ -34,6 +36,7 @@ public class ModStyle {
                     case MAIN -> 0xFFAA3300;
                     case TEXT -> 0xFFFFDDAA;
                     case WAYPOINT -> 0xFF6601;
+                    case SCREENSHOT -> 0xFF652000;
                 };
                 case CANDY -> switch (type) {
                     case TITLE_START -> 0xFF69B4;
@@ -41,6 +44,7 @@ public class ModStyle {
                     case MAIN -> 0xFFFF69B4;
                     case TEXT -> 0xFFFFD1DC;
                     case WAYPOINT -> 0xFF69B5;
+                    case SCREENSHOT -> 0xFF810095;
                 };
                 case SHARK -> switch (type) {
                     case TITLE_START -> 0x8A43FF;
@@ -48,6 +52,7 @@ public class ModStyle {
                     case MAIN -> 0xFF7200BA;
                     case TEXT -> 0xFFC1A4DB;
                     case WAYPOINT -> 0x913BE3;
+                    case SCREENSHOT -> 0xFF5B20A7;
                 };
             };
         }

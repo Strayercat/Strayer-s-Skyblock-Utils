@@ -1,6 +1,6 @@
 package com.skyblockutils.mixin.client;
 
-import com.skyblockutils.features.SsuHud;
+import com.skyblockutils.features.hud.SsuHud;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.BossBarHud;
 import org.spongepowered.asm.mixin.Mixin;
