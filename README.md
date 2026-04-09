@@ -40,3 +40,5 @@ SSU started as a personal project. I wanted to make something for myself to help
 
 ## REPORTING ISSUES
 Please keep in mind that this is the first mod I develop and release and I am still just getting used to the Minecraft modding environment. Just like anyone in my position, I'm bound to make mistakes, introduce bugs or make your game crash :p. If you find a bug, please let me know so I can release a fix ASAP.
+
+Modrinth download: https://modrinth.com/mod/strayers-skyblock-utils
