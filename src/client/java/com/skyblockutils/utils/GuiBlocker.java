@@ -15,7 +15,7 @@ public class GuiBlocker {
     public static boolean shouldHideScreen = false;
 
     public static void init() {
-        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+        ScreenEvents.AFTER_INIT.register((client, screen, _, _) -> {
             if (screen instanceof Screen containerScreen) {
                 String title = containerScreen.getTitle().getString().toLowerCase();
                 if (shouldHideScreen) {

@@ -31,7 +31,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
@@ -45,21 +44,21 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register(ModCommands::register);
 
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+        ClientPlayConnectionEvents.JOIN.register((handler, _, client) -> {
             if (!handler.getConnection().getRemoteAddress().toString().contains("hypixel.net")) return;
             AutoFish.registerListener(client);
             ModFunctions.connectionEventDataReset("Join");
         });
 
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ModFunctions.connectionEventDataReset("Leave"));
+        ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> ModFunctions.connectionEventDataReset("Leave"));
 
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, deltaTracker) -> SsuHud.onHudRender(context, SideBarUtils.location));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, _) -> SsuHud.onHudRender(context, SideBarUtils.location));
 
-        HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, deltaTracker) -> {
+        HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> {
             if (isInSkyblock && ModConfig.INSTANCE.customSidebar) CustomSidebar.displayCustomSidebar(context);
         });
 
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_screenshot_manager"), (context, deltaTracker) -> ScreenshotManager.buildScreenshotHud(context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_screenshot_manager"), (context, _) -> ScreenshotManager.buildScreenshotHud(context));
 
         LevelRenderEvents.END_MAIN.register(context -> {
             GlaciteTunnelsWaypoints.onWorldRender(context);
@@ -95,7 +94,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             SideBarUtils.updateLocation();
         });
 
-        ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
+        ClientReceiveMessageEvents.GAME.register((message, _) -> {
             if (!isInSkyblock) return;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             DowntimeTracker.trackDowntime(cleanMessage);
@@ -106,7 +105,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             PartyInfo.handlePartyMessages(cleanMessage);
         });
 
-        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
+        ClientReceiveMessageEvents.ALLOW_GAME.register((message, _) -> {
             if (!isInSkyblock) return true;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);

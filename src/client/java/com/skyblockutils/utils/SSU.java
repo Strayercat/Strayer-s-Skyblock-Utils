@@ -24,7 +24,7 @@ public class SSU {
         return result;
     }
 
-    public static @Nullable MutableComponent gradientText(String message, int colorFrom, int colorTo) {
+    public static MutableComponent gradientText(String message, int colorFrom, int colorTo) {
         MutableComponent result = Component.empty();
         int len = message.length();
 

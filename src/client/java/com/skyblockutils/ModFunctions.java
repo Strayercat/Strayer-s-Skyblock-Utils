@@ -19,7 +19,6 @@ import java.util.List;
 
 public class ModFunctions {
     public static boolean playerWelcomedToIsland = false;
-    public static long lastTimePingCalculated;
     public static int ping = 0;
     public static float tps = 0;
 
@@ -125,7 +124,7 @@ public class ModFunctions {
     public static Boolean isInDungeons(Minecraft client) {
         String location = SideBarUtils.location;
         boolean isInCatacombs = location != null && location.contains("The Catacombs");
-        boolean hasF3Boss = ((BossHealthOverlayAccessor) (Object) client.gui.hud.getBossOverlay())
+        boolean hasF3Boss = ((BossHealthOverlayAccessor) client.gui.hud.getBossOverlay())
                 .getEvents().values().stream().findFirst()
                 .map(bossBar -> bossBar.getName().getString().replaceAll("§.", "").contains("The Professor"))
                 .orElse(false);

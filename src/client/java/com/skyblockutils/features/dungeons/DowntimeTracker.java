@@ -6,7 +6,6 @@ import com.skyblockutils.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundEvents;
 
 public class DowntimeTracker {
     public static boolean downtimeRequested = false;

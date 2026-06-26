@@ -39,13 +39,13 @@ public class GlowingPlayerEntry extends AbstractConfigListEntry<GlowingPlayers.G
 
         this.colorName = colors.get(colorIndex).getKey().replace("_", " ");
 
-        this.removeButton = Button.builder(Component.literal("✕"), b -> onRemove.run())
+        this.removeButton = Button.builder(Component.literal("✕"), _ -> onRemove.run())
                 .size(20, 20)
                 .build();
 
         this.editColorButton = Button.builder(
                 Component.empty(),
-                b -> GlowingPlayerCreationScreen.openScreenWithInfo(
+                _ -> GlowingPlayerCreationScreen.openScreenWithInfo(
                         Minecraft.getInstance().gui.screen(), player
                 )
         ).size(80, 20).build();
@@ -80,7 +80,7 @@ public class GlowingPlayerEntry extends AbstractConfigListEntry<GlowingPlayers.G
         }
     }
 
-    public List<Button> aJ_() {
+    public List<Button> list() {
         return List.of(editColorButton, removeButton);
     }
 

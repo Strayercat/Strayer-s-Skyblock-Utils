@@ -1,7 +1,5 @@
 package com.skyblockutils.mixin.client;
 
-import com.skyblockutils.StrayersSkyblockUtilsClient;
-import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
