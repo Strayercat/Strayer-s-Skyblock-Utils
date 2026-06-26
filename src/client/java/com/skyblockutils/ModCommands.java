@@ -9,11 +9,11 @@ import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.NpcFinder;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.utils.*;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -36,10 +36,10 @@ public class ModCommands {
     }
 
     @SuppressWarnings("unused")
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
-        var command = ClientCommandManager.literal("ssu")
-                .then(ClientCommandManager.literal("autorejoin")
-                        .then(ClientCommandManager.argument("floor", StringArgumentType.string())
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+        var command = ClientCommands.literal("ssu")
+                .then(ClientCommands.literal("autorejoin")
+                        .then(ClientCommands.argument("floor", StringArgumentType.string())
                                 .suggests((ctx, builder) -> {
                                     String remaining = builder.getRemaining().toLowerCase();
                                     fuzzyMatch(
@@ -68,19 +68,19 @@ public class ModCommands {
                                 })
                         )
                 )
-                .then(ClientCommandManager.literal("config").executes(context -> {
+                .then(ClientCommands.literal("config").executes(context -> {
                     ClothConfigHandler.configScreenRequested = true;
                     return 1;
                 }))
-                .then(ClientCommandManager.literal("glowingPlayers")
-                        .then(ClientCommandManager.literal("add")
-                                .then(ClientCommandManager.argument("username", StringArgumentType.string())
+                .then(ClientCommands.literal("glowingPlayers")
+                        .then(ClientCommands.literal("add")
+                                .then(ClientCommands.argument("username", StringArgumentType.string())
                                         .suggests((ctx, builder) -> {
-                                            var handler = MinecraftClient.getInstance().getNetworkHandler();
-                                            if (handler != null) {
+                                            var connection = Minecraft.getInstance().getConnection();
+                                            if (connection != null) {
                                                 String remaining = builder.getRemaining();
                                                 fuzzyMatch(
-                                                        handler.getPlayerList().stream()
+                                                        connection.getOnlinePlayers().stream()
                                                                 .map(entry -> entry.getProfile().name()),
                                                         remaining
                                                 ).forEach(builder::suggest);
@@ -92,7 +92,7 @@ public class ModCommands {
                                             PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> GlowingPlayers.add(formattedName, 0xFFAA00, false, null));
                                             return 1;
                                         })
-                                        .then(ClientCommandManager.argument("color", StringArgumentType.string())
+                                        .then(ClientCommands.argument("color", StringArgumentType.string())
                                                 .suggests((ctx, builder) -> {
                                                     String remaining = builder.getRemaining();
                                                     fuzzyMatch(
@@ -105,15 +105,14 @@ public class ModCommands {
                                                     String name = StringArgumentType.getString(context, "username");
                                                     String colorName = StringArgumentType.getString(context, "color").toUpperCase();
                                                     int hex = GlowingPlayers.MINECRAFT_COLORS.getOrDefault(colorName, 0xFFAA00);
-
                                                     GlowingPlayers.add(name, hex, false, null);
                                                     return 1;
                                                 })
                                         )
                                 )
                         )
-                        .then(ClientCommandManager.literal("remove")
-                                .then(ClientCommandManager.argument("username", StringArgumentType.string())
+                        .then(ClientCommands.literal("remove")
+                                .then(ClientCommands.argument("username", StringArgumentType.string())
                                         .suggests((ctx, builder) -> {
                                             String remaining = builder.getRemaining();
                                             fuzzyMatch(
@@ -130,21 +129,21 @@ public class ModCommands {
                                         })
                                 )
                         )
-                        .then(ClientCommandManager.literal("clear")
+                        .then(ClientCommands.literal("clear")
                                 .executes(context -> {
                                     GlowingPlayers.clearAll();
                                     ModFunctions.displayMessageWithHeader("§aCleared all glowing players.");
                                     return 1;
                                 })
                         )
-                        .then(ClientCommandManager.literal("list")
+                        .then(ClientCommands.literal("list")
                                 .executes(context -> {
                                     List<GlowingPlayers.GlowingPlayer> glowingPlayers = ModConfig.INSTANCE.getGlowingPlayers();
-                                    StringBuilder players = new StringBuilder();
                                     if (glowingPlayers.isEmpty()) {
                                         ModFunctions.displayMessageWithHeader("§cYou didn't add any glowing players!");
                                         return 1;
                                     }
+                                    StringBuilder players = new StringBuilder();
                                     for (GlowingPlayers.GlowingPlayer glowingPlayer : glowingPlayers) {
                                         players.append(glowingPlayer.username).append(", ");
                                     }
@@ -152,50 +151,50 @@ public class ModCommands {
                                     return 1;
                                 })
                         )
-                        .then(ClientCommandManager.literal("gui")
+                        .then(ClientCommands.literal("gui")
                                 .executes(context -> {
                                     GlowingPlayersGui.configScreenRequested = true;
                                     return 1;
                                 })
                         )
                 )
-                .then(ClientCommandManager.literal("dev")
-                        .then(ClientCommandManager.literal("testNotification").executes(context -> {
+                .then(ClientCommands.literal("dev")
+                        .then(ClientCommands.literal("testNotification").executes(context -> {
                             OnScreenNotification.renderNotification("Test", "THIS NOTIFICATION IS A TEST\nYou ran /ssu dev testNotification", 100);
                             return 1;
                         }))
-                        .then(ClientCommandManager.literal("teehee").executes(context -> {
+                        .then(ClientCommands.literal("teehee").executes(context -> {
                             ModFunctions.displayMessageWithHeader("§rNya! Mreow Mrpp Meow!");
                             return 1;
                         }))
-                        .then(ClientCommandManager.literal("location").executes(context -> {
-                            context.getSource().sendFeedback(Text.literal("§6" + SideBarUtils.location));
+                        .then(ClientCommands.literal("location").executes(context -> {
+                            context.getSource().sendFeedback(Component.literal("§6" + SideBarUtils.location));
                             return 1;
                         }))
-                        .then(ClientCommandManager.literal("coordinates")
-                                .then(ClientCommandManager.literal("add").executes(context -> {
+                        .then(ClientCommands.literal("coordinates")
+                                .then(ClientCommands.literal("add").executes(context -> {
                                     MarkCoordinates.addCoordinates();
-                                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("Coordinates added"));
+                                    Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(Component.literal("Coordinates added"));
                                     return 1;
                                 }))
-                                .then(ClientCommandManager.literal("log").executes(context -> {
+                                .then(ClientCommands.literal("log").executes(context -> {
                                     MarkCoordinates.logCoordinatesList();
                                     return 1;
                                 }))
-                                .then(ClientCommandManager.literal("clear").executes(context -> {
+                                .then(ClientCommands.literal("clear").executes(context -> {
                                     MarkCoordinates.clearCoordinates();
-                                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("Coordinates cleared"));
+                                    Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(Component.literal("Coordinates cleared"));
                                     return 1;
                                 }))
                         )
-                        .then(ClientCommandManager.literal("title")
+                        .then(ClientCommands.literal("title")
                                 .executes(context -> {
-                                    ModFunctions.showTitle(MinecraftClient.getInstance(),  Text.literal("TEST TITLE").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20);
+                                    ModFunctions.showTitle(Minecraft.getInstance(), Component.literal("TEST TITLE").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20);
                                     return 1;
                                 })
                         )
-                ).then(ClientCommandManager.literal("npcfinder")
-                        .then(ClientCommandManager.argument("npc", StringArgumentType.greedyString())
+                ).then(ClientCommands.literal("npcfinder")
+                        .then(ClientCommands.argument("npc", StringArgumentType.greedyString())
                                 .suggests((ctx, builder) -> {
                                     String remaining = builder.getRemaining();
                                     fuzzyMatch(
@@ -214,8 +213,8 @@ public class ModCommands {
                         )
                 );
 
-        var npcFinderCommand = ClientCommandManager.literal("snpc")
-                .then(ClientCommandManager.argument("id", StringArgumentType.string())
+        var npcFinderCommand = ClientCommands.literal("snpc")
+                .then(ClientCommands.argument("id", StringArgumentType.string())
                         .executes(context -> {
                             NpcFinder.handleCallback(StringArgumentType.getString(context, "id"));
                             return 1;
@@ -223,7 +222,7 @@ public class ModCommands {
                 );
 
         dispatcher.register(command);
-        dispatcher.register(ClientCommandManager.literal("strayerskyblockutils").redirect(command.build()));
+        dispatcher.register(ClientCommands.literal("strayerskyblockutils").redirect(command.build()));
         dispatcher.register(npcFinderCommand);
     }
 }

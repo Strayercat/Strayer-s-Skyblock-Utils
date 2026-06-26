@@ -1,3 +1,5 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
@@ -6,15 +8,13 @@ import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.WaypointRenderer;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -268,7 +268,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("St. Jerry|Jerry's Workshop", new Npc("St. Jerry", "Jerry's Workshop", new BlockPos(-22, 77, 92)));
         allSkyblockNpcs.put("Sherry|Jerry's Workshop", new Npc("Sherry", "Jerry's Workshop", new BlockPos(7, 77, 95)));
         allSkyblockNpcs.put("Gulliver|Jerry's Workshop", new Npc("Gulliver", "Jerry's Workshop", new BlockPos(68, 106, 33)));
-        allSkyblockNpcs.put("Frosty|Jerry's Workshop", new Npc("Frosty", "Jerry's Workshop", new BlockPos(-1,77, 92)));
+        allSkyblockNpcs.put("Frosty|Jerry's Workshop", new Npc("Frosty", "Jerry's Workshop", new BlockPos(-1, 77, 92)));
         allSkyblockNpcs.put("Gary|Jerry's Workshop", new Npc("Gary", "Jerry's Workshop", new BlockPos(53, 104, 56)));
         allSkyblockNpcs.put("Terry|Jerry's Workshop", new Npc("Terry", "Jerry's Workshop", new BlockPos(-92, 79, 25)));
         allSkyblockNpcs.put("Banker Barry|Jerry's Workshop", new Npc("Banker Barry", "Jerry's Workshop", new BlockPos(20, 78, 44)));
@@ -376,12 +376,12 @@ public class NpcFinder {
         pendingCallbacks.clear();
     }
 
-    public static void onWorldRender(WorldRenderContext context) {
-        if (MinecraftClient.getInstance().player == null) return;
+    public static void onWorldRender(LevelRenderContext context) {
+        if (Minecraft.getInstance().player == null) return;
         String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
 
         toBeMarked.removeIf(npc ->
-                MinecraftClient.getInstance().player.getBlockPos().isWithinDistance(Vec3d.ofCenter(npc.coordinates()), 5.0)
+                Minecraft.getInstance().player.blockPosition().closerThan(npc.coordinates(), 5.0)
         );
 
         for (Npc npc : toBeMarked) {
@@ -400,34 +400,34 @@ public class NpcFinder {
             return;
         }
 
-        MutableText message = Text.empty()
-                .append(SSU.NAME)
-                .append(Text.literal(matches.getFirst().name + " can be found in these locations:\n"));
+        MutableComponent message = Component.empty()
+                .append(SSU.getName())
+                .append(Component.literal(matches.getFirst().name + " can be found in these locations:\n"));
 
         for (int i = 0; i < matches.size(); i++) {
             Npc match = matches.get(i);
             String id = java.util.UUID.randomUUID().toString().replace("-", "");
             pendingCallbacks.put(id, match);
 
-            Text waypointButton = Text.literal("[Display Waypoint]")
+            Component waypointButton = Component.literal("[Display Waypoint]")
                     .setStyle(Style.EMPTY
-                            .withColor(Formatting.GREEN)
+                            .withColor(ChatFormatting.GREEN)
                             .withClickEvent(new ClickEvent.RunCommand("/snpc " + id)));
 
-            if (i > 0) message.append(Text.literal("\n"));
+            if (i > 0) message.append(Component.literal("\n"));
 
-            message.append(Text.literal("    - ").formatted(Formatting.GRAY))
-                    .append(Text.literal(match.location()).setStyle(Style.EMPTY.withColor(COLOR_MAIN)))
+            message.append(Component.literal("    - ").withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(match.location()).setStyle(Style.EMPTY.withColor(COLOR_MAIN)))
                     .append(match.coordinates.getX() == 20000
-                            ? Text.literal(": Location varies").formatted(Formatting.DARK_GRAY, Formatting.ITALIC)
-                            : Text.literal(": " + match.coordinates().getX() + " " +
+                            ? Component.literal(": Location varies").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)
+                            : Component.literal(": " + match.coordinates().getX() + " " +
                             match.coordinates().getY() + " " +
-                            match.coordinates().getZ() + " ").formatted(Formatting.GRAY))
+                            match.coordinates().getZ() + " ").withStyle(ChatFormatting.GRAY))
                     .append(match.coordinates.getX() == 20000
-                            ? Text.empty()
+                            ? Component.empty()
                             : waypointButton);
         }
 
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
+        Minecraft.getInstance().player.connection.sendChat(message.getString());
     }
 }

@@ -2,13 +2,13 @@ package com.skyblockutils.features.glowingPlayers;
 
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.PlayerLookup;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class GlowingPlayerCreationScreen extends Screen {
 
     private final Screen parent;
-    private TextFieldWidget playerNameField;
+    private EditBox playerNameField;
 
     private int selectedColor = 0xFFFFFF;
     private String selectedColorName = "WHITE";
@@ -35,7 +35,7 @@ public class GlowingPlayerCreationScreen extends Screen {
     }
 
     public GlowingPlayerCreationScreen(Screen parent, GlowingPlayers.GlowingPlayer player) {
-        super(Text.literal(player == null ? "Add Glowing Player" : "Edit Glowing Player"));
+        super(Component.literal(player == null ? "Add Glowing Player" : "Edit Glowing Player"));
         this.parent = parent;
         this.editingPlayer = player;
 
@@ -60,43 +60,37 @@ public class GlowingPlayerCreationScreen extends Screen {
         int centerX = this.width / 2;
         int panelTop = this.height / 2 - 80;
 
-        this.playerNameField = new TextFieldWidget(
-                this.textRenderer,
-                centerX - 100, panelTop + 20,
-                200, 20,
-                Text.literal("Player Name")
-        );
+        this.playerNameField = new EditBox(this.font, centerX - 100, panelTop + 20, 200, 20, Component.literal("Player Name"));
         this.playerNameField.setMaxLength(16);
 
         if (editingPlayer != null) {
-            this.playerNameField.setText(editingPlayer.getUsername());
+            this.playerNameField.insertText(editingPlayer.getUsername());
             this.playerNameField.setEditable(false);
-            this.playerNameField.setPlaceholder(Text.literal(""));
         } else {
-            this.playerNameField.setPlaceholder(Text.literal("Enter username..."));
+            this.playerNameField.setHint(Component.literal("Enter username..."));
         }
 
-        this.addDrawableChild(this.playerNameField);
+        this.addRenderableWidget(this.playerNameField);
         if (editingPlayer == null) {
             this.setInitialFocus(this.playerNameField);
         }
 
         String confirmLabel = editingPlayer == null ? "Add Player" : "Save Changes";
-        this.addDrawableChild(ButtonWidget.builder(
-                Text.literal(confirmLabel),
+        this.addRenderableWidget(Button.builder(
+                Component.literal(confirmLabel),
                 btn -> this.confirm()
-        ).dimensions(centerX - 105, panelTop + 155, 100, 20).build());
+        ).bounds(centerX - 105, panelTop + 155, 100, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(
-                Text.literal("Cancel"),
+        this.addRenderableWidget(Button.builder(
+                Component.literal("Cancel"),
                 btn -> this.close()
-        ).dimensions(centerX + 5, panelTop + 155, 100, 20).build());
+        ).bounds(centerX + 5, panelTop + 155, 100, 20).build());
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (this.parent != null) {
-            this.parent.render(context, mouseX, mouseY, delta);
+            this.parent.extractRenderState(context, mouseX, mouseY, delta);
         }
 
         context.fillGradient(0, 0, this.width, this.height, 0xC0101010, 0xD0101010);
@@ -113,32 +107,28 @@ public class GlowingPlayerCreationScreen extends Screen {
         );
         drawBorder(context, centerX - panelWidth / 2, panelTop, panelWidth, panelHeight, 0xFF555555);
 
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, centerX, panelTop + 7, 0xFFFFFF);
+        context.centeredText(this.font, this.title, centerX, panelTop + 7, 0xFFFFFF);
 
-        context.drawTextWithShadow(this.textRenderer, Text.literal("Username"), centerX - 100, panelTop + 10, 0xAAAAAA);
+        context.text(this.font, Component.literal("Username"), centerX - 100, panelTop + 10, 0xAAAAAA);
 
-        context.drawTextWithShadow(this.textRenderer, Text.literal("Color:"), centerX - 100, panelTop + 52, 0xAAAAAA);
+        context.text(this.font, Component.literal("Color:"), centerX - 100, panelTop + 52, 0xAAAAAA);
         context.fill(centerX + 58, panelTop + 50, centerX + 74, panelTop + 58, 0xFF000000 | selectedColor);
         drawBorder(context, centerX + 58, panelTop + 50, 16, 8, 0xFF888888);
-        context.drawTextWithShadow(
-                this.textRenderer,
-                Text.literal(selectedColorName.replace("_", " ")),
+        context.text(
+                this.font,
+                Component.literal(selectedColorName.replace("_", " ")),
                 centerX - 74, panelTop + 52,
                 0xFF000000 | selectedColor
         );
 
         renderColorGrid(context, centerX, panelTop + 65, mouseX, mouseY);
 
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
 
         OnScreenNotification.render(context, this.width, this.height);
     }
 
-    @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-    }
-
-    private void renderColorGrid(DrawContext context, int centerX, int gridTop, int mouseX, int mouseY) {
+    private void renderColorGrid(GuiGraphicsExtractor context, int centerX, int gridTop, int mouseX, int mouseY) {
         int gridWidth = COLS * (SWATCH_SIZE + SWATCH_PADDING) - SWATCH_PADDING;
         int startX = centerX - gridWidth / 2;
 
@@ -164,7 +154,7 @@ public class GlowingPlayerCreationScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int centerX = this.width / 2;
         int gridTop = this.height / 2 - 80 + 65;
 
@@ -177,65 +167,63 @@ public class GlowingPlayerCreationScreen extends Screen {
             int x = startX + col * (SWATCH_SIZE + SWATCH_PADDING);
             int y = gridTop + row * (SWATCH_SIZE + SWATCH_PADDING);
 
-            if (click.x() >= x && click.x() < x + SWATCH_SIZE
-                    && click.y() >= y && click.y() < y + SWATCH_SIZE) {
+            if (event.x() >= x && event.x() < x + SWATCH_SIZE
+                    && event.y() >= y && event.y() < y + SWATCH_SIZE) {
                 selectedColor = colorValues.get(i);
                 selectedColorName = colorNames.get(i);
                 return true;
             }
         }
 
-        return super.mouseClicked(click, doubled);
+        return super.mouseClicked(event, doubleClick);
     }
 
     private void confirm() {
         if (editingPlayer != null) {
             editingPlayer.color = selectedColor;
             GlowingPlayers.save();
-            MinecraftClient.getInstance().execute(() -> {
+            Minecraft.getInstance().execute(() -> {
                 this.close();
-                GlowingPlayersGui.refreshScreen(MinecraftClient.getInstance());
+                GlowingPlayersGui.refreshScreen(Minecraft.getInstance());
             });
         } else {
-            String name = this.playerNameField.getText().trim();
+            String name = this.playerNameField.getValue().trim();
             if (name.isEmpty()) return;
 
             PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> {
                 if (formattedName == null) {
-                    MinecraftClient.getInstance().execute(() ->
+                    Minecraft.getInstance().execute(() ->
                             OnScreenNotification.renderNotification("Player Not Found", "\"" + name + "\" doesn't exist.", 100)
                     );
                     return;
                 }
                 GlowingPlayers.add(formattedName, selectedColor, true, () ->
-                        MinecraftClient.getInstance().execute(() -> {
+                        Minecraft.getInstance().execute(() -> {
                             this.close();
-                            GlowingPlayersGui.refreshScreen(MinecraftClient.getInstance());
+                            GlowingPlayersGui.refreshScreen(Minecraft.getInstance());
                         })
                 );
             });
         }
     }
 
-    @Override
     public void close() {
-        MinecraftClient.getInstance().setScreen(this.parent);
+        Minecraft.getInstance().setScreenAndShow(this.parent);
     }
 
-    @Override
     public boolean shouldPause() {
         return false;
     }
 
     public static void openScreen(Screen parent) {
-        MinecraftClient.getInstance().setScreen(new GlowingPlayerCreationScreen(parent));
+        Minecraft.getInstance().setScreenAndShow(new GlowingPlayerCreationScreen(parent));
     }
 
     public static void openScreenWithInfo(Screen parent, GlowingPlayers.GlowingPlayer player) {
-        MinecraftClient.getInstance().setScreen(new GlowingPlayerCreationScreen(parent, player));
+        Minecraft.getInstance().setScreenAndShow(new GlowingPlayerCreationScreen(parent, player));
     }
 
-    private static void drawBorder(DrawContext context, int x, int y, int w, int h, int color) {
+    private static void drawBorder(GuiGraphicsExtractor context, int x, int y, int w, int h, int color) {
         context.fill(x, y, x + w, y + 1, color);
         context.fill(x, y + h - 1, x + w, y + h, color);
         context.fill(x, y, x + 1, y + h, color);

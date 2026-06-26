@@ -23,15 +23,18 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Glowing players via /ssu glowingPlayers
 - Config hud for editting glowing players
 - Automatic party members glow
+### Party
+- Party commands (!pt, !warp and such)
+- Custom party invites when in skyblock (on screen notification)
 ### Misc
 - A customizable contextual hud
-- Custom party invite notifications
 - Auto Hoppity eggs
 - Zoom
 - Chat peek
-- Color styles
+- Customizable Mod Colors (hud and such)
 - Custom sidebar
-- NPC locator via /ssu npcFinder
+- NPC locator via /ssu npcfinder
+- Puff farming helper - notifies you when you should kill
 </details>
 
 ## Dependencies

@@ -2,7 +2,7 @@ package com.skyblockutils.utils;
 
 import com.skyblockutils.config.ModConfig;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.Arrays;
 import java.util.concurrent.Executors;
@@ -16,13 +16,13 @@ public class GuiBlocker {
 
     public static void init() {
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (screen instanceof HandledScreen<?> containerScreen) {
+            if (screen instanceof Screen containerScreen) {
                 String title = containerScreen.getTitle().getString().toLowerCase();
                 if (shouldHideScreen) {
                     if (Arrays.asList(titles).contains(title)) {
                         client.execute(() -> {
-                            if (client.player != null) {
-                                client.player.closeHandledScreen();
+                            if (client.gui.screen() != null) {
+                                client.gui.screen().clearFocus();
                             }
                         });
                     }
@@ -34,8 +34,8 @@ public class GuiBlocker {
 
                 if (ModConfig.INSTANCE.autoHoppityEggs && title.matches("^chocolate .+ egg$")) {
                     client.execute(() -> {
-                        if (client.player != null) {
-                            client.player.closeHandledScreen();
+                        if (client.gui.screen() != null) {
+                            client.gui.screen().clearFocus();
                         }
                     });
                 }

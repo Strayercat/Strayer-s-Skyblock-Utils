@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "package": "com.skyblockutils.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "BossBarHudMixin",
+    "BossHealthOverlayAccessor",
+    "ChatHudMixin",
+    "EntitiesDestroyMixin",
+    "EntityTrackerUpdateMixin",
+    "GameRendererMixin",
+    "InGameHudMixin",
+    "MouseMixin",
+    "WorldTimeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  },
+  "mixins": [
+    "CameraMixin",
+    "EntityColorMixin",
+    "EntityGlowingMixin",
+    "ScreenshotRecorderMixin"
+  ]
+}

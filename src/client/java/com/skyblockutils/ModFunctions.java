@@ -8,13 +8,11 @@ import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
-import com.skyblockutils.mixin.client.GuiAccessor;
 import com.skyblockutils.utils.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.scoreboard.ScoreboardDisplaySlot;
-import net.minecraft.util.profiler.MultiValueDebugSampleLogImpl;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.scores.DisplaySlot;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,32 +46,34 @@ public class ModFunctions {
         SideBarUtils.resetLocation();
     }
 
-    public static void handleSkyblockExclusiveKeybinds(MinecraftClient client) {
-        while (ModKeyBindings.CORLEONE_TIMER_KEY.wasPressed()) CorlTimer.toggleCorlTimer();
-        while (ModKeyBindings.AUTOFISH_KEY.wasPressed()) AutoFish.toggleAutoFish(client);
-        while (ModKeyBindings.PUFF_TIMER_KEY.wasPressed()) PuffTracker.togglePuffTimer();
-        SsuHud.setVisible(ModKeyBindings.HUD_KEY.isPressed());
+    public static void handleSkyblockExclusiveKeybinds(Minecraft client) {
+        while (ModKeyBindings.CORLEONE_TIMER_KEY.consumeClick()) CorlTimer.toggleCorlTimer();
+        while (ModKeyBindings.AUTOFISH_KEY.consumeClick()) AutoFish.toggleAutoFish(client);
+        while (ModKeyBindings.PUFF_TIMER_KEY.consumeClick()) PuffTracker.togglePuffTimer();
+        SsuHud.setVisible(ModKeyBindings.HUD_KEY.isDown());
     }
 
-    public static void handleNonSkyblockExclusiveKeybinds(MinecraftClient client) {
-        while (ModKeyBindings.PRINT_COORDINATES_KEY.wasPressed())
+    public static void handleNonSkyblockExclusiveKeybinds(Minecraft client) {
+        while (ModKeyBindings.PRINT_COORDINATES_KEY.consumeClick())
             sendCoordinates(client, ModConfig.INSTANCE.coordinatesSendLocation ? "withLocation" : "");
-        boolean zoomPressed = ModKeyBindings.ZOOM_KEY.isPressed();
+        boolean zoomPressed = ModKeyBindings.ZOOM_KEY.isDown();
         if (zoomPressed && !ZoomState.isZooming) Zoom.enter(client);
         else if (!zoomPressed && ZoomState.isZooming) Zoom.exit(client);
     }
 
-    public static int getPing(MinecraftClient client) {
-        if (lastTimePingCalculated > System.currentTimeMillis() - 1000) return ping;
-        MultiValueDebugSampleLogImpl pingLog = client.getDebugHud().getPingLog();
-        if (pingLog.getLength() == 0) return 0;
-        ping = (int) pingLog.get(pingLog.getLength() - 1);
-        lastTimePingCalculated = System.currentTimeMillis();
+    public static int getPing(Minecraft client) {
+        if (client.getConnection() == null || client.player == null) return ping;
+        var playerInfo = client.getConnection().getPlayerInfo(client.player.getUUID());
+        if (playerInfo == null) return ping;
+        int rawPing = playerInfo.getLatency();
+        if (rawPing > 1) {
+            ping = rawPing;
+        }
         return ping;
     }
 
-    public static void sendCoordinates(MinecraftClient client, String argumentsString) {
-        if (client.player == null || client.getNetworkHandler() == null) return;
+    public static void sendCoordinates(Minecraft client, String argumentsString) {
+        if (client.player == null || client.getConnection() == null) return;
 
         List<String> arguments = Arrays.asList(argumentsString.split("-"));
 
@@ -85,50 +85,47 @@ public class ModFunctions {
                 ? SideBarUtils.location.isEmpty() ? "" : SideBarUtils.location + " | "
                 : "") + coordinates;
 
-        client.getNetworkHandler().sendChatMessage(coordinatesMessage);
+        client.getConnection().sendChat(coordinatesMessage);
     }
 
-    public static Text getFormattedCoordinates() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        MutableText coordinatesText = Text.empty();
+    public static Component getFormattedCoordinates() {
+        Minecraft client = Minecraft.getInstance();
+        MutableComponent coordinatesText = Component.empty();
 
         if (client.player == null) return coordinatesText;
 
-        coordinatesText.append(Text.literal("X: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getX()))
-                .append(Text.literal(" Y: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getY()))
-                .append(Text.literal(" Z: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getZ()));
+        coordinatesText.append(Component.literal("X: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getX()))
+                .append(Component.literal(" Y: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getY()))
+                .append(Component.literal(" Z: ").withColor(COLOR_MAIN)).append(String.valueOf((int) client.player.getZ()));
 
         return coordinatesText;
     }
 
-    public static void showTitle(net.minecraft.client.MinecraftClient client, Text title, int displayTime) {
+    public static void showTitle(Minecraft client, Component title, int displayTime) {
         if (client.player != null) {
-            GuiAccessor guiAccessor = (GuiAccessor) client.inGameHud;
-
-            guiAccessor.setTitleFadeInTime(10);
-            guiAccessor.setTitleStayTime(displayTime);
-            guiAccessor.setTitleFadeOutTime(10);
-
-            client.inGameHud.setTitle(title);
+            client.gui.hud.setTimes(10, displayTime, 10);
+            client.gui.hud.setTitle(title);
         }
     }
 
     public static void displayMessageWithHeader(String message) {
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.empty().append(SSU.NAME).append(Text.literal(message)));
+        Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
+                Component.empty().append(SSU.getName()).append(Component.literal(message))
+        );
     }
 
-    public static Boolean isInSkyblock(net.minecraft.client.MinecraftClient client) {
-        if (client.world == null) return null;
-        var scoreboard = client.world.getScoreboard();
-        var sidebar = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
+    public static Boolean isInSkyblock(Minecraft client) {
+        if (client.level == null) return null;
+        var scoreboard = client.level.getScoreboard();
+        var sidebar = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
         if (sidebar == null) return null;
         return sidebar.getDisplayName().getString().contains("SKYBLOCK");
     }
 
-    public static Boolean isInDungeons(net.minecraft.client.MinecraftClient client) {
+    public static Boolean isInDungeons(Minecraft client) {
         String location = SideBarUtils.location;
         boolean isInCatacombs = location != null && location.contains("The Catacombs");
-        boolean hasF3Boss = ((BossHealthOverlayAccessor) client.inGameHud.getBossBarHud())
+        boolean hasF3Boss = ((BossHealthOverlayAccessor) (Object) client.gui.hud.getBossOverlay())
                 .getEvents().values().stream().findFirst()
                 .map(bossBar -> bossBar.getName().getString().replaceAll("§.", "").contains("The Professor"))
                 .orElse(false);
