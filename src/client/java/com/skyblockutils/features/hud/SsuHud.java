@@ -111,7 +111,7 @@ public class SsuHud {
         context.pose().pushMatrix();
         float imageScale = (1.0f / 6.0f) * scale;
         context.pose().scale(imageScale, imageScale);
-        context.blit(RenderPipelines.GUI_TEXTURED, CAT_IMAGE,
+        if (ModConfig.INSTANCE.cat) context.blit(RenderPipelines.GUI_TEXTURED, CAT_IMAGE,
                 (int) ((renderX + scaledHudWidth) / imageScale) - 31,
                 (int) ((scaledHudHeight / 2.0f) / imageScale) - 175,
                 0, 0, 418, 418, 418, 418);

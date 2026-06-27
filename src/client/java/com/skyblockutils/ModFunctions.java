@@ -238,9 +238,6 @@ public class ModFunctions {
                  "⏣ Mithril Deposits", "⏣ Mines of Divan", "⏣ Precursor Remnants",
                  "⏣ Lost Precursor City" -> "Crystal Hollows";
 
-            // Fishing Islands
-            case "⏣ Backwater Bayou" -> "Backwater Bayou";
-
             // Jerry's Workshop
             case "⏣ Jerry's Workshop", "⏣ Einary's Emporium", "⏣ Gary's Shack",
                  "⏣ Glacial Cave", "⏣ Hot Springs", "⏣ Jerry Pond", "⏣ Mount Jerry",
@@ -265,6 +262,12 @@ public class ModFunctions {
 
             // Dungeon Hub
             case "⏣ Dungeon Hub" -> "Dungeon Hub";
+
+            // Backwater Bayou
+            case "⏣ Backwater Bayou" -> "Backwater Bayou";
+
+            // Lotus Atoll
+            case "⏣ Lotus Atoll", "⏣ Lotus Easter's Cave", "⏣ Tewtil Tunnel", "⏣ Lotus Highlands" -> "Lotus Atoll";
 
             default -> location;
         };

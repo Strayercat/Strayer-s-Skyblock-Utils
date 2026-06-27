@@ -80,6 +80,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(false).setTooltip(Component.literal("Whether or not to show coordinates in the custom sidebar"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.sidebarCoords = v).build());
 
+        general.addEntry(eb.startBooleanToggle(Component.literal("Cat"), ModConfig.INSTANCE.cat)
+                .setDefaultValue(false).setTooltip(Component.literal("Cat or no cat?"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.cat = v).build());
+
         general.addEntry(eb.startBooleanToggle(Component.literal("Party Glow"), ModConfig.INSTANCE.partyGlow)
                 .setDefaultValue(true).setTooltip(Component.literal("Whether or not party members should automatically glow"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.partyGlow = v).build());

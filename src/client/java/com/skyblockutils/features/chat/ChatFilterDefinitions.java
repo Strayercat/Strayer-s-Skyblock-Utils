@@ -60,11 +60,11 @@ public class ChatFilterDefinitions {
 
     static {
         ROOT_CATEGORIES.add(buildGeneral());
-        ROOT_CATEGORIES.add(buildDungeons());
-        ROOT_CATEGORIES.add(buildSlayers());
+        ROOT_CATEGORIES.add(buildCombat());
         ROOT_CATEGORIES.add(buildFishing());
         ROOT_CATEGORIES.add(buildHunting());
         ROOT_CATEGORIES.add(buildMining());
+        ROOT_CATEGORIES.add(buildCrimsonIsle());
         ROOT_CATEGORIES.add(buildEvents());
     }
 
@@ -85,6 +85,8 @@ public class ChatFilterDefinitions {
         general.addEntry(new FilterEntry("lootShare", "Loot Share", "Filter 'LOOT SHARE You received loot for assisting' messages", "^LOOT SHARE You received loot for assisting .+!$"));
         general.addEntry(new FilterEntry("killCombo", "Kill Combo", "Filter '+X Kill Combo' messages", "^\\+\\d+ Kill Combo.*$"));
         general.addEntry(new FilterEntry("killComboExpired", "Kill Combo Expired", "Filter 'Your Kill Combo has expired!' messages", "^Your Kill Combo has expired! You reached a \\d+ Kill Combo!$"));
+        general.addEntry(new FilterEntry("deathMessages", "Death Messages", "Filter death messages", "☠ .*"));
+        general.addEntry(new FilterEntry("npcMessages", "NPC Messages", "Filter all noc ([NPC]) messages", "[NPC] .*"));
 
         general.addSubCategory(buildGeneralBank());
         general.addSubCategory(buildGeneralPets());
@@ -178,7 +180,16 @@ public class ChatFilterDefinitions {
         return island;
     }
 
-    // Dungeons
+    // Combat
+    private static FilterCategory buildCombat() {
+        FilterCategory combat = new FilterCategory("Combat", "Combat related filters");
+
+        combat.addSubCategory(buildDungeons());
+        combat.addSubCategory(buildSlayers());
+
+        return combat;
+    }
+
     private static FilterCategory buildDungeons() {
         FilterCategory dungeons = new FilterCategory("Dungeons", "Dungeon related message filters (only active in The Catacombs)", "The Catacombs");
 
@@ -456,6 +467,64 @@ public class ChatFilterDefinitions {
     private static FilterCategory buildMining() {
         FilterCategory c = new FilterCategory("Mining", "Mining related messages");
         c.addEntry(new FilterEntry("breakingPowerWarning", "Breaking Power Warning", "Filter 'You need a tool with a Breaking Power of [x] to mine [block]!' messages", "^You need a tool with a Breaking Power of \\d+ to mine .*! Speak to Fragilis by the entrance to the Crystal Hollows to learn more!$"));
+
+        c.addSubCategory(buildDwarvenMines());
+        c.addSubCategory(buildCrystalHollows());
+        return c;
+    }
+
+    private static FilterCategory buildDwarvenMines() {
+        FilterCategory c = new FilterCategory("Dwarven Mines", "Dwarven mines related messages");
+
+        c.addEntry(new FilterEntry("goblinCoins", "Goblin Coins", "Filter 'The Goblin was carrying a bag of coins! +x Coins!' messages", "^The Goblin was carrying a bag of coins! \\+.* Coins!$"));
+        return c;
+    }
+
+    private static FilterCategory buildCrystalHollows() {
+        FilterCategory c = new FilterCategory("Crystal Hollows", "Crystal Hollows related messages");
+
+        c.addEntry(new FilterEntry("treasureChest", "Treasure Chest", "Filter 'You uncovered a treasure chest!' messages", "^You uncovered a treasure chest!$"));
+        c.addEntry(new FilterEntry("chestLooted", "Chest Already Looted", "Filter 'This chest has already been looted.' messages", "^This chest has already been looted.$"));
+        c.addEntry(new FilterEntry("chestOpening", "Already Opening Loot Chest", "Filter 'You are already opening a loot chest!' messages", "^You are already opening a loot chest!$"));
+        c.addEntry(new FilterEntry("chestOpened", "Chest Already Opened", "Filter 'You have already opened this chest!' messages", "^You have already opened this chest!$"));
+        c.addEntry(new FilterEntry("balMessages", "Bal", "Filter '[BOSS] Bal' messages", "^\\[BOSS] Bal: .*$"));
+        c.addEntry(new FilterEntry("balDmg", "Bal Damage", "Filter bal damage progression messages", "^(Half way there! The boss is starting to become weaker!)|(Nearly there! The boss is shaking, it can't last much longer)|(The boss looks weak and tired and retreats into the lava...)$"));
+        c.addEntry(new FilterEntry("crystalNotEarned", "Crystal Not Earned", "Filter 'You haven't earned this Crystal! Come back when you have >:-)' messages", "^You haven't earned this Crystal! Come back when you have >:-\\)$"));
+        c.addEntry(new FilterEntry("crystalAlreadyObtained", "Crystal Already Obtained", "Filter 'You have already obtained this Crystal!' messages", "^You have already obtained this Crystal!$"));
+        return c;
+    }
+
+    private static FilterCategory buildCrimsonIsle() {
+        FilterCategory isle = new FilterCategory("Crimson Isle", "Crimson Isle message filters");
+
+        isle.addEntry(new FilterEntry("townBoard", "New Town Board Quests", "Filter 'The Town Board has new quests available!' messages", "^The Town Board has new quests available!$"));
+        isle.addEntry(new FilterEntry("vanquisherSpawning", "Vanquisher Spawn", "Filter 'A Vanquisher is spawning nearby!' messages", "^A Vanquisher is spawning nearby!$"));
+
+        isle.addSubCategory(buildMinibosses());
+
+        return isle;
+    }
+
+    private static FilterCategory buildMinibosses() {
+        FilterCategory c = new FilterCategory("Minibosses", "Miniboss related messages");
+
+        c.addEntry(new FilterEntry("minibossSpawn", "Miniboss Spawn", "Filter 'BEWARE - [boss] is spawning' messages", "^BEWARE - .* is spawning$"));
+        c.addEntry(new FilterEntry("bladesoulSkull", "Bladesoul Wither Skull", "Filter 'The Wither Skull hit you for x damage.' messages", "^The Wither Skull hit you for .* damage.$"));
+        c.addEntry(new FilterEntry("bladesoulPlume", "Bladesoul Plume", "Filter 'The Plume damaged you for 10,000 damage.' messages", "^The Plume damaged you for 10,000 damage.$"));
+        c.addEntry(new FilterEntry("mageShield", "Mage Shield", "Filter 'The Mage's shield reflected x damage back to you!' messages", "^The Mage's shield reflected .* damage back to you!$"));
+        c.addEntry(new FilterEntry("mageTeleport", "Mage Teleport", "Filter 'You were teleported back by the boss!' messages", "^You were teleported back by the boss!$"));
+        c.addEntry(new FilterEntry("dukeFist", "Duke Fist", "Filter 'The Duke's Flaming Fist hit you for x damage!' messages", "^The Duke's Flaming Fist hit you for .* damage!$"));
+        c.addEntry(new FilterEntry("dukeLeap", "Duke Leap", "Filter 'Barbarian Duke's Leap damaged and stunned you for x damage.' messages", "^Barbarian Duke's Leap damaged and stunned you for .* damage.$"));
+        c.addEntry(new FilterEntry("magmaBossAnger", "Magma Boss Angers", "Filter 'The Magma Boss angers! (+x% Damage)' messages", "^The Magma Boss angers! (\\+\\d+% Damage)$"));
+        c.addEntry(new FilterEntry("additionalGlares", "Addition Glares", "Filter 'WARNING: 5 additional Magma Glares have spawned targeting you!' messages", "^WARNING: 5 additional Magma Glares have spawned targeting you!$"));
+        c.addEntry(new FilterEntry("scorchedBarrierNullified", "Scorched Barrier Nullified", "Filter 'Your attack was nullified by the Scorched Barrier!' messages", "^Your attack was nullified by the Scorched Barrier!$"));
+        c.addEntry(new FilterEntry("scorchedBarrierDmg", "Scorched Barrier Damage", "Filter 'Ashfang's Scorched Barrier hit you for x damage!' messages", "^Ashfang's Scorched Barrier hit you for .+ damage!$"));
+        c.addEntry(new FilterEntry("followerWrongDamageType", "Follower Wrong Damage Type", "Filter 'Ashfang Follower can only be damaged by x.' messages", "^Ashfang Follower can only be damaged by .*.$"));
+        c.addEntry(new FilterEntry("cryogenicBlast", "Cryogenic Blast", "Filter 'Ashfang Follower's Cryogenic Blast hit you for x damage!' messages", "^Ashfang Follower's Cryogenic Blast hit you for .* damage!$"));
+        c.addEntry(new FilterEntry("noxiousAshCloud", "Noxious Ash Cloud", "Filter 'Noxious Ash Cloud hit you for x damage!' messages", "^Noxious Ash Cloud hit you for .* damage!$"));
+        c.addEntry(new FilterEntry("tooCold", "Too Cold", "Filter 'You are too cold to use abilities!' messages", "^You are too cold to use abilities!$"));
+        c.addEntry(new FilterEntry("blazingSoul", "Blazing Soul", "Filter 'CRITICAL HIT The Blazing Soul dealt 2,000,000 damage to Ashfang!' messages", "^CRITICAL HIT The Blazing Soul dealt 2,000,000 damage to Ashfang!$"));
+        c.addEntry(new FilterEntry("attackNulliFied", "Attack From Outside The Flame Domain", "Filter 'You attacked from outside the Flame Domain! Your attack was nullified!' messages", "^You attacked from outside the Flame Domain! Your attack was nullified!$"));
         return c;
     }
 

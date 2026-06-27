@@ -28,7 +28,7 @@ public class NpcFinder {
     public static final Map<String, Npc> allSkyblockNpcs = new HashMap<>();
 
     static {
-// Hub
+        // Hub
         allSkyblockNpcs.put("Adventurer|Hub", new Npc("Adventurer", "Hub", new BlockPos(-50, 70, -67)));
         allSkyblockNpcs.put("Alda|Hub", new Npc("Alda", "Hub", new BlockPos(71, 81, -60)));
         allSkyblockNpcs.put("Karis|Hub", new Npc("Karis", "Hub", new BlockPos(65, 82, -60)));
@@ -111,11 +111,11 @@ public class NpcFinder {
         allSkyblockNpcs.put("Tyashoi Alchemist|Hub", new Npc("Tyashoi Alchemist", "Hub", new BlockPos(41, 68, -55))); //TODO
         allSkyblockNpcs.put("Hoppity|Hub", new Npc("Hoppity", "Hub", new BlockPos(56, 71, -2)));
 
-// The Barn
+        // The Barn
         allSkyblockNpcs.put("Farmhand|The Barn", new Npc("Farmhand", "The Barn", new BlockPos(144, 74, -241)));
         allSkyblockNpcs.put("Windmill Operator|The Barn", new Npc("Windmill Operator", "The Barn", new BlockPos(98, 90, -283)));
 
-// Mushroom Desert
+        // Mushroom Desert
         allSkyblockNpcs.put("Beth|Mushroom Desert", new Npc("Beth", "Mushroom Desert", new BlockPos(163, 78, -359)));
         allSkyblockNpcs.put("Mason|Mushroom Desert", new Npc("Mason", "Mushroom Desert", new BlockPos(177, 78, -356)));
         allSkyblockNpcs.put("Friendly Hiker|Mushroom Desert", new Npc("Friendly Hiker", "Mushroom Desert", new BlockPos(181, 77, -381)));
@@ -131,21 +131,21 @@ public class NpcFinder {
         allSkyblockNpcs.put("Farmer Jon|Mushroom Desert", new Npc("Farmer Jon", "Mushroom Desert", new BlockPos(167, 92, -599)));
         allSkyblockNpcs.put("Moby|Mushroom Desert", new Npc("Moby", "Mushroom Desert", new BlockPos(205, 44, -500)));
 
-// Gold Mine
+        // Gold Mine
         allSkyblockNpcs.put("Gold Forger|Gold Mine", new Npc("Gold Forger", "Gold Mine", new BlockPos(-28, 75, -295)));
         allSkyblockNpcs.put("Iron Forger|Gold Mine", new Npc("Iron Forger", "Gold Mine", new BlockPos(-2, 76, -308)));
         allSkyblockNpcs.put("Rusty|Gold Mine", new Npc("Rusty", "Gold Mine", new BlockPos(-21, 79, -326)));
         allSkyblockNpcs.put("Lazy Miner|Gold Mine", new Npc("Lazy Miner", "Gold Mine", new BlockPos(-12, 79, -338)));
         allSkyblockNpcs.put("Blacksmith|Gold Mine", new Npc("Blacksmith", "Gold Mine", new BlockPos(-40, 78, -300)));
 
-// Deep Caverns
+        // Deep Caverns
         allSkyblockNpcs.put("Walter|Deep Caverns", new Npc("Walter", "Deep Caverns", new BlockPos(18, 157, -37)));
         allSkyblockNpcs.put("Lapis Miner|Deep Caverns", new Npc("Lapis Miner", "Deep Caverns", new BlockPos(-11, 121, 35)));
         allSkyblockNpcs.put("Redstone Miner|Deep Caverns", new Npc("Redstone Miner", "Deep Caverns", new BlockPos(24, 105, 16)));
         allSkyblockNpcs.put("Rhys|Deep Caverns", new Npc("Rhys", "Deep Caverns", new BlockPos(31, 13, 14)));
         allSkyblockNpcs.put("Lift Operator|Deep Caverns", new Npc("Lift Operator", "Deep Caverns", new BlockPos(45, 151, 15)));
 
-// Dwarven Mines
+        // Dwarven Mines
         allSkyblockNpcs.put("Rhys|Dwarven Mines", new Npc("Rhys", "Dwarven Mines", new BlockPos(-38, 201, -119)));
         allSkyblockNpcs.put("Bulvar|Dwarven Mines", new Npc("Bulvar", "Dwarven Mines", new BlockPos(-16, 202, -99)));
         allSkyblockNpcs.put("Bubu|Dwarven Mines", new Npc("Bubu", "Dwarven Mines", new BlockPos(-11, 202, -104)));
@@ -196,7 +196,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Lift Operator|Dwarven Mines", new Npc("Lift Operator", "Dwarven Mines", new BlockPos(-80, 201, -124)));
         allSkyblockNpcs.put("Matigold|Dwarven Mines", new Npc("Marigold", "Dwarven Mines", new BlockPos(181, 151, 60)));
 
-// Crystal Hollows
+        // Crystal Hollows
         allSkyblockNpcs.put("King Yolkar|Crystal Hollows", new Npc("King Yolkar", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
         allSkyblockNpcs.put("Professor Robot|Crystal Hollows", new Npc("Professor Robot", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
         allSkyblockNpcs.put("Kalhuiki Door Guardian|Crystal Hollows", new Npc("Kalhuiki Door Guardian", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
@@ -210,7 +210,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Gemma|Crystal Hollows", new Npc("Gemma", "Crystal Hollows", new BlockPos(475, 107, 513)));
         allSkyblockNpcs.put("Chunk|Crystal Hollows", new Npc("Chunk", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
 
-// Spider's Den
+        // Spider's Den
         allSkyblockNpcs.put("Haymitch|Spider's Den", new Npc("Haymitch", "Spider's Den", new BlockPos(-203, 83, -237)));
         allSkyblockNpcs.put("Rick|Spider's Den", new Npc("Rick", "Spider's Den", new BlockPos(-265, 72, -324)));
         allSkyblockNpcs.put("Grandma Wolf|Spider's Den", new Npc("Grandma Wolf", "Spider's Den", new BlockPos(-282, 123, -191)));
@@ -220,14 +220,14 @@ public class NpcFinder {
         allSkyblockNpcs.put("Spider Tamer|Spider's Den", new Npc("Spider Tamer", "Spider's Den", new BlockPos(-299, 62, -195)));
         // TODO ike and michael
 
-// The End
+        // The End
         allSkyblockNpcs.put("Pearl Dealer|The End", new Npc("Pearl Dealer", "The End", new BlockPos(-505, 102, -285)));
         allSkyblockNpcs.put("Gregory|The End", new Npc("Gregory", "The End", new BlockPos(-607, 22, -284)));
         allSkyblockNpcs.put("Guber|The End", new Npc("Guber", "The End", new BlockPos(-495, 122, -242)));
         allSkyblockNpcs.put("Lone Adventurer|The End", new Npc("Lone Adventurer", "The End", new BlockPos(-589, 23, -271)));
         allSkyblockNpcs.put("Tyzzo|The End", new Npc("Tyzzo", "The End", new BlockPos(-597, 6, -272)));
 
-// Crimson Isle
+        // Crimson Isle
         allSkyblockNpcs.put("Elle|Crimson Isle", new Npc("Elle", "Crimson Isle", new BlockPos(-365, 81, -477)));
         allSkyblockNpcs.put("Desperate Engineer|Crimson Isle", new Npc("Desperate Engineer", "Crimson Isle", new BlockPos(-290, 128, -982)));
         allSkyblockNpcs.put("Crag|Crimson Isle", new Npc("Crag", "Crimson Isle", new BlockPos(-371, 115, -1043)));
@@ -240,7 +240,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Udel|Crimson Isle", new Npc("Udel", "Crimson Isle", new BlockPos(-79, 109, -788)));
         allSkyblockNpcs.put("Aranya|Crimson Isle", new Npc("Aranya", "Crimson Isle", new BlockPos(-322, 153, -1007)));
 
-// The Park
+        // The Park
         allSkyblockNpcs.put("Charlie|The Park", new Npc("Charlie", "The Park", new BlockPos(-278, 81, -18)));
         allSkyblockNpcs.put("Kelly|The Park", new Npc("Kelly", "The Park", new BlockPos(-351, 95, 33)));
         allSkyblockNpcs.put("Molbert|The Park", new Npc("Molbert", "The Park", new BlockPos(-448, 121, -64)));
@@ -253,7 +253,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Juliette|The Park", new Npc("Juliette", "The Park", new BlockPos(-416, 131, -122)));
         allSkyblockNpcs.put("Old Shaman Nyko|The Park", new Npc("Old Shaman Nyko", "The Park", new BlockPos(-371, 85, -65)));
 
-// Dungeon Hub
+        // Dungeon Hub
         allSkyblockNpcs.put("Malik|Dungeon Hub", new Npc("Malik", "Dungeon Hub", new BlockPos(-50, 120, 10)));
         allSkyblockNpcs.put("Mort|Dungeon Hub", new Npc("Mort", "Dungeon Hub", new BlockPos(-62, 124, 0)));
         allSkyblockNpcs.put("Ophelia|Dungeon Hub", new Npc("Ophelia", "Dungeon Hub", new BlockPos(-50, 120, -10)));
@@ -264,7 +264,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Crag|Dungeon Hub", new Npc("Crag", "Dungeon Hub", new BlockPos(-48, 122, -25)));
         allSkyblockNpcs.put("Vulcan|Dungeon Hub", new Npc("Vulcan", "Dungeon Hub", new BlockPos(-46, 121, -28)));
 
-// Jerry's Workshop
+        // Jerry's Workshop
         allSkyblockNpcs.put("St. Jerry|Jerry's Workshop", new Npc("St. Jerry", "Jerry's Workshop", new BlockPos(-22, 77, 92)));
         allSkyblockNpcs.put("Sherry|Jerry's Workshop", new Npc("Sherry", "Jerry's Workshop", new BlockPos(7, 77, 95)));
         allSkyblockNpcs.put("Gulliver|Jerry's Workshop", new Npc("Gulliver", "Jerry's Workshop", new BlockPos(68, 106, 33)));
@@ -274,7 +274,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Banker Barry|Jerry's Workshop", new Npc("Banker Barry", "Jerry's Workshop", new BlockPos(20, 78, 44)));
         allSkyblockNpcs.put("Einary|Jerry's Workshop", new Npc("Einary", "Jerry's Workshop", new BlockPos(-16, 77, 63)));
 
-// Rift
+        // Rift
         allSkyblockNpcs.put("Alatar|Rift", new Npc("Alatar", "Rift", new BlockPos(-47, 117, 70)));
         allSkyblockNpcs.put("Wizard|Rift", new Npc("Wizard", "Rift", new BlockPos(-48, 123, 77)));
         allSkyblockNpcs.put("Wizardman|Rift", new Npc("Wizardman", "Rift", new BlockPos(-46, 91, 79)));
@@ -343,6 +343,49 @@ public class NpcFinder {
         allSkyblockNpcs.put("Deer|Rift", new Npc("Deer", "Rift", new BlockPos(139, 71, -12)));
         allSkyblockNpcs.put("Phaser|Rift", new Npc("Phaser", "Rift", new BlockPos(59, 71, -89)));
         allSkyblockNpcs.put("Maddox the Slayer|Rift", new Npc("Maddox the Slayer", "Rift", new BlockPos(204, 78, 44)));
+
+        // Backwater Bayou
+        allSkyblockNpcs.put("Jonesy|Backwater Bayou", new Npc("Jonesy", "Backwater Bayou", new BlockPos(-9, 75, -10)));
+        allSkyblockNpcs.put("Junker Joel|Backwater Bayou", new Npc("Junker Joel", "Backwater Bayou", new BlockPos(6, 72, 4)));
+        allSkyblockNpcs.put("Roddy|Backwater Bayou", new Npc("Roddy", "Backwater Bayou", new BlockPos(23, 79, -24)));
+        allSkyblockNpcs.put("Hattie|Backwater Bayou", new Npc("Hattie", "Backwater Bayou", new BlockPos(17, 72, 14)));
+        allSkyblockNpcs.put("Carly|Backwater Bayou", new Npc("Carly", "Backwater Bayou", new BlockPos(38, 71, 6)));
+        allSkyblockNpcs.put("Researcher Gilbert|Backwater Bayou", new Npc("", "Backwater Bayou", new BlockPos(27, 60, -26)));
+
+        // Lotus Atoll
+        allSkyblockNpcs.put("Researcher Betty|Lotus Atoll", new Npc("Researcher Betty", "Lotus Atoll", new BlockPos(-11, 72, 3)));
+        allSkyblockNpcs.put("Researcher Ribery|Lotus Atoll", new Npc("Researcher Ribery", "Lotus Atoll", new BlockPos(-11, 72, -6)));
+        allSkyblockNpcs.put("Researcher Lily|Lotus Atoll", new Npc("Researcher Lily", "Lotus Atoll", new BlockPos(26, 67, 15)));
+        allSkyblockNpcs.put("Researcher Tina|Lotus Atoll", new Npc("Researcher Tina", "Lotus Atoll", new BlockPos(43, 71, 29)));
+        allSkyblockNpcs.put("Researcher Jessica|Lotus Atoll", new Npc("Researcher Jessica", "Lotus Atoll", new BlockPos(76, 64, -10)));
+        allSkyblockNpcs.put("Researcher Kay|Lotus Atoll", new Npc("Researcher Kay", "Lotus Atoll", new BlockPos(23, 84, -50)));
+        allSkyblockNpcs.put("Researcher Tay|Lotus Atoll", new Npc("Researcher Tay", "Lotus Atoll", new BlockPos(26, 142, -60)));
+        allSkyblockNpcs.put("Researcher Timmy|Lotus Atoll", new Npc("Researcher Timmy", "Lotus Atoll", new BlockPos(11, 76, 30)));
+
+        // Galatea
+        allSkyblockNpcs.put("Hina|Galatea", new Npc("Hina", "Galatea", new BlockPos(-553, 111, -16)));
+        allSkyblockNpcs.put("Swoop|Galatea", new Npc("Swoop", "Galatea", new BlockPos(-579, 115, -23)));
+        allSkyblockNpcs.put("David Hunterborough|Galatea", new Npc("David Hunterborough", "Galatea", new BlockPos(-593, 115, -13)));
+        allSkyblockNpcs.put("Kysha|Galatea", new Npc("Kysha", "Galatea", new BlockPos(-601, 116, -11)));
+        allSkyblockNpcs.put("Pounce|Galatea", new Npc("Pounce", "Galatea", new BlockPos(-598, 128, -20)));
+        allSkyblockNpcs.put("Banker Bonsai|Galatea", new Npc("Banker Bonsai", "Galatea", new BlockPos(-598, 117, -37)));
+        allSkyblockNpcs.put("Alan|Galatea", new Npc("Alan", "Galatea", new BlockPos(-625, 117, -36)));
+        allSkyblockNpcs.put("Teddy|Galatea", new Npc("Teddy", "Galatea", new BlockPos(-656, 116, -39)));
+        allSkyblockNpcs.put("Kiara|Galatea", new Npc("Kiara", "Galatea", new BlockPos(-653, 114, -70)));
+        allSkyblockNpcs.put("Vaeri|Galatea", new Npc("Vaeri", "Galatea", new BlockPos(-688, 117, -35)));
+        allSkyblockNpcs.put("Sawyer|Galatea", new Npc("Sawyer", "Galatea", new BlockPos(691, 122, 81)));
+        allSkyblockNpcs.put("Boris|Galatea", new Npc("Boris", "Galatea", new BlockPos(-684, 129, 64)));
+        allSkyblockNpcs.put("Brian|Galatea", new Npc("Brian", "Galatea", new BlockPos(-628, 118, 47)));
+        allSkyblockNpcs.put("Loras|Galatea", new Npc("Loras", "Galatea", new BlockPos(-593, 119, 14)));
+        allSkyblockNpcs.put("Albert|Galatea", new Npc("Albert", "Galatea", new BlockPos(-592, 114, 8)));
+        allSkyblockNpcs.put("Auryon|Galatea", new Npc("Auryon", "Galatea", new BlockPos(-557, 112, 48)));
+        allSkyblockNpcs.put("Rosemary|Galatea", new Npc("Rosemary", "Galatea", new BlockPos(-703, 163, 3)));
+        allSkyblockNpcs.put("Coral|Galatea", new Npc("Coral", "Galatea", new BlockPos(-626, 100, -87)));
+        allSkyblockNpcs.put("Jaeger|Galatea", new Npc("Jaeger", "Galatea", new BlockPos(-651, 90, -24)));
+        allSkyblockNpcs.put("Agatha|Galatea", new Npc("Agatha", "Galatea", new BlockPos(-648, 90, -3)));
+        allSkyblockNpcs.put("Nemo|Galatea", new Npc("Nemo", "Galatea", new BlockPos(-619, 87, -6)));
+        allSkyblockNpcs.put("Amaury|Galatea", new Npc("Amaury", "Galatea", new BlockPos(-578, 115, 2)));
+        allSkyblockNpcs.put("Talia|Galatea", new Npc("Talia", "Galatea", new BlockPos(-615, 108, 2)));
     }
 
     public static int COLOR_WAYPOINT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.WAYPOINT);

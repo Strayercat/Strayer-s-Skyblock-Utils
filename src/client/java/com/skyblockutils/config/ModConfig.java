@@ -32,6 +32,7 @@ public class ModConfig {
     public boolean chatCommands = true;
     public boolean customSidebar = true;
     public boolean sidebarCoords = false;
+    public boolean cat = true;
     public boolean partyGlow = true;
 
     // Dungeons
@@ -128,6 +129,7 @@ public class ModConfig {
             INSTANCE.chatCommands = loaded.chatCommands;
             INSTANCE.customSidebar = loaded.customSidebar;
             INSTANCE.sidebarCoords = loaded.sidebarCoords;
+            INSTANCE.cat = loaded.cat;
             INSTANCE.partyGlow = loaded.partyGlow;
             INSTANCE.downtimeTracker = loaded.downtimeTracker;
             INSTANCE.dungeonPartyCommands = loaded.dungeonPartyCommands;

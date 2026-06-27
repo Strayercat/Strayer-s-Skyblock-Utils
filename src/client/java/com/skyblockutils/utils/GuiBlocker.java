@@ -22,7 +22,7 @@ public class GuiBlocker {
                     if (Arrays.asList(titles).contains(title)) {
                         client.execute(() -> {
                             if (client.gui.screen() != null) {
-                                client.gui.screen().clearFocus();
+                                client.gui.setScreen(null);
                             }
                         });
                     }
@@ -35,7 +35,7 @@ public class GuiBlocker {
                 if (ModConfig.INSTANCE.autoHoppityEggs && title.matches("^chocolate .+ egg$")) {
                     client.execute(() -> {
                         if (client.gui.screen() != null) {
-                            client.gui.screen().clearFocus();
+                            client.gui.setScreen(null);
                         }
                     });
                 }
