@@ -60,7 +60,7 @@ public class UpdateChecker {
     private static void checkForUpdate(Minecraft client) {
         String latestVersion = fetchLatestVersion(client);
 
-        if (latestVersion == null || !isNewer(latestVersion, CURRENT_VERSION)) return;
+        if (latestVersion == null || !isNewer(latestVersion)) return;
 
         if (client.level != null) {
             userNotified = true;
@@ -73,9 +73,9 @@ public class UpdateChecker {
         scheduler.schedule(() -> checkForUpdate(client), 1, TimeUnit.MINUTES);
     }
 
-    private static boolean isNewer(String latest, String current) {
+    private static boolean isNewer(String latest) {
         String[] a = latest.split("\\.");
-        String[] b = current.split("\\.");
+        String[] b = UpdateChecker.CURRENT_VERSION.split("\\.");
         int len = Math.max(a.length, b.length);
         for (int i = 0; i < len; i++) {
             int av = i < a.length ? Integer.parseInt(a[i]) : 0;
