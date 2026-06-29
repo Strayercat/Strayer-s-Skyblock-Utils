@@ -39,6 +39,18 @@ public class ModCommands {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
         var command = ClientCommands.literal("ssu")
                 .then(ClientCommands.literal("autorejoin")
+                        .executes(context -> {
+                            if (!AutoRejoin.autoRejoinEnabled) {
+                                ModFunctions.displayTextMessageWithHeader("§cPlease specify a floor");
+                                return 1;
+                            }
+
+                            AutoRejoin.autoRejoinEnabled = false;
+                            AutoRejoin.currentFloor = "";
+                            ModFunctions.displayTextMessageWithHeader("§cAuto-rejoin disabled");
+                            ModConfig.save();
+                            return 1;
+                        })
                         .then(ClientCommands.argument("floor", StringArgumentType.string())
                                 .suggests((ctx, builder) -> {
                                     String remaining = builder.getRemaining().toLowerCase();
@@ -72,7 +84,7 @@ public class ModCommands {
                     ClothConfigHandler.configScreenRequested = true;
                     return 1;
                 }))
-                .then(ClientCommands.literal("glowingPlayers")
+                .then(ClientCommands.literal("glowingplayers")
                         .then(ClientCommands.literal("add")
                                 .then(ClientCommands.argument("username", StringArgumentType.string())
                                         .suggests((ctx, builder) -> {
@@ -159,7 +171,7 @@ public class ModCommands {
                         )
                 )
                 .then(ClientCommands.literal("dev")
-                        .then(ClientCommands.literal("testNotification").executes(context -> {
+                        .then(ClientCommands.literal("testnotification").executes(context -> {
                             OnScreenNotification.renderNotification("Test", "THIS NOTIFICATION IS A TEST\nYou ran /ssu dev testNotification", 100);
                             return 1;
                         }))

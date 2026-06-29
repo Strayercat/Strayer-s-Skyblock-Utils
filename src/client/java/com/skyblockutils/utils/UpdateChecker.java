@@ -3,7 +3,6 @@ package com.skyblockutils.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.skyblockutils.ModFunctions;
-import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
@@ -21,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class UpdateChecker {
-    private static final String CURRENT_VERSION = "4.4.0";
+    private static final String CURRENT_VERSION = "4.4.1";
     private static final String UPDATE_URL = "https://raw.githubusercontent.com/Strayercat/Strayer-s-Skyblock-Utils/main/update.json";
     private static final String MOD_URL = "https://modrinth.com/mod/strayers-skyblock-utils/versions";
     private static boolean userNotified = false;
@@ -30,8 +29,6 @@ public class UpdateChecker {
     public static void init(Minecraft client) {
         if (initialized) return;
         initialized = true;
-
-        System.out.println("Updater Initialized with version " + SharedConstants.getCurrentVersion().id());
         userNotified = false;
         scheduler.schedule(() -> checkForUpdate(client), 1, TimeUnit.MINUTES);
     }
@@ -66,8 +63,6 @@ public class UpdateChecker {
     }
 
     private static void checkForUpdate(Minecraft client) {
-        System.out.println("Checking for update");
-
         String latestVersion = fetchLatestVersion();
 
         if (latestVersion == null || !isNewer(latestVersion)) return;

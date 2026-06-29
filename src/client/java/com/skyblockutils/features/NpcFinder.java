@@ -3,6 +3,7 @@
 package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
+import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SSU;
@@ -434,6 +435,11 @@ public class NpcFinder {
     }
 
     public static void handleCommand(String npcName) {
+        if (!StrayersSkyblockUtilsClient.isInSkyblock) {
+            ModFunctions.displayTextMessageWithHeader("§cYou must be in skyblock to use this feature.");
+            return;
+        }
+
         List<Npc> matches = allSkyblockNpcs.values().stream()
                 .filter(npc -> npc.name().equalsIgnoreCase(npcName))
                 .toList();
@@ -471,6 +477,8 @@ public class NpcFinder {
                             : waypointButton);
         }
 
-        Minecraft.getInstance().player.connection.sendChat(message.getString());
+        Minecraft client = Minecraft.getInstance();
+        if (client.player == null) return;
+        client.player.sendSystemMessage(message);
     }
 }

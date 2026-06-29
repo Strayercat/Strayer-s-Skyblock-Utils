@@ -4,6 +4,7 @@ plugins {
 }
 
 version = project.mod_version + "+" + project.minecraft_version
+//version = project.dev_version + "-" + "DEV"
 group = project.maven_group
 
 base {
