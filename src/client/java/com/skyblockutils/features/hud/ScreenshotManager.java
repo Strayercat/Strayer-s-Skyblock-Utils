@@ -60,6 +60,8 @@ public class ScreenshotManager {
     private record PendingScreenshot(NativeImage image, String filename) {}
 
     public static void addScreenshot(NativeImage image, String filename) {
+        if (!ModConfig.INSTANCE.screenshotHud) return;
+
         Minecraft client = Minecraft.getInstance();
         client.execute(() -> {
             if (screenshots.size() >= MAX_SCREENSHOTS) {
@@ -99,10 +101,6 @@ public class ScreenshotManager {
 
             int x = (int) (screenWidth - THUMBNAIL_WIDTH - GAP + entry.xOffset());
             int y = currentY.get(i).intValue();
-
-            // TEMP DEBUG - remove once the click issue is confirmed/fixed
-            System.out.println("[ScreenshotManager] entry " + i + " bounds x=[" + x + "," + (x + THUMBNAIL_WIDTH)
-                    + "] y=[" + y + "," + (y + entry.thumbHeight()) + "] state=" + entry.state());
 
             if (mouseX >= x && mouseX <= x + THUMBNAIL_WIDTH && mouseY >= y && mouseY <= y + entry.thumbHeight()) {
                 ClipboardUtils.copyImageToClipboard(entry.filename);

@@ -8,10 +8,14 @@ import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
+import com.skyblockutils.mixin.client.PingDebugMonitorAccessor;
+import com.skyblockutils.mixin.client.PingDebugMonitorInvoker;
 import com.skyblockutils.utils.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.debugchart.LocalSampleLogger;
 import net.minecraft.world.scores.DisplaySlot;
 
 import java.util.Arrays;
@@ -19,6 +23,7 @@ import java.util.List;
 
 public class ModFunctions {
     public static boolean playerWelcomedToIsland = false;
+    public static long lastPingMeasure = 0;
     public static int ping = 0;
     public static float tps = 0;
 
@@ -48,6 +53,18 @@ public class ModFunctions {
         SideBarUtils.resetLocation();
     }
 
+    public static void calculatePing(Minecraft client, ClientPacketListener listener) {
+        ((PingDebugMonitorInvoker) ((PingDebugMonitorAccessor) listener).getPingDebugMonitor()).ssu$tick();
+
+        if (lastPingMeasure + 1000 > System.currentTimeMillis()) return;
+        lastPingMeasure = System.currentTimeMillis();
+
+        LocalSampleLogger pingLog = client.getDebugOverlay().getPingLogger();
+        if (pingLog.size() > 0) {
+            ping = (int) pingLog.get(pingLog.size() - 1);
+        }
+    }
+
     public static void handleSkyblockExclusiveKeybinds(Minecraft client) {
         while (ModKeyBindings.CORLEONE_TIMER_KEY.consumeClick()) CorlTimer.toggleCorlTimer();
         while (ModKeyBindings.AUTOFISH_KEY.consumeClick()) AutoFish.toggleAutoFish(client);
@@ -61,17 +78,6 @@ public class ModFunctions {
         boolean zoomPressed = ModKeyBindings.ZOOM_KEY.isDown();
         if (zoomPressed && !ZoomState.isZooming) Zoom.enter(client);
         else if (!zoomPressed && ZoomState.isZooming) Zoom.exit(client);
-    }
-
-    public static int getPing(Minecraft client) {
-        if (client.getConnection() == null || client.player == null) return ping;
-        var playerInfo = client.getConnection().getPlayerInfo(client.player.getUUID());
-        if (playerInfo == null) return ping;
-        int rawPing = playerInfo.getLatency();
-        if (rawPing > 1) {
-            ping = rawPing;
-        }
-        return ping;
     }
 
     public static void sendCoordinates(Minecraft client, String argumentsString) {

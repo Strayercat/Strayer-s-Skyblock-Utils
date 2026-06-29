@@ -31,6 +31,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.resources.Identifier;
 
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
@@ -74,11 +75,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
             if (client.level == null) return;
 
-            if (client.getConnection() != null && client.player != null) {
-                var playerInfo = client.getConnection().getPlayerInfo(client.player.getUUID());
-                if (playerInfo != null && playerInfo.getLatency() > 1) {
-                    ModFunctions.ping = playerInfo.getLatency();
-                }
+            if (client.getConnection() instanceof ClientPacketListener listener) {
+                ModFunctions.calculatePing(client, listener);
             }
 
             Boolean skyblockCheck = ModFunctions.isInSkyblock(client);

@@ -100,10 +100,6 @@ public class ScreenshotManager {
             int x = (int) (screenWidth - THUMBNAIL_WIDTH - GAP + entry.xOffset());
             int y = currentY.get(i).intValue();
 
-            // TEMP DEBUG - remove once the click issue is confirmed/fixed
-            System.out.println("[ScreenshotManager] entry " + i + " bounds x=[" + x + "," + (x + THUMBNAIL_WIDTH)
-                    + "] y=[" + y + "," + (y + entry.thumbHeight()) + "] state=" + entry.state());
-
             if (mouseX >= x && mouseX <= x + THUMBNAIL_WIDTH && mouseY >= y && mouseY <= y + entry.thumbHeight()) {
                 ClipboardUtils.copyImageToClipboard(entry.filename);
                 screenshots.set(i, new ScreenshotEntry(

@@ -71,7 +71,6 @@ public class PuffTracker {
     }
 
     public static void startTimer(MinecraftClient client) {
-        System.out.println("started");
         if (currentScheduledAction != null && !currentScheduledAction.isDone()) {
             currentScheduledAction.cancel(false);
         }

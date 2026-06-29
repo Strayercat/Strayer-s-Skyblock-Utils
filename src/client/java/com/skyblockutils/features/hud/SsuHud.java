@@ -135,7 +135,7 @@ public class SsuHud {
         }
 
         if (ModConfig.INSTANCE.hudPing) {
-            lines.add(HudLine.of("Ping: " + ModFunctions.getPing(client), COLOR_TEXT));
+            lines.add(HudLine.of("Ping: " + ModFunctions.ping, COLOR_TEXT));
             anyGeneralInfo = true;
         }
 

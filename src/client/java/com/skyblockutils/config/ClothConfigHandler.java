@@ -88,6 +88,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Whether or not party members should automatically glow"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.partyGlow = v).build());
 
+        general.addEntry(eb.startBooleanToggle(Component.literal("Screenshot HUD"), ModConfig.INSTANCE.screenshotHud)
+                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to use SSU's custom screenshot hud"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.screenshotHud = v).build());
+
         general.addEntry(eb.startBooleanToggle(Component.literal("Ragebait button"), true)
                 .setDefaultValue(true).setTooltip(Component.literal("No matter how much you toggle it, whenever you come back it'll always be true"))
                 .build());

@@ -35,6 +35,7 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Custom sidebar
 - NPC locator via /ssu npcfinder
 - Puff farming helper - notifies you when you should kill
+- Custom screenshot HUD with preview and copy on click
 </details>
 
 ## Dependencies

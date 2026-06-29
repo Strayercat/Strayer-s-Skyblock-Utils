@@ -34,9 +34,6 @@ public class PartyCommands {
                 messageContent.equalsIgnoreCase("!pwarp") ||
                 messageContent.equalsIgnoreCase("!warp")) {
             if (!Objects.equals(PartyInfo.leader, MinecraftClient.getInstance().getSession().getUsername())) return;
-            System.out.println(PartyInfo.leader);
-            System.out.println(MinecraftClient.getInstance().getSession().getUsername());
-
             networkHandler.sendChatCommand("party warp");
         }
 

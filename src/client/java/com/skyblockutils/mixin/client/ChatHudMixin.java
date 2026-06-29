@@ -1,6 +1,7 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.ModKeyBindings;
+import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -86,7 +87,7 @@ public class ChatHudMixin {
     @Unique
     private static void filterScreenshotMessage(Component message, CallbackInfo ci) {
         String clean = message.getString().replaceAll("§.", "").trim();
-        if (clean.startsWith("Saved screenshot as")) {
+        if (clean.startsWith("Saved screenshot as") && ModConfig.INSTANCE.screenshotHud) {
             ci.cancel();
         }
     }

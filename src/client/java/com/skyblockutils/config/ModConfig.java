@@ -34,6 +34,7 @@ public class ModConfig {
     public boolean sidebarCoords = false;
     public boolean cat = true;
     public boolean partyGlow = true;
+    public boolean screenshotHud = true;
 
     // Dungeons
     public boolean downtimeTracker = true;
@@ -131,6 +132,7 @@ public class ModConfig {
             INSTANCE.sidebarCoords = loaded.sidebarCoords;
             INSTANCE.cat = loaded.cat;
             INSTANCE.partyGlow = loaded.partyGlow;
+            INSTANCE.screenshotHud = loaded.screenshotHud;
             INSTANCE.downtimeTracker = loaded.downtimeTracker;
             INSTANCE.dungeonPartyCommands = loaded.dungeonPartyCommands;
             INSTANCE.autoRejoinReminders = loaded.autoRejoinReminders;

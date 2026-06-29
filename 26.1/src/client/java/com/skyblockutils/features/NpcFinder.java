@@ -356,7 +356,6 @@ public class NpcFinder {
 
         String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
         if (!npc.location().equals(currentLocation)) {
-            System.out.println(currentLocation);
             ModFunctions.displayMessageWithHeader("§cYou need to be in §eThe " + npc.location() + " §cto display this waypoint.");
             return;
         }

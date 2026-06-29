@@ -22,7 +22,6 @@ public class IrisCompat {
             REGISTER_PIPELINE.invoke(GET_IRIS_API.invoke(), pipeline, GET_IRIS_PROGRAM.invoke(irisProgramName));
         } catch (IllegalStateException ignored) {
         } catch (Throwable e) {
-            System.out.println("[SSU] Failed to assign pipeline to Iris: " + e);
         }
     }
 

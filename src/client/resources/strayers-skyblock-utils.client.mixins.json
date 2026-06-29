@@ -21,6 +21,8 @@
     "EntityColorMixin",
     "EntityGlowingMixin",
     "HudMixin",
+    "PingDebugMonitorAccessor",
+    "PingDebugMonitorInvoker",
     "ScreenshotRecorderMixin"
   ]
 }

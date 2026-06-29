@@ -126,7 +126,6 @@ public class OnScreenNotification {
     }
 
     public static boolean handleNotificationClicks(int mouseX, int mouseY, int button, int screenWidth, int screenHeight) {
-        System.out.println("[OSN] click check: mouse=" + mouseX + "," + mouseY + " button=" + button + " screen=" + screenWidth + "x" + screenHeight + " notifs=" + notifications.size());
         int yOffset = 0;
         Notification toRemove = null;
 
