@@ -105,13 +105,13 @@ public class SsuHud {
             }
         }
 
-        if (ModConfig.INSTANCE.customSidebar) return;
+        if (ModConfig.INSTANCE.customSidebar || !ModConfig.INSTANCE.cat) return;
 
         context.pose().popMatrix();
         context.pose().pushMatrix();
         float imageScale = (1.0f / 6.0f) * scale;
         context.pose().scale(imageScale, imageScale);
-        if (ModConfig.INSTANCE.cat) context.blit(RenderPipelines.GUI_TEXTURED, CAT_IMAGE,
+        context.blit(RenderPipelines.GUI_TEXTURED, CAT_IMAGE,
                 (int) ((renderX + scaledHudWidth) / imageScale) - 31,
                 (int) ((scaledHudHeight / 2.0f) / imageScale) - 175,
                 0, 0, 418, 418, 418, 418);

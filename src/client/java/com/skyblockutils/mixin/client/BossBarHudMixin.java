@@ -2,16 +2,20 @@ package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.features.hud.SsuHud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.world.BossEvent;
+import net.minecraft.client.gui.components.BossHealthOverlay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(BossEvent.BossBarOverlay.class)
+@Mixin(BossHealthOverlay.class)
 public class BossBarHudMixin {
-    @Inject(method = "setOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRender(GuiGraphicsExtractor context, CallbackInfo ci) {
+    @Inject(
+            at = @At("HEAD"),
+            method = "extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V",
+            cancellable = true
+    )
+    private void onExtractRenderState(GuiGraphicsExtractor graphics, CallbackInfo ci) {
         if (!SsuHud.showBossBar) {
             ci.cancel();
         }

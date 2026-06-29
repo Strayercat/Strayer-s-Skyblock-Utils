@@ -57,6 +57,8 @@ public class CustomSidebar {
 
         drawSidebarText(context, client, x1, x2, barPosition + 1, y2 - barPosition + 1, 10);
 
+        if (!ModConfig.INSTANCE.cat) return;
+
         context.pose().pushMatrix();
         try {
             float imageScale = 0.13f;
