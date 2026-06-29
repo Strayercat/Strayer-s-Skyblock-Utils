@@ -5,12 +5,11 @@ import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundEvents;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.skyblockutils.utils.Scheduler.scheduler;
+
 public class AutoRejoin {
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     public static boolean autoRejoinEnabled = false;
     public static String currentFloor = "";
     public static boolean partialParty = false;

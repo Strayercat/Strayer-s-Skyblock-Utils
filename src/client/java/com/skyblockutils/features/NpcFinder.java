@@ -400,12 +400,12 @@ public class NpcFinder {
         String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
         if (!npc.location().equals(currentLocation)) {
             System.out.println(currentLocation);
-            ModFunctions.displayMessageWithHeader("§cYou need to be in §eThe " + npc.location() + " §cto display this waypoint.");
+            ModFunctions.displayTextMessageWithHeader("§cYou need to be in §eThe " + npc.location() + " §cto display this waypoint.");
             return;
         }
 
         addToBeMarked(npc);
-        ModFunctions.displayMessageWithHeader("§aWaypoint displayed.");
+        ModFunctions.displayTextMessageWithHeader("§aWaypoint displayed.");
     }
 
     private static final List<Npc> toBeMarked = new ArrayList<>();
@@ -439,7 +439,7 @@ public class NpcFinder {
                 .toList();
 
         if (matches.isEmpty()) {
-            ModFunctions.displayMessageWithHeader("§cNo NPC found with name: " + npcName);
+            ModFunctions.displayTextMessageWithHeader("§cNo NPC found with name: " + npcName);
             return;
         }
 

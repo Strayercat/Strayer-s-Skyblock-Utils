@@ -59,7 +59,7 @@ public class GlowingPlayers {
             if (fromGui) {
                 OnScreenNotification.renderNotification("Already Glowing", username + " is already glowing!", 60);
             } else {
-                ModFunctions.displayMessageWithHeader("§c" + username + " is already glowing!");
+                ModFunctions.displayTextMessageWithHeader("§c" + username + " is already glowing!");
             }
             return;
         }
@@ -70,14 +70,14 @@ public class GlowingPlayers {
                 client.execute(() -> {
                     if (uuid != null) {
                         ModConfig.INSTANCE.addGlowingPlayer(new GlowingPlayer(username, uuid, color));
-                        ModFunctions.displayMessageWithHeader("§a" + username + " is now glowing!");
+                        ModFunctions.displayTextMessageWithHeader("§a" + username + " is now glowing!");
                         ModConfig.save();
                         if (onSuccess != null) onSuccess.run();
                     } else {
                         if (fromGui) {
                             OnScreenNotification.renderNotification("Player Not Found", "\"" + username + "\" doesn't exist.", 100);
                         } else {
-                            ModFunctions.displayMessageWithHeader("§cPlayer " + username + " not found :c");
+                            ModFunctions.displayTextMessageWithHeader("§cPlayer " + username + " not found :c");
                         }
                     }
                 })
@@ -86,12 +86,12 @@ public class GlowingPlayers {
 
     public static void remove(String username) {
         if (!isPlayerGlowing(username)) {
-            ModFunctions.displayMessageWithHeader("§c" + username + " already wasn't glowing");
+            ModFunctions.displayTextMessageWithHeader("§c" + username + " already wasn't glowing");
             return;
         }
 
         ModConfig.INSTANCE.removeGlowingPlayer(username);
-        ModFunctions.displayMessageWithHeader("§a" + username + " is no longer glowing");
+        ModFunctions.displayTextMessageWithHeader("§a" + username + " is no longer glowing");
         ModConfig.save();
     }
 

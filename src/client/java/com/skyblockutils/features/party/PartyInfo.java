@@ -6,12 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.skyblockutils.utils.Scheduler.scheduler;
+
 public class PartyInfo {
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     public static boolean isInParty = false;
     public static String leader = Minecraft.getInstance().getUser().getName();
     public static List<String> members = new ArrayList<>();

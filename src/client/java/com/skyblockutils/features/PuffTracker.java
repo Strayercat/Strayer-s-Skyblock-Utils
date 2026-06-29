@@ -11,13 +11,12 @@ import net.minecraft.world.entity.Entity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.skyblockutils.utils.Scheduler.scheduler;
+
 public class PuffTracker {
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     public static boolean puffTrackerEnabled = false;
     public static List<Integer> puffsAroundPlayer = new ArrayList<>();
 
@@ -28,15 +27,15 @@ public class PuffTracker {
             puffTrackerEnabled = false;
             currentScheduledAction.cancel(true);
             puffsAroundPlayer.clear();
-            ModFunctions.displayMessageWithHeader("§cPuff Timer toggled off");
+            ModFunctions.displayTextMessageWithHeader("§cPuff Timer toggled off");
         } else {
             if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Rift")) {
-                ModFunctions.displayMessageWithHeader("§cYou must be in The Rift to use Puff Timer");
+                ModFunctions.displayTextMessageWithHeader("§cYou must be in The Rift to use Puff Timer");
                 return;
             }
 
             puffTrackerEnabled = true;
-            ModFunctions.displayMessageWithHeader("§aPuff Timer toggled on");
+            ModFunctions.displayTextMessageWithHeader("§aPuff Timer toggled on");
         }
     }
 

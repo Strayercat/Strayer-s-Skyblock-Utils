@@ -53,15 +53,15 @@ public class ModCommands {
                                     if (floor.equals("off")) {
                                         AutoRejoin.autoRejoinEnabled = false;
                                         AutoRejoin.currentFloor = "";
-                                        ModFunctions.displayMessageWithHeader("§cAuto-rejoin disabled");
+                                        ModFunctions.displayTextMessageWithHeader("§cAuto-rejoin disabled");
                                         ModConfig.save();
                                     } else if (floor.matches("^[mf][1-7]$")) {
                                         AutoRejoin.autoRejoinEnabled = true;
                                         AutoRejoin.currentFloor = floor.toUpperCase();
-                                        ModFunctions.displayMessageWithHeader("§aAuto-rejoin enabled for " + floor.toUpperCase());
+                                        ModFunctions.displayTextMessageWithHeader("§aAuto-rejoin enabled for " + floor.toUpperCase());
                                         ModConfig.save();
                                     } else {
-                                        ModFunctions.displayMessageWithHeader("§cInvalid floor! Use m1-m7 or f1-f7, or off to disable");
+                                        ModFunctions.displayTextMessageWithHeader("§cInvalid floor! Use m1-m7 or f1-f7, or off to disable");
                                         return 0;
                                     }
                                     return 1;
@@ -132,7 +132,7 @@ public class ModCommands {
                         .then(ClientCommands.literal("clear")
                                 .executes(context -> {
                                     GlowingPlayers.clearAll();
-                                    ModFunctions.displayMessageWithHeader("§aCleared all glowing players.");
+                                    ModFunctions.displayTextMessageWithHeader("§aCleared all glowing players.");
                                     return 1;
                                 })
                         )
@@ -140,14 +140,14 @@ public class ModCommands {
                                 .executes(context -> {
                                     List<GlowingPlayers.GlowingPlayer> glowingPlayers = ModConfig.INSTANCE.getGlowingPlayers();
                                     if (glowingPlayers.isEmpty()) {
-                                        ModFunctions.displayMessageWithHeader("§cYou didn't add any glowing players!");
+                                        ModFunctions.displayTextMessageWithHeader("§cYou didn't add any glowing players!");
                                         return 1;
                                     }
                                     StringBuilder players = new StringBuilder();
                                     for (GlowingPlayers.GlowingPlayer glowingPlayer : glowingPlayers) {
                                         players.append(glowingPlayer.username).append(", ");
                                     }
-                                    ModFunctions.displayMessageWithHeader("§rThese players are glowing: \n" + players);
+                                    ModFunctions.displayTextMessageWithHeader("§rThese players are glowing: \n" + players);
                                     return 1;
                                 })
                         )
@@ -164,7 +164,7 @@ public class ModCommands {
                             return 1;
                         }))
                         .then(ClientCommands.literal("teehee").executes(context -> {
-                            ModFunctions.displayMessageWithHeader("§rNya! Mreow Mrpp Meow!");
+                            ModFunctions.displayTextMessageWithHeader("§rNya! Mreow Mrpp Meow!");
                             return 1;
                         }))
                         .then(ClientCommands.literal("location").executes(context -> {

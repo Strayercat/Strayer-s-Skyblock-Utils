@@ -25,8 +25,11 @@ public class ModFunctions {
     public static int COLOR_MAIN = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
 
     public static void connectionEventDataReset(String type) {
+        Minecraft client = Minecraft.getInstance();
+
         if (type.equals("Join")) {
             GuiBlocker.shouldHideScreen = false;
+            UpdateChecker.init(client);
         } else {
             StrayersSkyblockUtilsClient.isInSkyblock = false;
             AutoRejoin.resetAutoRejoin();
@@ -107,9 +110,15 @@ public class ModFunctions {
         }
     }
 
-    public static void displayMessageWithHeader(String message) {
+    public static void displayTextMessageWithHeader(String message) {
         Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
                 Component.empty().append(SSU.getName()).append(Component.literal(message))
+        );
+    }
+
+    public static void displayComponentMessageWithHeader(Component message) {
+        Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
+                Component.empty().append(SSU.getName()).append(message)
         );
     }
 

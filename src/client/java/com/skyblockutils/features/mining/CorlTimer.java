@@ -13,12 +13,11 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.skyblockutils.utils.Scheduler.scheduler;
+
 public class CorlTimer {
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     public static boolean corlTimerEnabled = false;
     public static BlockPos corlPos = null;
     public static UUID corlUUID = null;
@@ -44,7 +43,7 @@ public class CorlTimer {
                 waitTime = true;
 
                 scheduler.schedule(() -> {
-                    if (client.level == null) return;
+                    if (client.level == null || !corlTimerEnabled) return;
                     client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1.0F));
                     ModFunctions.showTitle(client, Component.literal("CORL").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20);
                     waitTime = false;
@@ -68,15 +67,15 @@ public class CorlTimer {
     public static void toggleCorlTimer() {
         if (corlTimerEnabled) {
             corlTimerEnabled = false;
-            ModFunctions.displayMessageWithHeader("§cCorleone Timer toggled off");
+            ModFunctions.displayTextMessageWithHeader("§cCorleone Timer toggled off");
         } else {
             if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows")) {
-                ModFunctions.displayMessageWithHeader("§cYou must be in the Crystal Hollows to use Corleone Timer");
+                ModFunctions.displayTextMessageWithHeader("§cYou must be in the Crystal Hollows to use Corleone Timer");
                 return;
             }
 
             corlTimerEnabled = true;
-            ModFunctions.displayMessageWithHeader("§aCorleone Timer toggled on");
+            ModFunctions.displayTextMessageWithHeader("§aCorleone Timer toggled on");
         }
     }
 
