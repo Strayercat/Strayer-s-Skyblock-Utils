@@ -47,3 +47,4 @@ SSU started as a personal project. I wanted to make something for myself to help
 Please keep in mind that this is the first mod I develop and release and I am still just getting used to the Minecraft modding environment. Just like anyone in my position, I'm bound to make mistakes, introduce bugs or make your game crash :p. If you find a bug, please let me know so I can release a fix ASAP.
 
 Modrinth download: https://modrinth.com/mod/strayers-skyblock-utils
+To report issues, head to the github repo (https://github.com/Strayercat/Strayer-s-Skyblock-Utils), then in the "Issues" tab and click "New issue". Describe your problem as clearly as possible, if necessary attach screenshots and make sure to mention your version of the mod.
