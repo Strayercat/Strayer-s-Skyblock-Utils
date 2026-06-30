@@ -16,7 +16,7 @@ public class PowderChestNotifications {
     private static final List<Component> buffer = new ArrayList<>();
 
     public static boolean handleMessage(Component message) {
-        if (!expectingChest) return true;
+        if (!ModConfig.INSTANCE.powderChestNotification || !expectingChest) return true;
 
         if (message.getString().startsWith("▬▬▬▬")) {
             if (!reading) {
@@ -39,11 +39,10 @@ public class PowderChestNotifications {
     }
 
     public static void handleChestClick() {
-        if (ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows")) expectingChest = true;
+        if (ModConfig.INSTANCE.powderChestNotification && ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows")) expectingChest = true;
     }
 
     private static void parseBuffer() {
-        System.out.println(buffer);
         List<Component> lines = buffer.stream()
                 .filter(c -> {
                     String trimmed = c.getString().trim();

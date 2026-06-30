@@ -39,4 +39,11 @@ public class ClipboardUtils {
         } catch (Exception ignored) {
         }
     }
+
+    public static void copyTextToClipboard(String text) {
+        org.lwjgl.glfw.GLFW.glfwSetClipboardString(
+                Minecraft.getInstance().getWindow().handle(),
+                text
+        );
+    }
 }

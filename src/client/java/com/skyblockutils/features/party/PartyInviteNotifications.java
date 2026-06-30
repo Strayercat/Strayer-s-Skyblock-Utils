@@ -18,7 +18,7 @@ public class PartyInviteNotifications {
             String username = message.replaceAll("-", "").replaceAll("\\[[^]]*] ?", "").split(" ")[0];
             OnScreenNotification.builder()
                     .title("PARTY INVITE")
-                    .subtitle(username + " is inviting you to their party. Click here to join.\nRight click to dismiss.")
+                    .subtitle(username + " is inviting you to their party.\nClick here to join.")
                     .tickTime(1200)
                     .send();
             return false;

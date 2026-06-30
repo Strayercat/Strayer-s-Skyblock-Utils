@@ -21,6 +21,8 @@ public class OnScreenNotification {
     private static final int MARGIN = 2;
     private static final int PADDING = 5;
 
+    private static final List<String> HOVER_TEXT = List.of("Right click to dismiss", "Middle click to copy");
+
     private static class Notification {
         String title;
         String subtitle;
@@ -29,6 +31,8 @@ public class OnScreenNotification {
         int height;
         int x, y;
         int titleColor;
+        boolean copied = false;
+        long copiedTimestamp = 0;
 
         Notification(String title, String subtitle, int tickTime, int titleColor) {
             this.title = title;
@@ -143,8 +147,7 @@ public class OnScreenNotification {
 
             boolean isHovered = notif.isClicked((int) mouseX, (int) mouseY);
 
-            int bgColor = isHovered ? 0x2a2a2a : 0x1a1a1a;
-            context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + notif.height, bgColor | alphaInt);
+            context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + notif.height, 0x1a1a1a | alphaInt);
 
             int borderColor = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
             context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + 2, borderColor | alphaInt);
@@ -153,18 +156,55 @@ public class OnScreenNotification {
             var subtitleLines = wrapText(notif.subtitle);
 
             int lineY = notif.y + PADDING;
+            int lineStep = mc.font.lineHeight + 2;
 
             for (String line : titleLines) {
                 context.text(mc.font, line, notif.x + PADDING, lineY, notif.titleColor | alphaInt, false);
-                lineY += mc.font.lineHeight + 2;
+                lineY += lineStep;
             }
 
             for (String line : subtitleLines) {
                 context.text(mc.font, line, notif.x + PADDING, lineY, 0xAAAAAA | alphaInt, false);
-                lineY += mc.font.lineHeight + 2;
+                lineY += lineStep;
+            }
+
+            if (isHovered && !notif.copied) {
+                int overlayTop = notif.y + 2;
+                int overlayBottom = notif.y + notif.height;
+
+                float overlayOpacity = 0.85f;
+                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
+                context.fill(notif.x, overlayTop, notif.x + WIDTH, overlayBottom, 0x2a2a2a | overlayAlphaInt);
+
+                drawCenteredOverlayText(context, mc, HOVER_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
+            }
+
+            if (notif.copied && notif.copiedTimestamp + 2000 > System.currentTimeMillis()) {
+                int overlayTop = notif.y + 2;
+                int overlayBottom = notif.y + notif.height;
+
+                float overlayOpacity = 0.85f;
+                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
+                context.fill(notif.x, overlayTop, notif.x + WIDTH, overlayBottom, 0x2a2a2a | overlayAlphaInt);
+
+                drawCenteredOverlayText(context, mc, List.of("Copied ✓"), notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
             yOffset += notif.height + MARGIN;
+        }
+    }
+
+    private static void drawCenteredOverlayText(GuiGraphicsExtractor context, Minecraft mc, List<String> lines,
+                                                int x, int top, int bottom, int alphaInt) {
+        int lineStep = mc.font.lineHeight + 2;
+        int blockHeight = lines.size() * lineStep - 2;
+
+        int lineY = top + (bottom - top - blockHeight) / 2;
+        for (String line : lines) {
+            int lineWidth = mc.font.width(line);
+            int lineX = x + (OnScreenNotification.WIDTH - lineWidth) / 2;
+            context.text(mc.font, line, lineX, lineY, 16777215 | alphaInt, false);
+            lineY += lineStep;
         }
     }
 
@@ -251,15 +291,28 @@ public class OnScreenNotification {
                     && mouseY >= y && mouseY <= y + notif.height;
 
             if (hit) {
-                if (button == 0 && notif.title.contains("PARTY INVITE")) {
-                    Minecraft mc = Minecraft.getInstance();
-                    if (mc.player != null) {
-                        mc.player.connection.sendChat("/p accept " + notif.subtitle.split(" ")[0]);
-                    }
+                if (button == 2) {
+                    ClipboardUtils.copyTextToClipboard(notif.subtitle.replaceAll("\n", " "));
+                    notif.copied = true;
+                    notif.copiedTimestamp = System.currentTimeMillis();
                 }
-                toRemove = notif;
+
+                if (button == 1) {
+                    toRemove = notif;
+                }
+
+                if (button == 0) {
+                    if (notif.title.contains("PARTY INVITE")) {
+                        Minecraft mc = Minecraft.getInstance();
+                        if (mc.player != null) {
+                            mc.player.connection.sendChat("/p accept " + notif.subtitle.split(" ")[0]);
+                        }
+                    }
+                    toRemove = notif;
+                }
                 break;
             }
+
             yOffset += notif.height + MARGIN;
         }
 

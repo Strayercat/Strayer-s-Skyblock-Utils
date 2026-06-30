@@ -55,7 +55,7 @@ public class CorlTimer {
         if (waitTime) return;
 
         AABB blockBox = new AABB(corlPos).inflate(5.0, 3.0, 5.0);
-        List<Entity> entities = client.level.getEntitiesOfClass(Entity.class, blockBox); // More reliable in Mojang
+        List<Entity> entities = client.level.getEntitiesOfClass(Entity.class, blockBox);
 
         for (Entity entity : entities) {
             if (entity.getName().getString().contains("Corleone")) {
