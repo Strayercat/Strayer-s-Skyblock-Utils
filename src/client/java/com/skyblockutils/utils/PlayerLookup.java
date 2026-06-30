@@ -42,9 +42,7 @@ public class PlayerLookup {
                     }
                     return null;
                 })
-                .exceptionally(e -> {
-                    return "";
-                });
+                .exceptionally(_ -> null);
     }
 
     public static UUID formatMojangUuid(String id) {

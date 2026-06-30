@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,17 +79,17 @@ public class GlowingPlayerCreationScreen extends Screen {
         String confirmLabel = editingPlayer == null ? "Add Player" : "Save Changes";
         this.addRenderableWidget(Button.builder(
                 Component.literal(confirmLabel),
-                btn -> this.confirm()
+                _ -> this.confirm()
         ).bounds(centerX - 105, panelTop + 155, 100, 20).build());
 
         this.addRenderableWidget(Button.builder(
                 Component.literal("Cancel"),
-                btn -> this.close()
+                _ -> this.close()
         ).bounds(centerX + 5, panelTop + 155, 100, 20).build());
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (this.parent != null) {
             this.parent.extractRenderState(context, mouseX, mouseY, delta);
         }
@@ -154,7 +155,7 @@ public class GlowingPlayerCreationScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
         int centerX = this.width / 2;
         int gridTop = this.height / 2 - 80 + 65;
 
@@ -191,7 +192,7 @@ public class GlowingPlayerCreationScreen extends Screen {
             if (name.isEmpty()) return;
 
             PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> {
-                if (formattedName == null) {
+                if (formattedName == null || formattedName.isBlank()) {
                     Minecraft.getInstance().execute(() ->
                             OnScreenNotification.builder()
                                     .title("Player Not Found")
@@ -213,10 +214,6 @@ public class GlowingPlayerCreationScreen extends Screen {
 
     public void close() {
         Minecraft.getInstance().setScreenAndShow(this.parent);
-    }
-
-    public boolean shouldPause() {
-        return false;
     }
 
     public static void openScreen(Screen parent) {

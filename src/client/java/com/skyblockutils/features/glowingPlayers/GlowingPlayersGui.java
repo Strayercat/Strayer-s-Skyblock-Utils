@@ -46,7 +46,7 @@ public class GlowingPlayersGui {
         for (GlowingPlayers.GlowingPlayer p : ModConfig.INSTANCE.getGlowingPlayers()) {
             Screen parent = builder.getParentScreen();
             category.addEntry(new GlowingPlayerEntry(p, () -> {
-                GlowingPlayers.remove(p.username);
+                GlowingPlayers.remove(p.username, true);
                 Minecraft client = Minecraft.getInstance();
                 client.setScreenAndShow(GlowingPlayersGui.createConfigScreen(parent));
             }));

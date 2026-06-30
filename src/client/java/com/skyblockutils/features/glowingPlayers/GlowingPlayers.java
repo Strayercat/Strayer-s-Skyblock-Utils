@@ -74,7 +74,7 @@ public class GlowingPlayers {
                 client.execute(() -> {
                     if (uuid != null) {
                         ModConfig.INSTANCE.addGlowingPlayer(new GlowingPlayer(username, uuid, color));
-                        ModFunctions.displayTextMessageWithHeader("§a" + username + " is now glowing!");
+                        if (!fromGui) ModFunctions.displayTextMessageWithHeader("§a" + username + " is now glowing!");
                         ModConfig.save();
                         if (onSuccess != null) onSuccess.run();
                     } else {
@@ -92,14 +92,14 @@ public class GlowingPlayers {
         );
     }
 
-    public static void remove(String username) {
+    public static void remove(String username, boolean fromGui) {
         if (!isPlayerGlowing(username)) {
-            ModFunctions.displayTextMessageWithHeader("§c" + username + " already wasn't glowing");
+            if(!fromGui) ModFunctions.displayTextMessageWithHeader("§c" + username + " already wasn't glowing");
             return;
         }
 
         ModConfig.INSTANCE.removeGlowingPlayer(username);
-        ModFunctions.displayTextMessageWithHeader("§a" + username + " is no longer glowing");
+        if(!fromGui) ModFunctions.displayTextMessageWithHeader("§a" + username + " is no longer glowing");
         ModConfig.save();
     }
 

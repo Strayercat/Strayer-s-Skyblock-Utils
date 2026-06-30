@@ -101,7 +101,13 @@ public class ModCommands {
                                         })
                                         .executes(context -> {
                                             String name = StringArgumentType.getString(context, "username");
-                                            PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> GlowingPlayers.add(formattedName, 0xFFAA00, false, null));
+                                            PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> {
+                                                if (formattedName == null) {
+                                                    ModFunctions.displayTextMessageWithHeader("§cPlayer " + name + " not found :c");
+                                                    return;
+                                                }
+                                                GlowingPlayers.add(formattedName, 0xFFAA00, false, null);
+                                            });
                                             return 1;
                                         })
                                         .then(ClientCommands.argument("color", StringArgumentType.string())
@@ -136,7 +142,7 @@ public class ModCommands {
                                         })
                                         .executes(context -> {
                                             String name = StringArgumentType.getString(context, "username");
-                                            GlowingPlayers.remove(name);
+                                            GlowingPlayers.remove(name, false);
                                             return 1;
                                         })
                                 )
