@@ -16,7 +16,11 @@ public class PartyInviteNotifications {
         if (!ModConfig.INSTANCE.partyInviteNotifications) return true;
         if (message.contains("has invited you to join their party!")) {
             String username = message.replaceAll("-", "").replaceAll("\\[[^]]*] ?", "").split(" ")[0];
-            OnScreenNotification.renderNotification("PARTY INVITE", username + " is inviting you to their party. Click here to join.\nRight click to dismiss.", 1200);
+            OnScreenNotification.builder()
+                    .title("PARTY INVITE")
+                    .subtitle(username + " is inviting you to their party. Click here to join.\nRight click to dismiss.")
+                    .tickTime(1200)
+                    .send();
             return false;
         }
         return true;

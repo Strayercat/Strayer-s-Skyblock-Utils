@@ -15,6 +15,7 @@ SSU started as a personal project. I wanted to make something for myself to help
 ### Mining
 - Corleone reminders via keybinds (reminds you 1 minute after killing it)
 - Umber and tungsten veins waypoints while in the glacite tunnels
+- Powder chest notifications - Replaces the chat message with an SSU notification
 ### Chat
 - Chat filter toggles (Incomplete)
 - Printing coordinates to chat via keybinds

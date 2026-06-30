@@ -4,7 +4,7 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.Minecraft;
-import net.minecraft.sounds.SoundEvents;
+
 import java.util.concurrent.TimeUnit;
 
 import static com.skyblockutils.utils.Scheduler.scheduler;
@@ -26,19 +26,31 @@ public class AutoRejoin {
 
         if (message.contains("Click HERE to re-queue")) {
             if (ModConfig.INSTANCE.autoRejoinReminders) {
-                OnScreenNotification.renderNotification("AUTO-REJOIN REMINDER", "Auto-rejoin is still enabled ;)\nSelected floor: " + currentFloor, 100);
-                Minecraft.getInstance().player.playSound(SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value());
+                OnScreenNotification.builder()
+                        .title("AUTO-REJOIN REMINDER")
+                        .subtitle("Auto-rejoin is still enabled ;)\nSelected floor: " + currentFloor)
+                        .tickTime(100)
+                        .withSound(true)
+                        .send();
             }
 
             if (DowntimeTracker.downtimeRequested) {
-                OnScreenNotification.renderNotification("AUTO-REJOIN PAUSED", "Someone requested downtime, auto-rejoin has paused. Run a '!m1' format command again to resume.", 100);
-                Minecraft.getInstance().player.playSound(SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value());
+                OnScreenNotification.builder()
+                        .title("AUTO-REJOIN PAUSED")
+                        .subtitle("Someone requested downtime, auto-rejoin has paused. Run a '!m1' format command again to resume.")
+                        .tickTime(100)
+                        .withSound(true)
+                        .send();
                 return;
             }
 
             if (partialParty) {
-                OnScreenNotification.renderNotification("AUTO-REJOIN PAUSED", "Your party is not full. Get a full party and run a '!m1' format command again to resume.", 100);
-                Minecraft.getInstance().player.playSound(SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value());
+                OnScreenNotification.builder()
+                        .title("AUTO-REJOIN PAUSED")
+                        .subtitle("Your party is not full. Get a full party and run a '!m1' format command again to resume.")
+                        .tickTime(100)
+                        .withSound(true)
+                        .send();
                 return;
             }
 

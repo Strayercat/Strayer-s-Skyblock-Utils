@@ -6,6 +6,7 @@ import com.skyblockutils.features.*;
 import com.skyblockutils.features.chat.ChatCommands;
 import com.skyblockutils.features.chat.ChatFilter;
 import com.skyblockutils.features.chat.FancyEmotes;
+import com.skyblockutils.features.mining.PowderChestNotifications;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.hud.CustomSidebar;
@@ -31,8 +32,13 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public static boolean isInSkyblock = false;
@@ -109,9 +115,20 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
             boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
-            return chatFilter && partyMsgFilter && partyListMessages;
+            boolean powderChestMessage = PowderChestNotifications.handleMessage(message);
+            return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage;
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);
+
+        UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
+            BlockPos pos = hitResult.getBlockPos();
+            BlockState state = level.getBlockState(pos);
+
+            if (state.getBlock() instanceof ChestBlock) {
+                    PowderChestNotifications.handleChestClick();
+            }
+            return InteractionResult.PASS;
+        });
     }
 }

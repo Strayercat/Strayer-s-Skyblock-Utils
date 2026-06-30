@@ -1,10 +1,19 @@
 package com.skyblockutils.utils;
 
 import com.skyblockutils.config.ModConfig;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.sounds.SoundEvents;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 
 public class OnScreenNotification {
@@ -19,13 +28,15 @@ public class OnScreenNotification {
         int maxTicks;
         int height;
         int x, y;
+        int titleColor;
 
-        Notification(String title, String subtitle, int tickTime) {
+        Notification(String title, String subtitle, int tickTime, int titleColor) {
             this.title = title;
             this.subtitle = subtitle;
             this.ticks = tickTime;
             this.maxTicks = tickTime;
             this.height = calculateHeight(title, subtitle);
+            this.titleColor = titleColor;
         }
 
         private int calculateHeight(String title, String subtitle) {
@@ -43,8 +54,70 @@ public class OnScreenNotification {
 
     private static final Queue<Notification> notifications = new LinkedList<>();
 
-    public static void renderNotification(String title, String subtitle, int tickTime) {
-        notifications.add(new Notification(title, subtitle, tickTime));
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String title = "";
+        private String subtitle = "";
+        private int tickTime = 60;
+        private boolean withSound = false;
+        private int titleColor = 0xFFFFFF;
+
+        public Builder title(String title) {
+            this.title = title;
+            this.titleColor = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_END) & 0xFFFFFF;
+            return this;
+        }
+
+        public Builder title(Component title) {
+            this.title = toLegacyString(title);
+            this.titleColor = 0xFFFFFF;
+            return this;
+        }
+
+        public Builder subtitle(String subtitle) {
+            this.subtitle = subtitle;
+            return this;
+        }
+
+        public Builder subtitle(Component subtitle) {
+            this.subtitle = toLegacyString(subtitle);
+            return this;
+        }
+
+        public Builder subtitle(List<?> lines) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < lines.size(); i++) {
+                if (i > 0) sb.append("\n");
+                Object line = lines.get(i);
+                sb.append(line instanceof Component c ? toLegacyString(c) : line.toString());
+            }
+            this.subtitle = sb.toString();
+            return this;
+        }
+
+        public Builder tickTime(int tickTime) {
+            this.tickTime = tickTime;
+            return this;
+        }
+
+        public Builder withSound(boolean withSound) {
+            this.withSound = withSound;
+            return this;
+        }
+
+        public void send() {
+            notifications.add(new Notification(title, subtitle, tickTime, titleColor));
+
+            if (withSound) {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.player != null) {
+                    mc.player.playSound(SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value());
+                }
+            }
+        }
     }
 
     public static void tick() {
@@ -82,7 +155,7 @@ public class OnScreenNotification {
             int lineY = notif.y + PADDING;
 
             for (String line : titleLines) {
-                context.text(mc.font, line, notif.x + PADDING, lineY, 0xFFFFFF | alphaInt, false);
+                context.text(mc.font, line, notif.x + PADDING, lineY, notif.titleColor | alphaInt, false);
                 lineY += mc.font.lineHeight + 2;
             }
 
@@ -95,8 +168,8 @@ public class OnScreenNotification {
         }
     }
 
-    private static java.util.List<String> wrapText(String text) {
-        java.util.List<String> lines = new java.util.ArrayList<>();
+    private static List<String> wrapText(String text) {
+        List<String> lines = new ArrayList<>();
         Minecraft mc = Minecraft.getInstance();
 
         String[] paragraphs = text.split("\n", -1);
@@ -123,6 +196,47 @@ public class OnScreenNotification {
         }
 
         return lines;
+    }
+
+    public static String toLegacyString(Component component) {
+        StringBuilder sb = new StringBuilder();
+        component.visit((style, text) -> {
+            sb.append(styleToLegacyCodes(style)).append(text);
+            return Optional.empty();
+        }, Style.EMPTY);
+        return sb.toString();
+    }
+
+    private static String styleToLegacyCodes(Style style) {
+        StringBuilder sb = new StringBuilder();
+
+        TextColor color = style.getColor();
+        if (color != null) {
+            try {
+                sb.append(ChatFormatting.valueOf(color.serialize().toUpperCase()));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        if (style.isBold()) sb.append(ChatFormatting.BOLD);
+        if (style.isItalic()) sb.append(ChatFormatting.ITALIC);
+        if (style.isUnderlined()) sb.append(ChatFormatting.UNDERLINE);
+        if (style.isStrikethrough()) sb.append(ChatFormatting.STRIKETHROUGH);
+        if (style.isObfuscated()) sb.append(ChatFormatting.OBFUSCATED);
+
+        return sb.toString();
+    }
+
+    public static Component removeText(Component component, String target) {
+        MutableComponent result = Component.empty();
+        component.visit((style, text) -> {
+            String replaced = text.replace(target, "");
+            if (!replaced.isEmpty()) {
+                result.append(Component.literal(replaced).setStyle(style));
+            }
+            return Optional.empty();
+        }, Style.EMPTY);
+        return result;
     }
 
     public static boolean handleNotificationClicks(int mouseX, int mouseY, int button, int screenWidth, int screenHeight) {
@@ -154,11 +268,5 @@ public class OnScreenNotification {
             return true;
         }
         return false;
-    }
-
-    public static int[] getNotificationPosition(Notification notif, int screenWidth, int screenHeight, int yOffset) {
-        int x = screenWidth - WIDTH;
-        int y = screenHeight - notif.height - yOffset;
-        return new int[]{x, y};
     }
 }

@@ -58,6 +58,8 @@ public class ModConfig {
     // Mining
     public boolean displayGlaciteWaypoints = true;
     public GlaciteWaypoints glaciteWaypoints = GlaciteWaypoints.BOTH;
+    public boolean powderChestNotification = true;
+    public int powderChestNotificationTime = 60;
 
     // Chat filters & glowing players
     private final Map<String, Boolean> chatFilters = new HashMap<>();
@@ -150,6 +152,8 @@ public class ModConfig {
             INSTANCE.hudIslandFunFact = loaded.hudIslandFunFact;
             INSTANCE.displayGlaciteWaypoints = loaded.displayGlaciteWaypoints;
             INSTANCE.glaciteWaypoints = loaded.glaciteWaypoints != null ? loaded.glaciteWaypoints : GlaciteWaypoints.BOTH;
+            INSTANCE.powderChestNotification = loaded.powderChestNotification;
+            INSTANCE.powderChestNotificationTime = loaded.powderChestNotificationTime;
             INSTANCE.glowingPlayers = loaded.glowingPlayers != null ? new ArrayList<>(loaded.glowingPlayers) : new ArrayList<>();
 
             loaded.chatFilters.forEach(INSTANCE::setChatFilter);

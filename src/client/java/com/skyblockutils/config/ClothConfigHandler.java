@@ -136,6 +136,14 @@ public class ClothConfigHandler {
                 .setDefaultValue(ModConfig.GlaciteWaypoints.BOTH).setTooltip(Component.literal("Which waypoints to display: Umber, Tungsten, or Both"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.glaciteWaypoints = v).build());
 
+        mining.add(eb.startBooleanToggle(Component.literal("Powder Chest Notifications"), ModConfig.INSTANCE.powderChestNotification)
+                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to replace powder chest reward messages with a notification"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.powderChestNotification = v).build());
+
+        mining.add(eb.startIntSlider(Component.literal("Powder Chest Notification Time (tick)"), ModConfig.INSTANCE.powderChestNotificationTime, 20, 100)
+                .setDefaultValue(60).setTooltip(Component.literal("Time in ticks of the powder chest notification"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.powderChestNotificationTime = v).build());
+
         return mining;
     }
 

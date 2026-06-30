@@ -193,7 +193,11 @@ public class GlowingPlayerCreationScreen extends Screen {
             PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> {
                 if (formattedName == null) {
                     Minecraft.getInstance().execute(() ->
-                            OnScreenNotification.renderNotification("Player Not Found", "\"" + name + "\" doesn't exist.", 100)
+                            OnScreenNotification.builder()
+                                    .title("Player Not Found")
+                                    .subtitle("\"" + name + "\" doesn't exist.")
+                                    .tickTime(100)
+                                    .send()
                     );
                     return;
                 }

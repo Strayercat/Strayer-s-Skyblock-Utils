@@ -172,7 +172,12 @@ public class ModCommands {
                 )
                 .then(ClientCommands.literal("dev")
                         .then(ClientCommands.literal("testnotification").executes(context -> {
-                            OnScreenNotification.renderNotification("Test", "THIS NOTIFICATION IS A TEST\nYou ran /ssu dev testNotification", 100);
+                            OnScreenNotification.builder()
+                                    .title("Test")
+                                    .subtitle("THIS NOTIFICATION IS A TEST\nYou ran /ssu dev testNotification")
+                                    .tickTime(100)
+                                    .withSound(true)
+                                    .send();
                             return 1;
                         }))
                         .then(ClientCommands.literal("teehee").executes(context -> {

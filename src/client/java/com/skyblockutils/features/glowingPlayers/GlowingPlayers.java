@@ -57,7 +57,11 @@ public class GlowingPlayers {
     public static void add(String username, int color, boolean fromGui, Runnable onSuccess) {
         if (isPlayerGlowing(username)) {
             if (fromGui) {
-                OnScreenNotification.renderNotification("Already Glowing", username + " is already glowing!", 60);
+                OnScreenNotification.builder()
+                        .title("Already Glowing")
+                        .subtitle(username + " is already glowing")
+                        .tickTime(60)
+                        .send();
             } else {
                 ModFunctions.displayTextMessageWithHeader("§c" + username + " is already glowing!");
             }
@@ -75,7 +79,11 @@ public class GlowingPlayers {
                         if (onSuccess != null) onSuccess.run();
                     } else {
                         if (fromGui) {
-                            OnScreenNotification.renderNotification("Player Not Found", "\"" + username + "\" doesn't exist.", 100);
+                            OnScreenNotification.builder()
+                                    .title("Player Not Found")
+                                    .subtitle("\"" + username + "\" doesn't exist.")
+                                    .tickTime(100)
+                                    .send();
                         } else {
                             ModFunctions.displayTextMessageWithHeader("§cPlayer " + username + " not found :c");
                         }
