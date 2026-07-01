@@ -34,14 +34,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public static boolean isInSkyblock = false;
+    private static boolean soundListenerRegistered = false;
 
     @Override
     public void onInitializeClient() {
@@ -73,11 +70,17 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (!soundListenerRegistered) {
+                client.getSoundManager().addListener(new PowderChestNotifications());
+                soundListenerRegistered = true;
+            }
+
             OnScreenNotification.tick();
             ClothConfigHandler.handleConfigScreen(client);
             GlowingPlayersGui.handleConfigScreen(client);
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
             ScreenshotManager.tick();
+            PowderChestNotifications.tick();
 
             if (client.level == null) return;
 
@@ -107,28 +110,22 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ChatCommands.handleCommands(cleanMessage);
             PartyCommands.handlePartyCommands(cleanMessage);
             PartyInfo.handlePartyMessages(cleanMessage);
+            PowderChestNotifications.handleMessage(message);
         });
-
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, _) -> {
             if (!isInSkyblock) return true;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
             boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
-            boolean powderChestMessage = PowderChestNotifications.handleMessage(message);
+            boolean powderChestMessage = PowderChestNotifications.parseChestReward(message);
             return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage;
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);
 
-        UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
-            BlockPos pos = hitResult.getBlockPos();
-            BlockState state = level.getBlockState(pos);
-
-            if (state.getBlock() instanceof ChestBlock) {
-                    PowderChestNotifications.handleChestClick();
-            }
-            return InteractionResult.PASS;
+        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+            return PowderChestNotifications.handleChestclick(hitResult);
         });
     }
 }

@@ -6,6 +6,7 @@ import com.skyblockutils.features.hud.SsuHud;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
+import com.skyblockutils.features.mining.PowderChestNotifications;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.PingDebugMonitorAccessor;
@@ -51,6 +52,7 @@ public class ModFunctions {
         AutoFish.resetAutoFish();
         NpcFinder.clear();
         SideBarUtils.resetLocation();
+        PowderChestNotifications.resetKnownChests();
     }
 
     public static void calculatePing(Minecraft client, ClientPacketListener listener) {
