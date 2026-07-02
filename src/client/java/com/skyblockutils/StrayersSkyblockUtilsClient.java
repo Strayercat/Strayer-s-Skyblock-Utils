@@ -110,22 +110,23 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ChatCommands.handleCommands(cleanMessage);
             PartyCommands.handlePartyCommands(cleanMessage);
             PartyInfo.handlePartyMessages(cleanMessage);
-            PowderChestNotifications.handleMessage(message);
         });
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, _) -> {
             if (!isInSkyblock) return true;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
+
+            PowderChestNotifications.handleMessage(message);
+
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
-            boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
             boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
             boolean powderChestMessage = PowderChestNotifications.parseChestReward(message);
+
+            boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
             return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage;
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);
 
-        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-            return PowderChestNotifications.handleChestclick(hitResult);
-        });
+        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> PowderChestNotifications.handleChestclick(hitResult));
     }
 }

@@ -176,7 +176,9 @@ public class PowderChestNotifications implements SoundEventListener {
         if (!ModConfig.INSTANCE.powderChestNotification || !ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows"))
             return;
         String soundId = sound.getIdentifier().toString();
-        if (!soundId.equals("minecraft:block.chest.open") && !soundId.equals("minecraft:entity.cat.purreow")) return;
+        System.out.println("[SSU DEBUG] Sound played: " + soundId + " category=" + sound.getSource());
+
+        if (!soundId.equals("minecraft:block.chest.open")) return;
 
         Minecraft client = Minecraft.getInstance();
         BlockPos targetedChest = getTargetedChestPos(client);
@@ -255,7 +257,6 @@ public class PowderChestNotifications implements SoundEventListener {
                             .title(matchedLockpick ? "CHEST LOCKPICKED" : "LOOT CHEST")
                             .subtitle(subtitle)
                             .tickTime(ModConfig.INSTANCE.powderChestNotificationTime)
-                            .withSound(true)
                             .send();
                     if (matchedLockpick) EXPECTING_LOCKPICK_CHEST = false;
                     if (matchedLoot) EXPECTING_LOOT_CHEST = false;
