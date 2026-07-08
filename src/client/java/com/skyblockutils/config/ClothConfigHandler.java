@@ -29,6 +29,7 @@ public class ClothConfigHandler {
         buildGeneralCategory(builder, eb);
         buildHudCategory(builder, eb);
         buildChatFiltersCategory(builder, eb);
+        buildEventsCategory(builder, eb);
 
         return builder.build();
     }
@@ -51,6 +52,19 @@ public class ClothConfigHandler {
                     return Component.literal(name).withColor(rgb);
                 })
                 .setSaveConsumer(v -> ModConfig.INSTANCE.colorStyle = v).requireRestart().build());
+
+        general.addEntry(eb.startEnumSelector(Component.literal("Notification Style"), ModStyle.NotificationStyle.class, ModConfig.INSTANCE.notificationStyle)
+                .setDefaultValue(ModStyle.NotificationStyle.ROUNDED)
+                .setEnumNameProvider(value -> {
+                    ModStyle.NotificationStyle style = (ModStyle.NotificationStyle) value;
+                    int rgb = ModConfig.INSTANCE.colorStyle.getColor(ModStyle.ColorType.MAIN);
+                    String hudStyle = switch (style) {
+                        case ModStyle.NotificationStyle.ROUNDED -> "Modern";
+                        case ModStyle.NotificationStyle.LEGACY -> "Legacy";
+                    };
+                    return Component.literal(hudStyle).withColor(rgb);
+                })
+                .setSaveConsumer(v -> ModConfig.INSTANCE.notificationStyle = v).build());
 
         general.addEntry(eb.startBooleanToggle(Component.literal("Party Invite Notifications"), ModConfig.INSTANCE.partyInviteNotifications)
                 .setDefaultValue(true).setTooltip(Component.literal("Sends party invites as a notification instead of a chat message"))
@@ -243,5 +257,30 @@ public class ClothConfigHandler {
         }
 
         return sub;
+    }
+
+    private static void buildEventsCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
+        ConfigCategory category = builder.getOrCreateCategory(Component.literal("Events"));
+
+        category.addEntry(buildSpookyFestSubcategory(eb).build());
+    }
+
+    private static SubCategoryBuilder buildSpookyFestSubcategory(ConfigEntryBuilder eb) {
+        SubCategoryBuilder spookyFest = eb.startSubCategory(Component.literal("Spooky Festival"))
+                .setTooltip(Component.literal("Spooky Festival Related Features"));
+
+        spookyFest.add(eb.startBooleanToggle(Component.literal("Spooky Chest Title"), ModConfig.INSTANCE.spookyChestTitle)
+                .setDefaultValue(true).setTooltip(Component.literal("Replace the spooky chest appearing message for a title"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.spookyChestTitle = v).build());
+
+        spookyFest.add(eb.startBooleanToggle(Component.literal("Spooky Rewards Notification"), ModConfig.INSTANCE.spookyLootNotification)
+                .setDefaultValue(true).setTooltip(Component.literal("Send an SSU notification with the spooky chest rewards"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.spookyLootNotification = v).build());
+
+        spookyFest.add(eb.startBooleanToggle(Component.literal("Trick Jumpscare"), ModConfig.INSTANCE.spookyTrickJumpscare)
+                .setDefaultValue(true).setTooltip(Component.literal("Send a 'BOO!' title when you get tricked"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.spookyTrickJumpscare = v).build());
+
+        return spookyFest;
     }
 }

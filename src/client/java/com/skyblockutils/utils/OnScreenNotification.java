@@ -17,9 +17,18 @@ import java.util.Optional;
 import java.util.Queue;
 
 public class OnScreenNotification {
-    private static final int WIDTH = 145;
+    private static final int WIDTH = 120;
     private static final int MARGIN = 2;
     private static final int PADDING = 5;
+    private static final int CORNER_RADIUS = 4;
+    private static final int DIVIDER_HEIGHT = 1;
+    private static final int DIVIDER_MARGIN = 2;
+    private static final int DIVIDER_SPACE = DIVIDER_HEIGHT + DIVIDER_MARGIN * 2;
+
+    private static final int SCREEN_MARGIN_X = 3;
+    private static final int SCREEN_MARGIN_Y = 3;
+
+    private static final float TEXT_SCALE = 0.8f;
 
     private static final List<String> HOVER_TEXT = List.of("Right click to dismiss", "Middle click to copy");
 
@@ -44,11 +53,10 @@ public class OnScreenNotification {
         }
 
         private int calculateHeight(String title, String subtitle) {
-            Minecraft mc = Minecraft.getInstance();
-            int lineHeight = mc.font.lineHeight + 2;
+            int lineStep = scaledLineStep();
             int titleLines = wrapText(title).size();
             int subtitleLines = wrapText(subtitle).size();
-            return (titleLines + subtitleLines) * lineHeight + PADDING * 2;
+            return titleLines * lineStep + DIVIDER_SPACE + subtitleLines * lineStep + PADDING * 2;
         }
 
         boolean isClicked(int mouseX, int mouseY) {
@@ -130,10 +138,20 @@ public class OnScreenNotification {
     }
 
     public static void render(GuiGraphicsExtractor context, int screenWidth, int screenHeight) {
+        if (ModConfig.INSTANCE.notificationStyle == ModStyle.NotificationStyle.LEGACY) {
+            renderLegacy(context, screenWidth, screenHeight);
+        } else {
+            renderRounded(context, screenWidth, screenHeight);
+        }
+    }
+
+    private static void renderLegacy(GuiGraphicsExtractor context, int screenWidth, int screenHeight) {
         if (notifications.isEmpty()) return;
 
         int yOffset = 0;
         Minecraft mc = Minecraft.getInstance();
+
+        boolean guiOpen = mc.gui.screen() != null;
 
         double mouseX = mc.mouseHandler.xpos() * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getWidth();
         double mouseY = mc.mouseHandler.ypos() * mc.getWindow().getGuiScaledHeight() / mc.getWindow().getHeight();
@@ -145,7 +163,7 @@ public class OnScreenNotification {
             float alpha = Math.min(1.0f, notif.ticks / 20.0f);
             int alphaInt = (int) (alpha * 255) << 24;
 
-            boolean isHovered = notif.isClicked((int) mouseX, (int) mouseY);
+            boolean isHovered = guiOpen && notif.isClicked((int) mouseX, (int) mouseY);
 
             context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + notif.height, 0x1a1a1a | alphaInt);
 
@@ -194,16 +212,125 @@ public class OnScreenNotification {
         }
     }
 
+    private static void renderRounded(GuiGraphicsExtractor context, int screenWidth, int screenHeight) {
+        if (notifications.isEmpty()) return;
+
+        int yOffset = 0;
+        Minecraft mc = Minecraft.getInstance();
+
+        boolean guiOpen = mc.gui.screen() != null;
+
+        double mouseX = mc.mouseHandler.xpos() * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getWidth();
+        double mouseY = mc.mouseHandler.ypos() * mc.getWindow().getGuiScaledHeight() / mc.getWindow().getHeight();
+
+        int accentColor = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
+
+        for (Notification notif : notifications) {
+            notif.x = screenWidth - WIDTH - SCREEN_MARGIN_X;
+            notif.y = screenHeight - notif.height - yOffset - SCREEN_MARGIN_Y;
+
+            float alpha = Math.min(1.0f, notif.ticks / 20.0f);
+            int alphaInt = (int) (alpha * 255) << 24;
+
+            boolean isHovered = guiOpen && notif.isClicked((int) mouseX, (int) mouseY);
+
+            fillRounded(context, notif.x, notif.y, notif.x + WIDTH, notif.y + notif.height,
+                    accentColor | alphaInt, CORNER_RADIUS);
+            fillRounded(context, notif.x + 1, notif.y + 1, notif.x + WIDTH - 1, notif.y + notif.height - 1,
+                    0x1a1a1a | alphaInt, Math.max(0, CORNER_RADIUS - 1));
+
+            var titleLines = wrapText(notif.title);
+            var subtitleLines = wrapText(notif.subtitle);
+
+            int lineY = notif.y + PADDING;
+            int lineStep = scaledLineStep();
+
+            for (String line : titleLines) {
+                int scaledWidth = Math.round(mc.font.width(line) * TEXT_SCALE);
+                int lineX = notif.x + (WIDTH - scaledWidth) / 2;
+                drawScaledText(context, mc, line, lineX, lineY, notif.titleColor | alphaInt);
+                lineY += lineStep;
+            }
+
+            lineY += DIVIDER_MARGIN;
+            context.fill(notif.x + 1, lineY, notif.x + WIDTH - 1, lineY + DIVIDER_HEIGHT, accentColor | alphaInt);
+            lineY += DIVIDER_HEIGHT + DIVIDER_MARGIN;
+
+            for (String line : subtitleLines) {
+                drawScaledText(context, mc, line, notif.x + PADDING, lineY, 0xAAAAAA | alphaInt);
+                lineY += lineStep;
+            }
+
+            if (isHovered && !notif.copied) {
+                int overlayTop = notif.y + 1;
+                int overlayBottom = notif.y + notif.height - 1;
+
+                float overlayOpacity = 0.85f;
+                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
+                context.fill(notif.x + 1, overlayTop, notif.x + WIDTH - 1, overlayBottom, 0x2a2a2a | overlayAlphaInt);
+
+                drawCenteredOverlayText(context, mc, HOVER_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
+            }
+
+            if (notif.copied && notif.copiedTimestamp + 2000 > System.currentTimeMillis()) {
+                int overlayTop = notif.y + 1;
+                int overlayBottom = notif.y + notif.height - 1;
+
+                float overlayOpacity = 0.85f;
+                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
+                context.fill(notif.x + 1, overlayTop, notif.x + WIDTH - 1, overlayBottom, 0x2a2a2a | overlayAlphaInt);
+
+                drawCenteredOverlayText(context, mc, List.of("Copied ✓"), notif.x, overlayTop, overlayBottom, alphaInt);
+            }
+
+            yOffset += notif.height + MARGIN;
+        }
+    }
+
+    private static void drawScaledText(GuiGraphicsExtractor context, Minecraft mc, String line, int x, int y, int color) {
+        context.pose().pushMatrix();
+        context.pose().translate(x, y);
+        context.pose().scale(TEXT_SCALE, TEXT_SCALE);
+        context.text(mc.font, line, 0, 0, color, false);
+        context.pose().popMatrix();
+    }
+
+    private static int scaledLineStep() {
+        Minecraft mc = Minecraft.getInstance();
+        return Math.round(mc.font.lineHeight * TEXT_SCALE) + 2;
+    }
+
+    private static void fillRounded(GuiGraphicsExtractor context, int x1, int y1, int x2, int y2, int color, int radius) {
+        int width = x2 - x1;
+        int height = y2 - y1;
+        radius = Math.min(radius, Math.min(width, height) / 2);
+
+        if (radius <= 0) {
+            context.fill(x1, y1, x2, y2, color);
+            return;
+        }
+
+        context.fill(x1, y1 + radius, x2, y2 - radius, color);
+
+        for (int i = 0; i < radius; i++) {
+            double dy = radius - i - 0.5;
+            int inset = (int) Math.round(radius - Math.sqrt(Math.max(0, radius * radius - dy * dy)));
+
+            context.fill(x1 + inset, y1 + i, x2 - inset, y1 + i + 1, color);
+            context.fill(x1 + inset, y2 - i - 1, x2 - inset, y2 - i, color);
+        }
+    }
+
     private static void drawCenteredOverlayText(GuiGraphicsExtractor context, Minecraft mc, List<String> lines,
                                                 int x, int top, int bottom, int alphaInt) {
-        int lineStep = mc.font.lineHeight + 2;
+        int lineStep = scaledLineStep();
         int blockHeight = lines.size() * lineStep - 2;
 
         int lineY = top + (bottom - top - blockHeight) / 2;
         for (String line : lines) {
-            int lineWidth = mc.font.width(line);
-            int lineX = x + (OnScreenNotification.WIDTH - lineWidth) / 2;
-            context.text(mc.font, line, lineX, lineY, 16777215 | alphaInt, false);
+            int scaledWidth = Math.round(mc.font.width(line) * TEXT_SCALE);
+            int lineX = x + (OnScreenNotification.WIDTH - scaledWidth) / 2;
+            drawScaledText(context, mc, line, lineX, lineY, 16777215 | alphaInt);
             lineY += lineStep;
         }
     }
@@ -211,6 +338,9 @@ public class OnScreenNotification {
     private static List<String> wrapText(String text) {
         List<String> lines = new ArrayList<>();
         Minecraft mc = Minecraft.getInstance();
+
+        int contentWidth = WIDTH - PADDING * 2;
+        double wrapWidth = contentWidth / TEXT_SCALE;
 
         String[] paragraphs = text.split("\n", -1);
 
@@ -220,7 +350,7 @@ public class OnScreenNotification {
 
             for (String word : words) {
                 String testLine = currentLine.isEmpty() ? word : currentLine + " " + word;
-                if (mc.font.width(testLine) <= 135) {
+                if (mc.font.width(testLine) <= wrapWidth) {
                     currentLine = new StringBuilder(testLine);
                 } else {
                     if (!currentLine.isEmpty()) {
@@ -280,12 +410,14 @@ public class OnScreenNotification {
     }
 
     public static boolean handleNotificationClicks(int mouseX, int mouseY, int button, int screenWidth, int screenHeight) {
+        if (Minecraft.getInstance().gui.screen() == null) return false;
+
         int yOffset = 0;
         Notification toRemove = null;
 
         for (Notification notif : notifications) {
-            int x = screenWidth - WIDTH;
-            int y = screenHeight - notif.height - yOffset;
+            int x = screenWidth - WIDTH - SCREEN_MARGIN_X;
+            int y = screenHeight - notif.height - yOffset - SCREEN_MARGIN_Y;
 
             boolean hit = mouseX >= x && mouseX <= x + WIDTH
                     && mouseY >= y && mouseY <= y + notif.height;

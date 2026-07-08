@@ -13,8 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class WorldTimeMixin {
     @Unique private long lastTimeUpdate = -1;
     @Unique private long lastWorldTime = -1;
-    @Unique private final float[] tpsSamples = new float[10];
-    @Unique private int sampleIndex = 0;
 
     @Inject(at = @At("HEAD"), method = "handleSetTime")
     private void onWorldTimeUpdate(ClientboundSetTimePacket packet, CallbackInfo ci) {
@@ -26,14 +24,7 @@ public class WorldTimeMixin {
             long msPassed = now - lastTimeUpdate;
 
             if (ticksPassed > 0 && msPassed > 0) {
-                float sample = Math.min(20f, ticksPassed / (msPassed / 1000f));
-                tpsSamples[sampleIndex % tpsSamples.length] = sample;
-                sampleIndex++;
-
-                float sum = 0;
-                int count = Math.min(sampleIndex, tpsSamples.length);
-                for (int i = 0; i < count; i++) sum += tpsSamples[i];
-                ModFunctions.tps = sum / count;
+                ModFunctions.tps = Math.min(20f, ticksPassed / (msPassed / 1000f));
             }
         }
 

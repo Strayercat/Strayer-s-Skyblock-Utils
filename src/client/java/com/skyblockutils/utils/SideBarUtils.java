@@ -25,9 +25,9 @@ public class SideBarUtils {
                             : entry.owner();
                     return raw.replaceAll("(?i)§.", "").trim();
                 })
-                .filter(line -> line.contains("⏣") || line.contains("ф"))
+                .filter(line -> line.contains("\uE067") || line.contains("ф"))
                 .findFirst()
-                .ifPresent(line -> location = line);
+                .ifPresent(line -> location = line.replaceAll("\uE067", "").trim());
     }
 
     public static List<String> getSidebarLines() {

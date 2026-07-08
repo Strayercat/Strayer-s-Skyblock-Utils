@@ -4,10 +4,8 @@ import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SideBarUtils;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 
@@ -44,8 +42,7 @@ public class CorlTimer {
 
                 scheduler.schedule(() -> {
                     if (client.level == null || !corlTimerEnabled) return;
-                    client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1.0F));
-                    ModFunctions.showTitle(client, Component.literal("CORL").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20);
+                    ModFunctions.showTitle(client, Component.literal("CORL").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20, true);
                     waitTime = false;
                 }, 1, TimeUnit.MINUTES);
             }

@@ -36,8 +36,8 @@ public class PowderChestNotifications implements SoundEventListener {
     private static final List<BlockPos> KNOWN_CHEST_LOCATIONS = new ArrayList<>();
     private static final List<BlockPos> LOCKPICK_CHEST_LOCATIONS = new ArrayList<>();
 
-    private static boolean EXPECTING_LOCKPICK_CHEST = false;
-    private static boolean EXPECTING_LOOT_CHEST = false;
+    private static int EXPECTING_LOCKPICK_CHEST = 0;
+    private static int EXPECTING_LOOT_CHEST = 0;
 
     private static boolean reading = false;
     private static final List<Component> buffer = new ArrayList<>();
@@ -64,11 +64,11 @@ public class PowderChestNotifications implements SoundEventListener {
         BlockPos pos = hitResult.getBlockPos().immutable();
 
         if (LOCKPICK_CHEST_LOCATIONS.contains(pos)) {
-            EXPECTING_LOCKPICK_CHEST = true;
+            EXPECTING_LOCKPICK_CHEST++;
             LOCKPICK_CHEST_LOCATIONS.remove(pos);
             KNOWN_CHEST_LOCATIONS.remove(pos);
-        } else if (KNOWN_CHEST_LOCATIONS.contains(pos) && !SideBarUtils.location.equals("⏣ Mines of Divan")) {
-            EXPECTING_LOOT_CHEST = true;
+        } else if (KNOWN_CHEST_LOCATIONS.contains(pos) && !SideBarUtils.location.equals("Mines of Divan")) {
+            EXPECTING_LOOT_CHEST++;
             KNOWN_CHEST_LOCATIONS.remove(pos);
         }
 
@@ -167,8 +167,8 @@ public class PowderChestNotifications implements SoundEventListener {
         LOCKPICK_CHEST_LOCATIONS.clear();
         RECENT_CHEST_TARGETS.clear();
         pendingNewScanTicks = 0;
-        EXPECTING_LOOT_CHEST = false;
-        EXPECTING_LOCKPICK_CHEST = false;
+        EXPECTING_LOOT_CHEST = 0;
+        EXPECTING_LOCKPICK_CHEST = 0;
     }
 
     @Override
@@ -176,7 +176,6 @@ public class PowderChestNotifications implements SoundEventListener {
         if (!ModConfig.INSTANCE.powderChestNotification || !ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows"))
             return;
         String soundId = sound.getIdentifier().toString();
-        System.out.println("[SSU DEBUG] Sound played: " + soundId + " category=" + sound.getSource());
 
         if (!soundId.equals("minecraft:block.chest.open")) return;
 
@@ -192,11 +191,11 @@ public class PowderChestNotifications implements SoundEventListener {
         }
 
         if (LOCKPICK_CHEST_LOCATIONS.contains(targetedChest)) {
-            EXPECTING_LOCKPICK_CHEST = true;
+            EXPECTING_LOCKPICK_CHEST++;
             LOCKPICK_CHEST_LOCATIONS.remove(targetedChest);
             KNOWN_CHEST_LOCATIONS.remove(targetedChest);
-        } else if (KNOWN_CHEST_LOCATIONS.contains(targetedChest) && !SideBarUtils.location.equals("⏣ Mines of Divan")) {
-            EXPECTING_LOOT_CHEST = true;
+        } else if (KNOWN_CHEST_LOCATIONS.contains(targetedChest) && !SideBarUtils.location.equals("Mines of Divan")) {
+            EXPECTING_LOOT_CHEST++;
             KNOWN_CHEST_LOCATIONS.remove(targetedChest);
         } else {
             KNOWN_CHEST_LOCATIONS.remove(targetedChest);
@@ -221,7 +220,7 @@ public class PowderChestNotifications implements SoundEventListener {
         if (!ModConfig.INSTANCE.powderChestNotification || !ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows"))
             return true;
 
-        boolean expectingAny = EXPECTING_LOCKPICK_CHEST || EXPECTING_LOOT_CHEST;
+        boolean expectingAny = EXPECTING_LOCKPICK_CHEST > 0 || EXPECTING_LOOT_CHEST > 0;
 
         if (!reading && !expectingAny) return true;
 
@@ -238,8 +237,8 @@ public class PowderChestNotifications implements SoundEventListener {
                 reading = false;
                 closingBorder = message;
 
-                boolean matchedLockpick = EXPECTING_LOCKPICK_CHEST && isBufferValid("CHEST LOCKPICKED");
-                boolean matchedLoot = EXPECTING_LOOT_CHEST && isBufferValid("LOOT CHEST COLLECTED");
+                boolean matchedLockpick = EXPECTING_LOCKPICK_CHEST > 0 && isBufferValid("CHEST LOCKPICKED");
+                boolean matchedLoot = EXPECTING_LOOT_CHEST > 0 && isBufferValid("LOOT CHEST COLLECTED");
 
                 if (matchedLockpick || matchedLoot) {
 
@@ -258,8 +257,8 @@ public class PowderChestNotifications implements SoundEventListener {
                             .subtitle(subtitle)
                             .tickTime(ModConfig.INSTANCE.powderChestNotificationTime)
                             .send();
-                    if (matchedLockpick) EXPECTING_LOCKPICK_CHEST = false;
-                    if (matchedLoot) EXPECTING_LOOT_CHEST = false;
+                    if (matchedLockpick) EXPECTING_LOCKPICK_CHEST--;
+                    if (matchedLoot) EXPECTING_LOOT_CHEST--;
 
                     buffer.clear();
                 } else {

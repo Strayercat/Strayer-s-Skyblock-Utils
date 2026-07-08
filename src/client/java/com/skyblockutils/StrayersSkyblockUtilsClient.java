@@ -6,6 +6,7 @@ import com.skyblockutils.features.*;
 import com.skyblockutils.features.chat.ChatCommands;
 import com.skyblockutils.features.chat.ChatFilter;
 import com.skyblockutils.features.chat.FancyEmotes;
+import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.mining.PowderChestNotifications;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
@@ -111,6 +112,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             PartyCommands.handlePartyCommands(cleanMessage);
             PartyInfo.handlePartyMessages(cleanMessage);
         });
+
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, _) -> {
             if (!isInSkyblock) return true;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
@@ -120,9 +122,10 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
             boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
             boolean powderChestMessage = PowderChestNotifications.parseChestReward(message);
+            boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
 
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
-            return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage;
+            return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage && spookyFestMessage;
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);

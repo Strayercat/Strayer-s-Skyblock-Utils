@@ -4,9 +4,7 @@ import com.skyblockutils.ModFunctions;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 
 import java.util.ArrayList;
@@ -75,8 +73,7 @@ public class PuffTracker {
         }
         currentScheduledAction = scheduler.schedule(() -> {
             if (client.level == null) return;
-            client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1.0F));
-            ModFunctions.showTitle(client, Component.literal("KILL PUFFS").withColor(ModStyle.getColor(ModStyle.ColorStyle.OCEAN, ModStyle.ColorType.MAIN)), 20);
+            ModFunctions.showTitle(client, Component.literal("KILL PUFFS").withColor(ModStyle.getColor(ModStyle.ColorStyle.OCEAN, ModStyle.ColorType.MAIN)), 20, true);
         }, 75, TimeUnit.SECONDS);
     }
 

@@ -167,12 +167,12 @@ public class SsuHud {
             }
         }
 
-        if (location.equals("⏣ Dungeon Hub") || ModFunctions.isInDungeons(client)) {
+        if (location.equals("Dungeon Hub") || ModFunctions.isInDungeons(client)) {
             addDungeonSection(lines, anyGeneralInfo);
             return lines;
         }
 
-        if (location.equals("⏣ Your Island") && ModConfig.INSTANCE.hudIslandFunFact) {
+        if (location.equals("Your Island") && ModConfig.INSTANCE.hudIslandFunFact) {
             if (!funFactHandled) funFact = FunFacts.funFacts.get((int) (Math.random() * FunFacts.funFacts.size()));
             if (anyGeneralInfo) addDivider(lines);
             lines.addAll(wrapText("Fun fact: " + funFact));

@@ -212,7 +212,7 @@ public class ModCommands {
                         )
                         .then(ClientCommands.literal("title")
                                 .executes(context -> {
-                                    ModFunctions.showTitle(Minecraft.getInstance(), Component.literal("TEST TITLE").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20);
+                                    ModFunctions.showTitle(Minecraft.getInstance(), Component.literal("TEST TITLE").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20, true);
                                     return 1;
                                 })
                         )

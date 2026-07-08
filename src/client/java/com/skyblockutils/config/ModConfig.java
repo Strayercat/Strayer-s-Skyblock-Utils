@@ -24,6 +24,7 @@ public class ModConfig {
 
     // General
     public ModStyle.ColorStyle colorStyle = ModStyle.ColorStyle.ORIGINAL;
+    public ModStyle.NotificationStyle notificationStyle = ModStyle.NotificationStyle.ROUNDED;
     public boolean chatFiltersEnabled = true;
     public boolean partyInviteNotifications = true;
     public boolean fancyEmotes = true;
@@ -64,6 +65,11 @@ public class ModConfig {
     // Chat filters & glowing players
     private final Map<String, Boolean> chatFilters = new HashMap<>();
     private List<GlowingPlayer> glowingPlayers = new ArrayList<>();
+
+    // Events
+    public boolean spookyChestTitle = true;
+    public boolean spookyLootNotification = true;
+    public boolean spookyTrickJumpscare = false;
 
     // Enums
     public enum GlaciteWaypoints {

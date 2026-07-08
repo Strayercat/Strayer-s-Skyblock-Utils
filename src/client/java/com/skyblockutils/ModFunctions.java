@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.debugchart.LocalSampleLogger;
 import net.minecraft.world.scores.DisplaySlot;
 
@@ -92,7 +93,7 @@ public class ModFunctions {
                 + " z:" + (int) client.player.getZ();
 
         String coordinatesMessage = (arguments.contains("withLocation")
-                ? SideBarUtils.location.isEmpty() ? "" : SideBarUtils.location + " | "
+                ? SideBarUtils.location.isEmpty() ? "" : "⏣ " + SideBarUtils.location + " | "
                 : "") + coordinates;
 
         client.getConnection().sendChat(coordinatesMessage);
@@ -111,10 +112,11 @@ public class ModFunctions {
         return coordinatesText;
     }
 
-    public static void showTitle(Minecraft client, Component title, int displayTime) {
+    public static void showTitle(Minecraft client, Component title, int displayTime, boolean withSound) {
         if (client.player != null) {
             client.gui.hud.setTimes(10, displayTime, 10);
             client.gui.hud.setTitle(title);
+            if (withSound) client.player.playSound(SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value());
         }
     }
 
@@ -154,112 +156,112 @@ public class ModFunctions {
 
         return switch (location) {
             // Hub and all sub-locations
-            case "⏣ Hub", "⏣ Canvas Room", "⏣ Carnival", "⏣ Combat Settlement",
-                 "⏣ Archery Range", "⏣ Library", "⏣ Thaumaturgist", "⏣ Trade Center",
-                 "⏣ Colosseum", "⏣ Election Room", "⏣ Farm", "⏣ Farmhouse",
-                 "⏣ Fishing Outpost", "⏣ Fisherman's Hut", "⏣ Forest", "⏣ Foraging Camp",
-                 "⏣ Graveyard", "⏣ Hub Crypts", "⏣ Tavern", "⏣ Mining District",
-                 "⏣ Blacksmith", "⏣ Coal Mine", "⏣ Mountain", "⏣ Wizard Tower",
-                 "⏣ Regalia Room", "⏣ Ruins", "⏣ Unincorporated", "⏣ Village",
-                 "⏣ Abiphones & Co.", "⏣ Auction House", "⏣ Bank", "⏣ Bazaar Alley",
-                 "⏣ Builder's House", "⏣ Community Center", "⏣ Fashion Shop",
-                 "⏣ Flower House", "⏣ Hexatorum", "⏣ Museum", "⏣ Pet Care",
-                 "⏣ Rabbit House", "⏣ Sewer", "⏣ Shen's Auction", "⏣ Taylor's Shop",
-                 "⏣ Wilderness", "⏣ Artist's Abode", "⏣ Dark Auction" -> "Hub";
+            case "Hub", "Canvas Room", "Carnival", "Combat Settlement",
+                 "Archery Range", "Library", "Thaumaturgist", "Trade Center",
+                 "Colosseum", "Election Room", "Farm", "Farmhouse",
+                 "Fishing Outpost", "Fisherman's Hut", "Forest", "Foraging Camp",
+                 "Graveyard", "Hub Crypts", "Tavern", "Mining District",
+                 "Blacksmith", "Coal Mine", "Mountain", "Wizard Tower",
+                 "Regalia Room", "Ruins", "Unincorporated", "Village",
+                 "Abiphones & Co.", "Auction House", "Bank", "Bazaar Alley",
+                 "Builder's House", "Community Center", "Fashion Shop",
+                 "Flower House", "Hexatorum", "Museum", "Pet Care",
+                 "Rabbit House", "Sewer", "Shen's Auction", "Taylor's Shop",
+                 "Wilderness", "Artist's Abode", "Dark Auction" -> "Hub";
 
             // Private Island
-            case "⏣ Private Island" -> "Private Island";
+            case "Private Island" -> "Private Island";
 
             // The Garden
-            case "⏣ The Garden" -> "The Garden";
+            case "The Garden" -> "The Garden";
 
             // The Park and sub-locations
-            case "⏣ Birch Park", "⏣ Spruce Woods", "⏣ Viking Longhouse",
-                 "⏣ Dark Thicket", "⏣ Howling Cave", "⏣ Trials of Fire",
-                 "⏣ Savanna Woodland", "⏣ Soul Cave", "⏣ Melody's Plateau",
-                 "⏣ Jungle Island", "⏣ Spirit Cave" -> "The Park";
+            case "Birch Park", "Spruce Woods", "Viking Longhouse",
+                 "Dark Thicket", "Howling Cave", "Trials of Fire",
+                 "Savanna Woodland", "Soul Cave", "Melody's Plateau",
+                 "Jungle Island", "Spirit Cave" -> "The Park";
 
             // Galatea / Moonglade Marsh
-            case "⏣ Moonglade Marsh", "⏣ Ancient Ruins", "⏣ Bubbleboost Column",
-                 "⏣ Dive-Ember Pass", "⏣ Driptoad Delve", "⏣ Driptoad Pass",
-                 "⏣ Dragon's Lair", "⏣ Drowned Reliquary", "⏣ Evergreen Plateau",
-                 "⏣ Forest Temple", "⏣ Fusion House", "⏣ Kelpwoven Tunnels",
-                 "⏣ Moonglade's Edge", "⏣ Murkwater Depths", "⏣ Murkwater Loch",
-                 "⏣ Murkwater Outpost", "⏣ Murkwater Shallows", "⏣ North Reaches",
-                 "⏣ North Wetlands", "⏣ Red House", "⏣ Reefguard Pass",
-                 "⏣ Side-Ember Way", "⏣ Stride-Ember Fissure", "⏣ South Reaches",
-                 "⏣ South Wetlands", "⏣ SwampCut Inc.", "⏣ Tangleburg's Path",
-                 "⏣ Tangleburg", "⏣ Tangleburg Library", "⏣ Tangleburg Bank",
-                 "⏣ Tomb Floodway", "⏣ Tranquil Pass", "⏣ Tranquility Sanctum",
-                 "⏣ Verdant Summit", "⏣ West Reaches", "⏣ Westbound Wetlands",
-                 "⏣ Wyrmgrove Tomb" -> "Galatea";
+            case "Moonglade Marsh", "Ancient Ruins", "Bubbleboost Column",
+                 "Dive-Ember Pass", "Driptoad Delve", "Driptoad Pass",
+                 "Dragon's Lair", "Drowned Reliquary", "Evergreen Plateau",
+                 "Forest Temple", "Fusion House", "Kelpwoven Tunnels",
+                 "Moonglade's Edge", "Murkwater Depths", "Murkwater Loch",
+                 "Murkwater Outpost", "Murkwater Shallows", "North Reaches",
+                 "North Wetlands", "Red House", "Reefguard Pass",
+                 "Side-Ember Way", "Stride-Ember Fissure", "South Reaches",
+                 "South Wetlands", "SwampCut Inc.", "Tangleburg's Path",
+                 "Tangleburg", "Tangleburg Library", "Tangleburg Bank",
+                 "Tomb Floodway", "Tranquil Pass", "Tranquility Sanctum",
+                 "Verdant Summit", "West Reaches", "Westbound Wetlands",
+                 "Wyrmgrove Tomb" -> "Galatea";
 
             // The Barn
-            case "⏣ The Barn", "⏣ Windmill" -> "The Barn";
+            case "The Barn", "Windmill" -> "The Barn";
 
             // Mushroom Desert
-            case "⏣ Mushroom Desert", "⏣ Desert Settlement", "⏣ Oasis",
-                 "⏣ Shepherd's Keep", "⏣ Trapper's Den", "⏣ Jake's House",
-                 "⏣ Mushroom Gorge", "⏣ Overgrown Mushroom Cave",
-                 "⏣ Glowing Mushroom Cave" -> "Mushroom Desert";
+            case "Mushroom Desert", "Desert Settlement", "Oasis",
+                 "Shepherd's Keep", "Trapper's Den", "Jake's House",
+                 "Mushroom Gorge", "Overgrown Mushroom Cave",
+                 "Glowing Mushroom Cave" -> "Mushroom Desert";
 
             // Spider's Den
-            case "⏣ Spider's Den", "⏣ Arachne's Burrow", "⏣ Arachne's Sanctuary",
-                 "⏣ Archaeologist's Camp", "⏣ Grandma's House", "⏣ Gravel Mines",
-                 "⏣ Spider Mound" -> "Spider's Den";
+            case "Spider's Den", "Arachne's Burrow", "Arachne's Sanctuary",
+                 "Archaeologist's Camp", "Grandma's House", "Gravel Mines",
+                 "Spider Mound" -> "Spider's Den";
 
             // The End
-            case "⏣ The End", "⏣ Dragon's Nest", "⏣ Void Sepulture",
-                 "⏣ Void Slate", "⏣ Zealot Bruiser Hideout" -> "The End";
+            case "The End", "Dragon's Nest", "Void Sepulture",
+                 "Void Slate", "Zealot Bruiser Hideout" -> "The End";
 
             // Crimson Isle
-            case "⏣ Crimson Isle", "⏣ Aura's Lab", "⏣ Barbarian Outpost",
-                 "⏣ Belly of the Beast", "⏣ Blazing Volcano", "⏣ Burning Desert",
-                 "⏣ Courtyard", "⏣ Crimson Fields", "⏣ Dojo", "⏣ Dragontail",
-                 "⏣ Dragontail Auction House", "⏣ Dragontail Bank", "⏣ Dragontail Bazaar",
-                 "⏣ Dragontail Blacksmith", "⏣ Chief's Hut", "⏣ Dragontail Minion Shop",
-                 "⏣ Dragontail Townsquare", "⏣ Forgotten Skull", "⏣ Mage Outpost",
-                 "⏣ Magma Chamber", "⏣ Matriarch's Lair", "⏣ Mystic Marsh",
-                 "⏣ Odger's Hut", "⏣ Plhlegblast Pool", "⏣ Ruins of Ashfang",
-                 "⏣ Scarleton", "⏣ Scarleton Auction House", "⏣ Cathedral",
-                 "⏣ Igrupan's Chicken Coop", "⏣ Igrupan's House",
-                 "⏣ Mage Council", "⏣ Scarleton Bank", "⏣ Scarleton Bazaar",
-                 "⏣ Scarleton Blacksmith", "⏣ Scarleton Minion Shop", "⏣ Scarleton Plaza",
-                 "⏣ Throne Room", "⏣ Smoldering Tomb", "⏣ Stronghold",
-                 "⏣ The Bastion", "⏣ The Dukedom", "⏣ The Wasteland" -> "Crimson Isle";
+            case "Crimson Isle", "Aura's Lab", "Barbarian Outpost",
+                 "Belly of the Beast", "Blazing Volcano", "Burning Desert",
+                 "Courtyard", "Crimson Fields", "Dojo", "Dragontail",
+                 "Dragontail Auction House", "Dragontail Bank", "Dragontail Bazaar",
+                 "Dragontail Blacksmith", "Chief's Hut", "Dragontail Minion Shop",
+                 "Dragontail Townsquare", "Forgotten Skull", "Mage Outpost",
+                 "Magma Chamber", "Matriarch's Lair", "Mystic Marsh",
+                 "Odger's Hut", "Plhlegblast Pool", "Ruins of Ashfang",
+                 "Scarleton", "Scarleton Auction House", "Cathedral",
+                 "Igrupan's Chicken Coop", "Igrupan's House",
+                 "Mage Council", "Scarleton Bank", "Scarleton Bazaar",
+                 "Scarleton Blacksmith", "Scarleton Minion Shop", "Scarleton Plaza",
+                 "Throne Room", "Smoldering Tomb", "Stronghold",
+                 "The Bastion", "The Dukedom", "The Wasteland" -> "Crimson Isle";
 
             // Gold Mine
-            case "⏣ Gold Mine" -> "Gold Mine";
+            case "Gold Mine" -> "Gold Mine";
 
             // Deep Caverns
-            case "⏣ Deep Caverns", "⏣ Gunpowder Mines", "⏣ Lapis Quarry",
-                 "⏣ Pigmen's Den", "⏣ Slimehill", "⏣ Diamond Reserve",
-                 "⏣ Obsidian Sanctuary" -> "Deep Caverns";
+            case "Deep Caverns", "Gunpowder Mines", "Lapis Quarry",
+                 "Pigmen's Den", "Slimehill", "Diamond Reserve",
+                 "Obsidian Sanctuary" -> "Deep Caverns";
 
             // Dwarven Mines
-            case "⏣ Dwarven Mines", "⏣ Abandoned Quarry", "⏣ Cliffside Veins",
-                 "⏣ Divan's Gateway", "⏣ Dwarven Base Camp", "⏣ Dwarven Village",
-                 "⏣ Dwarven Tavern", "⏣ Far Reserve", "⏣ Fossil Research Center",
-                 "⏣ Gates to the Mines", "⏣ Goblin Burrows", "⏣ Glacite Tunnels",
-                 "⏣ Great Glacite Lake", "⏣ Great Ice Wall", "⏣ Rampart's Quarry",
-                 "⏣ Ironman's Guild", "⏣ Royal Mines", "⏣ Royal Palace",
-                 "⏣ Aristocrat Passage", "⏣ Barracks of Heroes", "⏣ Grand Library",
-                 "⏣ Hanging Court", "⏣ Palace Bridge", "⏣ Royal Quarters",
-                 "⏣ The Forge", "⏣ Forge Basin", "⏣ The Lift", "⏣ The Mist",
-                 "⏣ Upper Mines", "⏣ Lava Springs" -> "Dwarven Mines";
+            case "Dwarven Mines", "Abandoned Quarry", "Cliffside Veins",
+                 "Divan's Gateway", "Dwarven Base Camp", "Dwarven Village",
+                 "Dwarven Tavern", "Far Reserve", "Fossil Research Center",
+                 "Gates to the Mines", "Goblin Burrows", "Glacite Tunnels",
+                 "Great Glacite Lake", "Great Ice Wall", "Rampart's Quarry",
+                 "Ironman's Guild", "Royal Mines", "Royal Palace",
+                 "Aristocrat Passage", "Barracks of Heroes", "Grand Library",
+                 "Hanging Court", "Palace Bridge", "Royal Quarters",
+                 "The Forge", "Forge Basin", "The Lift", "The Mist",
+                 "Upper Mines", "Lava Springs" -> "Dwarven Mines";
 
             // Crystal Hollows
-            case "⏣ Crystal Hollows", "⏣ Crystal Nucleus", "⏣ Fairy Grotto",
-                 "⏣ Goblin Holdout", "⏣ Goblin Queen's Den", "⏣ Jungle",
-                 "⏣ Jungle Temple", "⏣ Magma Fields", "⏣ Khazad-dûm",
-                 "⏣ Mithril Deposits", "⏣ Mines of Divan", "⏣ Precursor Remnants",
-                 "⏣ Lost Precursor City" -> "Crystal Hollows";
+            case "Crystal Hollows", "Crystal Nucleus", "Fairy Grotto",
+                 "Goblin Holdout", "Goblin Queen's Den", "Jungle",
+                 "Jungle Temple", "Magma Fields", "Khazad-dûm",
+                 "Mithril Deposits", "Mines of Divan", "Precursor Remnants",
+                 "Lost Precursor City" -> "Crystal Hollows";
 
             // Jerry's Workshop
-            case "⏣ Jerry's Workshop", "⏣ Einary's Emporium", "⏣ Gary's Shack",
-                 "⏣ Glacial Cave", "⏣ Hot Springs", "⏣ Jerry Pond", "⏣ Mount Jerry",
-                 "⏣ Reflective Pond", "⏣ Sherry's Showroom", "⏣ Sunken Jerry Pond",
-                 "⏣ Terry's Shack" -> "Jerry's Workshop";
+            case "Jerry's Workshop", "Einary's Emporium", "Gary's Shack",
+                 "Glacial Cave", "Hot Springs", "Jerry Pond", "Mount Jerry",
+                 "Reflective Pond", "Sherry's Showroom", "Sunken Jerry Pond",
+                 "Terry's Shack" -> "Jerry's Workshop";
 
             // Rift Dimension
             case "ф Black Lagoon", "ф Lagoon Cave", "ф Lagoon Hut", "ф Leeches Lair",
@@ -278,13 +280,13 @@ public class ModFunctions {
                  "ф Book in a Book" -> "Rift";
 
             // Dungeon Hub
-            case "⏣ Dungeon Hub" -> "Dungeon Hub";
+            case "Dungeon Hub" -> "Dungeon Hub";
 
             // Backwater Bayou
-            case "⏣ Backwater Bayou" -> "Backwater Bayou";
+            case "Backwater Bayou" -> "Backwater Bayou";
 
             // Lotus Atoll
-            case "⏣ Lotus Atoll", "⏣ Lotus Easter's Cave", "⏣ Tewtil Tunnel", "⏣ Lotus Highlands" -> "Lotus Atoll";
+            case "Lotus Atoll", "Lotus Easter's Cave", "Tewtil Tunnel", "Lotus Highlands" -> "Lotus Atoll";
 
             default -> location;
         };

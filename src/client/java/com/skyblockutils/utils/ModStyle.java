@@ -58,6 +58,11 @@ public class ModStyle {
         }
     }
 
+    public enum NotificationStyle {
+        LEGACY, ROUNDED
+    }
+
+
     public static int getColor(ColorStyle style, ColorType type) {
         return style.getColor(type);
     }
