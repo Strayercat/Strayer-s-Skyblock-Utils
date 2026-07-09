@@ -82,6 +82,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Whether printing your coordinates (via the keybind) should also send the Skyblock location"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.coordinatesSendLocation = v).build());
 
+        general.addEntry(eb.startBooleanToggle(Component.literal("Stat Commands"), ModConfig.INSTANCE.statCommands)
+                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to enable !tps !fps and !ping"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.statCommands = v).build());
+
         general.addEntry(eb.startBooleanToggle(Component.literal("Chat Commands"), ModConfig.INSTANCE.chatCommands)
                 .setDefaultValue(true).setTooltip(Component.literal("Whether or not to enable !gay !furry !sus and such commands"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.chatCommands = v).build());
@@ -89,6 +93,10 @@ public class ClothConfigHandler {
         general.addEntry(eb.startBooleanToggle(Component.literal("Custom Sidebar"), ModConfig.INSTANCE.customSidebar)
                 .setDefaultValue(false).setTooltip(Component.literal("Whether or not to replace the vanilla scoreboard (sidebar) with a custom one"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.customSidebar = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Component.literal("Daily Reminders"), ModConfig.INSTANCE.dailyReminders)
+                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to be reminded about an island's dailies upon entering"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.dailyReminders = v).build());
 
         general.addEntry(eb.startBooleanToggle(Component.literal("Sidebar Coordinates"), ModConfig.INSTANCE.sidebarCoords)
                 .setDefaultValue(false).setTooltip(Component.literal("Whether or not to show coordinates in the custom sidebar"))
@@ -209,6 +217,10 @@ public class ClothConfigHandler {
 
         SubCategoryBuilder info = eb.startSubCategory(Component.literal("Info"))
                 .setTooltip(Component.literal("Contextual info overlays"));
+
+        info.add(eb.startBooleanToggle(Component.literal("Daily Reminders"), ModConfig.INSTANCE.hudDailies)
+                .setDefaultValue(true).setTooltip(Component.literal("Show the status of your daily tasks"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.hudDailies = v).build());
 
         info.add(eb.startBooleanToggle(Component.literal("Party Info"), ModConfig.INSTANCE.hudPartyInfo)
                 .setDefaultValue(true).setTooltip(Component.literal("Show current party leader and members in the HUD"))

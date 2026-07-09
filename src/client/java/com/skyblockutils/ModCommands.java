@@ -4,10 +4,12 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.DailyReminders;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayers;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.NpcFinder;
 import com.skyblockutils.features.dungeons.AutoRejoin;
+import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.utils.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -15,6 +17,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -37,6 +42,8 @@ public class ModCommands {
 
     @SuppressWarnings("unused")
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+        Minecraft client = Minecraft.getInstance();
+
         var command = ClientCommands.literal("ssu")
                 .then(ClientCommands.literal("autorejoin")
                         .executes(context -> {
@@ -88,7 +95,7 @@ public class ModCommands {
                         .then(ClientCommands.literal("add")
                                 .then(ClientCommands.argument("username", StringArgumentType.string())
                                         .suggests((ctx, builder) -> {
-                                            var connection = Minecraft.getInstance().getConnection();
+                                            var connection = client.getConnection();
                                             if (connection != null) {
                                                 String remaining = builder.getRemaining();
                                                 fuzzyMatch(
@@ -197,7 +204,7 @@ public class ModCommands {
                         .then(ClientCommands.literal("coordinates")
                                 .then(ClientCommands.literal("add").executes(context -> {
                                     MarkCoordinates.addCoordinates();
-                                    Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(Component.literal("Coordinates added"));
+                                    client.gui.hud.getChat().addClientSystemMessage(Component.literal("Coordinates added"));
                                     return 1;
                                 }))
                                 .then(ClientCommands.literal("log").executes(context -> {
@@ -206,13 +213,13 @@ public class ModCommands {
                                 }))
                                 .then(ClientCommands.literal("clear").executes(context -> {
                                     MarkCoordinates.clearCoordinates();
-                                    Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(Component.literal("Coordinates cleared"));
+                                    client.gui.hud.getChat().addClientSystemMessage(Component.literal("Coordinates cleared"));
                                     return 1;
                                 }))
                         )
                         .then(ClientCommands.literal("title")
                                 .executes(context -> {
-                                    ModFunctions.showTitle(Minecraft.getInstance(), Component.literal("TEST TITLE").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20, true);
+                                    ModFunctions.showTitle(client, Component.literal("TEST TITLE").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20, true);
                                     return 1;
                                 })
                         )
@@ -231,6 +238,49 @@ public class ModCommands {
                                 .executes(context -> {
                                     String name = StringArgumentType.getString(context, "npc");
                                     NpcFinder.handleCommand(name);
+                                    return 1;
+                                })
+                        )
+                ).then(ClientCommands.literal("partyinvites")
+                        .executes(ctx -> {
+                            List<String> previousInvites = PartyInviteNotifications.previousInvites;
+                            if (!previousInvites.isEmpty()) {
+                                ModFunctions.displayTextMessageWithHeader("Here are the last 10 received party invites (newest to oldest):");
+                                List<String> lastTenInvites = new ArrayList<>(
+                                        previousInvites.subList(Math.max(0, previousInvites.size() - 10), previousInvites.size())
+                                                .stream()
+                                                .map(String::trim)
+                                                .toList()
+                                );
+                                Collections.reverse(lastTenInvites);
+                                client.gui.hud.getChat().addClientSystemMessage(Component.literal(String.join(", ", lastTenInvites).trim()));
+                            } else {
+                                ModFunctions.displayTextMessageWithHeader("§cNobody has invited you to their party this session.");
+                            }
+                            return 1;
+                        })
+                )
+                .then(ClientCommands.literal("disableReminder")
+                        .then(ClientCommands.argument("type", StringArgumentType.string())
+                                .suggests((ctx, builder) -> {
+                                    String remaining = builder.getRemaining();
+                                    fuzzyMatch(
+                                            Arrays.stream(DailyReminders.ReminderType.values())
+                                                    .map(Enum::name),
+                                            remaining
+                                    ).forEach(builder::suggest);
+                                    return builder.buildFuture();
+                                })
+                                .executes(context -> {
+                                    String typeArg = StringArgumentType.getString(context, "type").toUpperCase();
+                                    try {
+                                        DailyReminders.ReminderType type = DailyReminders.ReminderType.valueOf(typeArg);
+                                        DailyReminders.disable(type);
+                                        ModFunctions.displayTextMessageWithHeader("§cDisabled reminder: " + typeArg);
+                                    } catch (IllegalArgumentException e) {
+                                        ModFunctions.displayTextMessageWithHeader("§cUnknown reminder type: " + typeArg);
+                                        return 0;
+                                    }
                                     return 1;
                                 })
                         )

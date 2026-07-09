@@ -26,7 +26,7 @@ public class DowntimeTracker {
                 reason = messageContent.replaceAll("^!?dt ?", "").isEmpty() ? "No reason given" : "Reason: " + messageContent.replaceAll("^!?dt ?", "");
                 OnScreenNotification.builder()
                         .title("Downtime Requested")
-                        .subtitle("By: " + requesterUsername)
+                        .subtitle("Downtime requested by " + requesterUsername + "\n" + reason)
                         .tickTime(100)
                         .withSound(true)
                         .send();
@@ -35,10 +35,10 @@ public class DowntimeTracker {
         }
 
         if (message.contains("Click HERE to re-queue") && downtimeRequested) {
-            player.connection.sendChat("[Strayer's Skyblock Utils] Downtime requested by " + requesterUsername + " " + reason);
+            player.connection.sendCommand("pc [Strayer's Skyblock Utils] Downtime requested by " + requesterUsername + " " + reason);
             OnScreenNotification.builder()
-                    .title("DOWNTIME REQUESTED")
-                    .subtitle("By: " + requesterUsername + "\n" + reason)
+                    .title("Downtime Requested")
+                    .subtitle("Downtime requested by " + requesterUsername + "\n" + reason)
                     .tickTime(100)
                     .withSound(true)
                     .send();

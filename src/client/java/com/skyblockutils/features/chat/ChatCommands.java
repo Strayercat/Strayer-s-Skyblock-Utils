@@ -24,6 +24,7 @@ public class ChatCommands {
             messageChannel = "all";
         }
 
+        if (!ModConfig.INSTANCE.statCommands) return;
         if (messageContent.equalsIgnoreCase("!tps"))
             sendMessageInChannel("Tps: " + String.format("%.1f", ModFunctions.tps), messageChannel);
         if (messageContent.equalsIgnoreCase("!ping"))

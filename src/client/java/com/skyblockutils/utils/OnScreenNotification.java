@@ -1,6 +1,8 @@
 package com.skyblockutils.utils;
 
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.DailyReminders;
+import com.skyblockutils.features.party.PartyInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -15,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.stream.Stream;
 
 public class OnScreenNotification {
     private static final int WIDTH = 120;
@@ -31,6 +34,8 @@ public class OnScreenNotification {
     private static final float TEXT_SCALE = 0.8f;
 
     private static final List<String> HOVER_TEXT = List.of("Right click to dismiss", "Middle click to copy");
+    private static final List<String> ALREADY_IN_PARTY_TEXT = List.of("Already in a party");
+    private static final List<String> COPIED_TEXT = List.of("Copied ✓");
 
     private static class Notification {
         String title;
@@ -42,14 +47,18 @@ public class OnScreenNotification {
         int titleColor;
         boolean copied = false;
         long copiedTimestamp = 0;
+        boolean error = false;
+        long errorTimestamp = 0;
+        Object metadata = null;
 
-        Notification(String title, String subtitle, int tickTime, int titleColor) {
+        Notification(String title, String subtitle, int tickTime, int titleColor, Object metadata) {
             this.title = title;
             this.subtitle = subtitle;
             this.ticks = tickTime;
             this.maxTicks = tickTime;
             this.height = calculateHeight(title, subtitle);
             this.titleColor = titleColor;
+            this.metadata = metadata;
         }
 
         private int calculateHeight(String title, String subtitle) {
@@ -76,6 +85,7 @@ public class OnScreenNotification {
         private int tickTime = 60;
         private boolean withSound = false;
         private int titleColor = 0xFFFFFF;
+        private Object metadata = null;
 
         public Builder title(String title) {
             this.title = title;
@@ -120,8 +130,13 @@ public class OnScreenNotification {
             return this;
         }
 
+        public Builder metadata(Object metadata) {
+            this.metadata = metadata;
+            return this;
+        }
+
         public void send() {
-            notifications.add(new Notification(title, subtitle, tickTime, titleColor));
+            notifications.add(new Notification(title, subtitle, tickTime, titleColor, metadata));
 
             if (withSound) {
                 Minecraft mc = Minecraft.getInstance();
@@ -194,10 +209,28 @@ public class OnScreenNotification {
                 int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x, overlayTop, notif.x + WIDTH, overlayBottom, 0x2a2a2a | overlayAlphaInt);
 
-                drawCenteredOverlayText(context, mc, HOVER_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
+                List<String> hoverText;
+                if (notif.title.contains("PARTY INVITE")) {
+                    hoverText = Stream.concat(Stream.of("Click to join"), HOVER_TEXT.stream()).toList();
+                } else if (notif.title.contains("Daily Reminder")) {
+                    hoverText = Stream.concat(Stream.of("Click to ignore for the day"), HOVER_TEXT.stream()).toList();
+                } else {
+                    hoverText = HOVER_TEXT;
+                }
+
+                drawCenteredOverlayText(context, mc, hoverText, notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
-            if (notif.copied && notif.copiedTimestamp + 2000 > System.currentTimeMillis()) {
+            if (notif.error && notif.errorTimestamp + 2000 > System.currentTimeMillis()) {
+                int overlayTop = notif.y + 2;
+                int overlayBottom = notif.y + notif.height;
+
+                float overlayOpacity = 0.85f;
+                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
+                context.fill(notif.x, overlayTop, notif.x + WIDTH, overlayBottom, 0x5a1a1a | overlayAlphaInt);
+
+                drawCenteredOverlayText(context, mc, ALREADY_IN_PARTY_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
+            } else if (notif.copied && notif.copiedTimestamp + 2000 > System.currentTimeMillis()) {
                 int overlayTop = notif.y + 2;
                 int overlayBottom = notif.y + notif.height;
 
@@ -205,7 +238,7 @@ public class OnScreenNotification {
                 int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x, overlayTop, notif.x + WIDTH, overlayBottom, 0x2a2a2a | overlayAlphaInt);
 
-                drawCenteredOverlayText(context, mc, List.of("Copied ✓"), notif.x, overlayTop, overlayBottom, alphaInt);
+                drawCenteredOverlayText(context, mc, COPIED_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
             yOffset += notif.height + MARGIN;
@@ -269,10 +302,28 @@ public class OnScreenNotification {
                 int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x + 1, overlayTop, notif.x + WIDTH - 1, overlayBottom, 0x2a2a2a | overlayAlphaInt);
 
-                drawCenteredOverlayText(context, mc, HOVER_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
+                List<String> hoverText;
+                if (notif.title.contains("PARTY INVITE")) {
+                    hoverText = Stream.concat(Stream.of("Click to join"), HOVER_TEXT.stream()).toList();
+                } else if (notif.title.contains("Daily Reminder")) {
+                    hoverText = Stream.concat(Stream.of("Click to ignore for the day"), HOVER_TEXT.stream()).toList();
+                } else {
+                    hoverText = HOVER_TEXT;
+                }
+
+                drawCenteredOverlayText(context, mc, hoverText, notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
-            if (notif.copied && notif.copiedTimestamp + 2000 > System.currentTimeMillis()) {
+            if (notif.error && notif.errorTimestamp + 2000 > System.currentTimeMillis()) {
+                int overlayTop = notif.y + 1;
+                int overlayBottom = notif.y + notif.height - 1;
+
+                float overlayOpacity = 0.85f;
+                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
+                context.fill(notif.x + 1, overlayTop, notif.x + WIDTH - 1, overlayBottom, 0x5a1a1a | overlayAlphaInt);
+
+                drawCenteredOverlayText(context, mc, ALREADY_IN_PARTY_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
+            } else if (notif.copied && notif.copiedTimestamp + 2000 > System.currentTimeMillis()) {
                 int overlayTop = notif.y + 1;
                 int overlayBottom = notif.y + notif.height - 1;
 
@@ -280,7 +331,7 @@ public class OnScreenNotification {
                 int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x + 1, overlayTop, notif.x + WIDTH - 1, overlayBottom, 0x2a2a2a | overlayAlphaInt);
 
-                drawCenteredOverlayText(context, mc, List.of("Copied ✓"), notif.x, overlayTop, overlayBottom, alphaInt);
+                drawCenteredOverlayText(context, mc, COPIED_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
             yOffset += notif.height + MARGIN;
@@ -412,15 +463,11 @@ public class OnScreenNotification {
     public static boolean handleNotificationClicks(int mouseX, int mouseY, int button, int screenWidth, int screenHeight) {
         if (Minecraft.getInstance().gui.screen() == null) return false;
 
-        int yOffset = 0;
         Notification toRemove = null;
 
         for (Notification notif : notifications) {
-            int x = screenWidth - WIDTH - SCREEN_MARGIN_X;
-            int y = screenHeight - notif.height - yOffset - SCREEN_MARGIN_Y;
-
-            boolean hit = mouseX >= x && mouseX <= x + WIDTH
-                    && mouseY >= y && mouseY <= y + notif.height;
+            boolean hit = mouseX >= notif.x && mouseX <= notif.x + WIDTH
+                    && mouseY >= notif.y && mouseY <= notif.y + notif.height;
 
             if (hit) {
                 if (button == 2) {
@@ -435,17 +482,25 @@ public class OnScreenNotification {
 
                 if (button == 0) {
                     if (notif.title.contains("PARTY INVITE")) {
-                        Minecraft mc = Minecraft.getInstance();
-                        if (mc.player != null) {
-                            mc.player.connection.sendChat("/p accept " + notif.subtitle.split(" ")[0]);
+                        if (PartyInfo.isInParty) {
+                            notif.error = true;
+                            notif.errorTimestamp = System.currentTimeMillis();
+                        } else {
+                            Minecraft mc = Minecraft.getInstance();
+                            if (mc.player != null) {
+                                mc.player.connection.sendChat("/p accept " + notif.subtitle.split(" ")[0]);
+                            }
+                            toRemove = notif;
                         }
+                    } else if (notif.title.contains("Daily Reminder")) {
+                        DailyReminders.disable((DailyReminders.ReminderType) notif.metadata);
+                        toRemove = notif;
+                    } else {
+                        toRemove = notif;
                     }
-                    toRemove = notif;
                 }
                 break;
             }
-
-            yOffset += notif.height + MARGIN;
         }
 
         if (toRemove != null) {

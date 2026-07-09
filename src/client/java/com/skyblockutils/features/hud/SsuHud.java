@@ -2,6 +2,7 @@ package com.skyblockutils.features.hud;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.DailyReminders;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.party.PartyInfo;
@@ -156,6 +157,15 @@ public class SsuHud {
         if (ModConfig.INSTANCE.sideBarInHud) {
             addSidebarSection(lines, anyGeneralInfo);
             anyGeneralInfo = true;
+        }
+
+        if (ModConfig.INSTANCE.hudDailies) {
+            if (!ModFunctions.isInDungeons(client)) {
+                if (anyGeneralInfo) addDivider(lines);
+                for (DailyReminders.ReminderType type : DailyReminders.ReminderType.values()) {
+                    lines.add(HudLine.of(type + ": " + (ModConfig.INSTANCE.completedTypes.contains(type) ? "§aCompleted" : "§cIncomplete"), COLOR_TEXT));
+                }
+            }
         }
 
         if (ModConfig.INSTANCE.hudPartyInfo) {

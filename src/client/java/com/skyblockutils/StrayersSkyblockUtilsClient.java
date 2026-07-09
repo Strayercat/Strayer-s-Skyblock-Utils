@@ -46,6 +46,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ModKeyBindings.init();
         ModConfig.load();
         GuiBlocker.init();
+        DailyReminders.init();
 
         ClientCommandRegistrationCallback.EVENT.register(ModCommands::register);
 
@@ -100,6 +101,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
             PartyListParser.handleOnJoinCommand();
             SideBarUtils.updateLocation();
+            DailyReminders.tick(client);
         });
 
         ClientReceiveMessageEvents.GAME.register((message, _) -> {
@@ -119,7 +121,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
             PowderChestNotifications.handleMessage(message);
 
-            boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(cleanMessage);
+            boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(message);
             boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
             boolean powderChestMessage = PowderChestNotifications.parseChestReward(message);
             boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);

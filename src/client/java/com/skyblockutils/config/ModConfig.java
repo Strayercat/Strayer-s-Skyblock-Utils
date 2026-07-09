@@ -3,6 +3,7 @@ package com.skyblockutils.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import com.skyblockutils.features.DailyReminders;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayers.GlowingPlayer;
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
 import com.skyblockutils.utils.ModStyle;
@@ -12,10 +13,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ModConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -30,6 +28,7 @@ public class ModConfig {
     public boolean fancyEmotes = true;
     public boolean autoHoppityEggs = false;
     public boolean coordinatesSendLocation = true;
+    public boolean statCommands = true;
     public boolean chatCommands = true;
     public boolean customSidebar = true;
     public boolean sidebarCoords = false;
@@ -51,6 +50,7 @@ public class ModConfig {
     public boolean hudTps = true;
     public boolean hudFps = true;
     public boolean hudCoords = true;
+    public boolean hudDailies = true;
     public boolean sideBarInHud = false;
     public boolean hudPartyInfo = true;
     public boolean hudPartyInfoInDungeons = false;
@@ -119,6 +119,12 @@ public class ModConfig {
         chatFilters.put(key, value);
     }
 
+    // Daily reminders
+    public boolean dailyReminders = true;
+    public Date lastReset = new Date(0);
+    public List<DailyReminders.ReminderType> disabledTypes = new ArrayList<>();
+    public List<DailyReminders.ReminderType> completedTypes = new ArrayList<>();
+
     public static void load() {
         if (!CONFIG_PATH.toFile().exists()) {
             save();
@@ -135,6 +141,7 @@ public class ModConfig {
             INSTANCE.fancyEmotes = loaded.fancyEmotes;
             INSTANCE.autoHoppityEggs = loaded.autoHoppityEggs;
             INSTANCE.coordinatesSendLocation = loaded.coordinatesSendLocation;
+            INSTANCE.statCommands = loaded.statCommands;
             INSTANCE.chatCommands = loaded.chatCommands;
             INSTANCE.customSidebar = loaded.customSidebar;
             INSTANCE.sidebarCoords = loaded.sidebarCoords;
@@ -152,6 +159,7 @@ public class ModConfig {
             INSTANCE.hudTps = loaded.hudTps;
             INSTANCE.hudFps = loaded.hudFps;
             INSTANCE.hudCoords = loaded.hudCoords;
+            INSTANCE.hudDailies = loaded.hudDailies;
             INSTANCE.sideBarInHud = loaded.sideBarInHud;
             INSTANCE.hudPartyInfo = loaded.hudPartyInfo;
             INSTANCE.hudPartyInfoInDungeons = loaded.hudPartyInfoInDungeons;
@@ -161,6 +169,10 @@ public class ModConfig {
             INSTANCE.powderChestNotification = loaded.powderChestNotification;
             INSTANCE.powderChestNotificationTime = loaded.powderChestNotificationTime;
             INSTANCE.glowingPlayers = loaded.glowingPlayers != null ? new ArrayList<>(loaded.glowingPlayers) : new ArrayList<>();
+            INSTANCE.dailyReminders = loaded.dailyReminders;
+            INSTANCE.lastReset = loaded.lastReset != null ? loaded.lastReset : new Date(0);
+            INSTANCE.disabledTypes = loaded.disabledTypes != null ? loaded.disabledTypes : new ArrayList<>();
+            INSTANCE.completedTypes = loaded.completedTypes != null ? loaded.completedTypes : new ArrayList<>();
 
             loaded.chatFilters.forEach(INSTANCE::setChatFilter);
         } catch (IOException ignored) {

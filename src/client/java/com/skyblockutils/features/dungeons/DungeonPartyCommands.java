@@ -27,7 +27,7 @@ public class DungeonPartyCommands {
         LocalPlayer player = Minecraft.getInstance().player;
 
         if (!message.startsWith("Party >")) return;
-        String messageContent = message.split(": ")[1];
+        String messageContent = message.split(": ")[1].toLowerCase();
         if (!messageContent.matches("![mf][1-7]")) return;
 
         int floor = Character.getNumericValue(messageContent.charAt(2));
@@ -35,15 +35,9 @@ public class DungeonPartyCommands {
         if (player == null) return;
         ClientPacketListener clientNetworkHandler = player.connection;
 
-        if (messageContent.charAt(1) == 'm') {
-            GuiBlocker.shouldHideScreen = true;
-            clientNetworkHandler.sendCommand("joindungeon MASTER_CATACOMBS_FLOOR_" + translations.get(floor));
-            return;
-        }
+        if (PartyInfo.members.size() < 4) return;
 
-        if (messageContent.charAt(1) == 'f') {
-            GuiBlocker.shouldHideScreen = true;
-            clientNetworkHandler.sendCommand("joindungeon CATACOMBS_FLOOR_" + translations.get(floor));
-        }
+        GuiBlocker.shouldHideScreen = true;
+        clientNetworkHandler.sendCommand("joindungeon " + (messageContent.charAt(1) == 'm' ? "MASTER_" : "") + "CATACOMBS_FLOOR_" + translations.get(floor));
     }
 }

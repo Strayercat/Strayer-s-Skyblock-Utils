@@ -54,6 +54,7 @@ public class ModFunctions {
         NpcFinder.clear();
         SideBarUtils.resetLocation();
         PowderChestNotifications.resetKnownChests();
+        DailyReminders.reset();
     }
 
     public static void calculatePing(Minecraft client, ClientPacketListener listener) {
@@ -120,9 +121,17 @@ public class ModFunctions {
         }
     }
 
+    public static void showTitle(Minecraft client, String title, int displayTime, boolean withSound) {
+        if (client.player != null) {
+            client.gui.hud.setTimes(10, displayTime, 10);
+            client.gui.hud.setTitle(Component.literal(title));
+            if (withSound) client.player.playSound(SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value());
+        }
+    }
+
     public static void displayTextMessageWithHeader(String message) {
         Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
-                Component.empty().append(SSU.getName()).append(Component.literal(message))
+                Component.empty().append(SSU.getName()).append(Component.literal(message).withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT)))
         );
     }
 

@@ -17,7 +17,7 @@ public class SpookyMessageHandler {
 
     public static boolean handleMessage(Component message) {
         if (message.getString().equals("SPOOKY! A Trick or Treat Chest has appeared!") && ModConfig.INSTANCE.spookyChestTitle) {
-            ModFunctions.showTitle(Minecraft.getInstance(), Component.literal("§6SPOOKY"), 30, true);
+            ModFunctions.showTitle(Minecraft.getInstance(), "§6SPOOKY", 30, true);
             return false;
         }
 
@@ -25,7 +25,7 @@ public class SpookyMessageHandler {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return true;
             mc.player.playSound(SoundEvents.LIGHTNING_BOLT_THUNDER);
-            ModFunctions.showTitle(Minecraft.getInstance(), Component.literal("§4BOO!"), 10, false);
+            ModFunctions.showTitle(Minecraft.getInstance(), "§4BOO!", 10, false);
         }
 
         if (ModConfig.INSTANCE.spookyLootNotification && message.getString().equals("TREAT! Your Trick or Treat Chest rewarded you with:")) {
@@ -40,7 +40,7 @@ public class SpookyMessageHandler {
             buffer.add(message);
             return false;
         } else {
-            if (message.getString().contains("❤")) return true;
+            if (message.getString().contains("\uE010") || message.getString().contains("\uE008") || message.getString().contains("\uE003")) return true;
             expecingLoot = false;
             OnScreenNotification.builder()
                     .title("Spooky Chest Rewards")

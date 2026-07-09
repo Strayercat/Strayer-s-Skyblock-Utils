@@ -26,7 +26,7 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Automatic party members glow
 ### Party
 - Party commands (!pt, !warp and such)
-- Custom party invites when in skyblock (on screen notification)
+- Custom party invites when in skyblock (on screen notification (/ssu partyinvites to see previous invites))
 ### Misc
 - A customizable contextual hud
 - Auto Hoppity eggs
