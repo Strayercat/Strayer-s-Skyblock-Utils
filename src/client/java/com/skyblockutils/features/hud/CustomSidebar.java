@@ -55,7 +55,7 @@ public class CustomSidebar {
         context.text(client.font, SSU.gradientText("Skyblock", COLOR_TITLE_START, COLOR_TITLE_END), x1 + ((x2 - x1) / 2) - client.font.width("Skyblock") / 2, y1 + ((barPosition - y1) / 2) - client.font.lineHeight / 2 + 1, 0xFFFFFFFF, true);
         context.fill(x1, barPosition, x2, barPosition + 1, COLOR_MAIN);
 
-        drawSidebarText(context, client, x1, x2, barPosition + 1, y2 - barPosition + 1, 10);
+        drawSidebarText(context, client, x1, barPosition + 1, y2 - barPosition + 1, 10);
 
         if (!ModConfig.INSTANCE.cat) return;
 
@@ -123,14 +123,14 @@ public class CustomSidebar {
         }
     }
 
-    public static void drawSidebarText(GuiGraphicsExtractor context, Minecraft client, int x1, int x2, int topPosition, int maxHeight, int padding) {
+    public static void drawSidebarText(GuiGraphicsExtractor context, Minecraft client, int x1, int topPosition, int maxHeight, int padding) {
         float textScale = 0.8f;
 
         List<Component> lines = new java.util.ArrayList<>(SideBarUtils.getSidebarLines().stream()
                 .filter(line -> !line.replaceAll("(?i)§.", "").trim().isEmpty()
                         && !line.replaceAll("§.", "").trim().matches("\\d{2}/\\d{2}/\\d{2} .*")
                         && !line.replaceAll("§.", "").trim().matches("www.hypixel.net"))
-                .map(line -> (Component) Component.literal(line.trim()))
+                .map(line -> (Component) Component.literal(line))
                 .toList());
 
         if (ModConfig.INSTANCE.sidebarCoords) {

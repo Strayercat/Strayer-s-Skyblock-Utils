@@ -131,13 +131,13 @@ public class ModFunctions {
 
     public static void displayTextMessageWithHeader(String message) {
         Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
-                Component.empty().append(SSU.getName()).append(Component.literal(message).withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT)))
+                Component.empty().append(SSU.getFullName()).append(Component.literal(message).withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT)))
         );
     }
 
     public static void displayComponentMessageWithHeader(Component message) {
         Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
-                Component.empty().append(SSU.getName()).append(message)
+                Component.empty().append(SSU.getFullName()).append(message)
         );
     }
 

@@ -81,7 +81,6 @@ public class PowderChestNotifications implements SoundEventListener {
             return;
 
         Minecraft client = Minecraft.getInstance();
-        if (client.player == null || client.level == null) return;
 
         recordTargetedChest(client);
 
@@ -93,6 +92,7 @@ public class PowderChestNotifications implements SoundEventListener {
             return;
         }
 
+        if (client.player == null) return;
         ItemStack stack = client.player.getMainHandItem();
         String mainHandItemName = stack.getItem().getName(stack).getString().toLowerCase();
 
@@ -223,7 +223,6 @@ public class PowderChestNotifications implements SoundEventListener {
         boolean expectingAny = EXPECTING_LOCKPICK_CHEST > 0 || EXPECTING_LOOT_CHEST > 0;
 
         if (!reading && !expectingAny) return true;
-
         boolean isBorder = message.getString().trim().startsWith("▬▬▬▬");
 
         if (isBorder) {
@@ -258,7 +257,7 @@ public class PowderChestNotifications implements SoundEventListener {
                             .tickTime(ModConfig.INSTANCE.powderChestNotificationTime)
                             .send();
                     if (matchedLockpick) EXPECTING_LOCKPICK_CHEST--;
-                    if (matchedLoot) EXPECTING_LOOT_CHEST--;
+                    if (matchedLoot && EXPECTING_LOOT_CHEST > 0) EXPECTING_LOOT_CHEST--;
 
                     buffer.clear();
                 } else {

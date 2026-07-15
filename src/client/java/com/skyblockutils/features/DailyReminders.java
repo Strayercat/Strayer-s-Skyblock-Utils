@@ -1,5 +1,6 @@
 package com.skyblockutils.features;
 
+import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
@@ -42,12 +43,12 @@ public class DailyReminders {
 
     public static void init() {
         dailyLocationMap.put(ReminderType.ISLE, List.of("Crimson Isle"));
-        dailyLocationMap.put(ReminderType.COMMISSION, List.of("Dwarven Mines", "Crystal Hollows"));
+        dailyLocationMap.put(ReminderType.COMMISSION, List.of("Dwarven Mines", "Crystal Hollows", "Glacite Mineshafts"));
         dailyLocationMap.put(ReminderType.MATRIARCH, List.of("Crimson Isle"));
     }
 
     public static void tick(Minecraft client) {
-        String location = SideBarUtils.location;
+        String location = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
 
         if (client.level == null) return;
 
@@ -61,7 +62,7 @@ public class DailyReminders {
 
                     if (ModConfig.INSTANCE.dailyReminders) {
                         scheduler.schedule(() -> {
-                            if (!ModConfig.INSTANCE.disabledTypes.contains(type)) {
+                            if (!ModConfig.INSTANCE.disabledTypes.contains(type) && !ModConfig.INSTANCE.completedTypes.contains(type)) {
                                 sendReminder(client, type);
                             }
                         }, 2, TimeUnit.SECONDS);
@@ -106,7 +107,7 @@ public class DailyReminders {
 
                             if (ModConfig.INSTANCE.dailyReminders) OnScreenNotification.builder()
                                     .title("Commissions Completed!")
-                                    .subtitle("You've completed your daily commissions. Don't forget to claim your rewards!")
+                                    .subtitle("You've completed your daily commissions.")
                                     .withSound(true)
                                     .tickTime(60)
                                     .send();
@@ -193,6 +194,8 @@ public class DailyReminders {
     private static void sendReminder(Minecraft client, ReminderType type) {
         if (client.player == null) return;
 
+        if (ModConfig.INSTANCE.disabledTypes.contains(type) || ModConfig.INSTANCE.completedTypes.contains(type)) return;
+
         String messageToSend = switch (type) {
             case ISLE -> "You haven't completed your isle dailies! ";
             case COMMISSION -> "You haven't completed your daily commissions! ";
@@ -215,10 +218,8 @@ public class DailyReminders {
         ZonedDateTime lastResetEst = ModConfig.INSTANCE.lastReset.toInstant().atZone(EST_ZONE);
 
         boolean pastMidnightEst = nowEst.toLocalDate().isAfter(lastResetEst.toLocalDate());
-        boolean over24Hours = System.currentTimeMillis() - ModConfig.INSTANCE.lastReset.getTime()
-                >= 1000L * 60 * 60 * 24;
 
-        if (pastMidnightEst && over24Hours) {
+        if (pastMidnightEst) {
             dailyReset();
         }
     }

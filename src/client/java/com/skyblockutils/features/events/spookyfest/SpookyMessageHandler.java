@@ -9,10 +9,14 @@ import net.minecraft.sounds.SoundEvents;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class SpookyMessageHandler {
     private static final List<String> allowedLoot = List.of("Green Candy", "Purple Candy", "Ectoplasm", "Blast o' Lantern", "Candy Corn", "Pumpkin Guts", "Rock Candy", "Spooky Cupcake", "Bat Person Talisman", "Vampirism VI", "Candy the Fish");
     private static boolean expecingLoot = false;
+    private static boolean notificationSent = false;
     private static final List<Component> buffer = new ArrayList<>();
 
     public static boolean handleMessage(Component message) {
@@ -38,16 +42,22 @@ public class SpookyMessageHandler {
 
         if (allowedLoot.contains(message.getString().replaceAll("x\\d", "").trim())) {
             buffer.add(message);
+
+            if (!notificationSent) {
+                notificationSent = true;
+                scheduler.schedule(() -> sendNotification(), 200, TimeUnit.MILLISECONDS);
+            }
+
             return false;
-        } else {
-            if (message.getString().contains("\uE010") || message.getString().contains("\uE008") || message.getString().contains("\uE003")) return true;
-            expecingLoot = false;
-            OnScreenNotification.builder()
-                    .title("Spooky Chest Rewards")
-                    .subtitle(buffer)
-                    .send();
         }
 
         return true;
+    }
+
+    private static void sendNotification() {
+        expecingLoot = false;
+        notificationSent = false;
+
+        OnScreenNotification.builder().title("Spooky Chest Rewards").subtitle(buffer).send();
     }
 }
