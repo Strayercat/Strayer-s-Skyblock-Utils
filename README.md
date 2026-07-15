@@ -38,6 +38,8 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Puff farming helper - notifies you when you should kill
 - Custom screenshot HUD with preview and copy on click
 - Spooky Festival chest titles + loot notifications
+- Daily task reminders
+- Boop party invites
 </details>
 
 ## Dependencies
