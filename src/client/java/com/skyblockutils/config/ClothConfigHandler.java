@@ -70,6 +70,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Sends party invites as a notification instead of a chat message"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.partyInviteNotifications = v).build());
 
+        general.addEntry(eb.startBooleanToggle(Component.literal("Boop Party Invites"), ModConfig.INSTANCE.boopPartyInvites)
+                .setDefaultValue(true).setTooltip(Component.literal("Sends a clickable notification to invite whoever boops you"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.boopPartyInvites = v).build());
+
         general.addEntry(eb.startBooleanToggle(Component.literal("Fancy Emotes"), ModConfig.INSTANCE.fancyEmotes)
                 .setDefaultValue(true).setTooltip(Component.literal("Transforms <3 into ♥ and such"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.fancyEmotes = v).build());
@@ -94,13 +98,13 @@ public class ClothConfigHandler {
                 .setDefaultValue(false).setTooltip(Component.literal("Whether or not to replace the vanilla scoreboard (sidebar) with a custom one"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.customSidebar = v).build());
 
-        general.addEntry(eb.startBooleanToggle(Component.literal("Daily Reminders"), ModConfig.INSTANCE.dailyReminders)
-                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to be reminded about an island's dailies upon entering"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.dailyReminders = v).build());
-
         general.addEntry(eb.startBooleanToggle(Component.literal("Sidebar Coordinates"), ModConfig.INSTANCE.sidebarCoords)
                 .setDefaultValue(false).setTooltip(Component.literal("Whether or not to show coordinates in the custom sidebar"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.sidebarCoords = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Component.literal("Daily Reminders"), ModConfig.INSTANCE.dailyReminders)
+                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to be reminded about an island's dailies upon entering"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.dailyReminders = v).build());
 
         general.addEntry(eb.startBooleanToggle(Component.literal("Cat"), ModConfig.INSTANCE.cat)
                 .setDefaultValue(false).setTooltip(Component.literal("Cat or no cat?"))

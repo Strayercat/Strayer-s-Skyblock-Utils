@@ -25,6 +25,7 @@ public class ModConfig {
     public ModStyle.NotificationStyle notificationStyle = ModStyle.NotificationStyle.ROUNDED;
     public boolean chatFiltersEnabled = true;
     public boolean partyInviteNotifications = true;
+    public boolean boopPartyInvites = true;
     public boolean fancyEmotes = true;
     public boolean autoHoppityEggs = false;
     public boolean coordinatesSendLocation = true;
@@ -138,6 +139,7 @@ public class ModConfig {
             INSTANCE.colorStyle = loaded.colorStyle != null ? loaded.colorStyle : ModStyle.ColorStyle.ORIGINAL;
             INSTANCE.chatFiltersEnabled = loaded.chatFiltersEnabled;
             INSTANCE.partyInviteNotifications = loaded.partyInviteNotifications;
+            INSTANCE.boopPartyInvites = loaded.boopPartyInvites;
             INSTANCE.fancyEmotes = loaded.fancyEmotes;
             INSTANCE.autoHoppityEggs = loaded.autoHoppityEggs;
             INSTANCE.coordinatesSendLocation = loaded.coordinatesSendLocation;

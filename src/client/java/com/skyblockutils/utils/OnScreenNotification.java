@@ -153,6 +153,8 @@ public class OnScreenNotification {
     }
 
     public static void render(GuiGraphicsExtractor context, int screenWidth, int screenHeight) {
+        if (Minecraft.getInstance().level == null) return;
+
         if (ModConfig.INSTANCE.notificationStyle == ModStyle.NotificationStyle.LEGACY) {
             renderLegacy(context, screenWidth, screenHeight);
         } else {
@@ -214,6 +216,8 @@ public class OnScreenNotification {
                     hoverText = Stream.concat(Stream.of("Click to join"), HOVER_TEXT.stream()).toList();
                 } else if (notif.title.contains("Daily Reminder")) {
                     hoverText = Stream.concat(Stream.of("Click to ignore for the day"), HOVER_TEXT.stream()).toList();
+                } else if (notif.title.contains("Boop")) {
+                    hoverText = Stream.concat(Stream.of("Click to party them"), HOVER_TEXT.stream()).toList();
                 } else {
                     hoverText = HOVER_TEXT;
                 }
@@ -307,6 +311,8 @@ public class OnScreenNotification {
                     hoverText = Stream.concat(Stream.of("Click to join"), HOVER_TEXT.stream()).toList();
                 } else if (notif.title.contains("Daily Reminder")) {
                     hoverText = Stream.concat(Stream.of("Click to ignore for the day"), HOVER_TEXT.stream()).toList();
+                } else if (notif.title.contains("Boop")) {
+                    hoverText = Stream.concat(Stream.of("Click to party them"), HOVER_TEXT.stream()).toList();
                 } else {
                     hoverText = HOVER_TEXT;
                 }
@@ -461,7 +467,8 @@ public class OnScreenNotification {
     }
 
     public static boolean handleNotificationClicks(int mouseX, int mouseY, int button, int screenWidth, int screenHeight) {
-        if (Minecraft.getInstance().gui.screen() == null) return false;
+        Minecraft client = Minecraft.getInstance();
+        if (client.gui.screen() == null) return false;
 
         Notification toRemove = null;
 
@@ -486,14 +493,17 @@ public class OnScreenNotification {
                             notif.error = true;
                             notif.errorTimestamp = System.currentTimeMillis();
                         } else {
-                            Minecraft mc = Minecraft.getInstance();
-                            if (mc.player != null) {
-                                mc.player.connection.sendChat("/p accept " + notif.subtitle.split(" ")[0]);
+                            if (client.player != null) {
+                                client.player.connection.sendChat("/p accept " + notif.subtitle.split(" ")[0]);
                             }
                             toRemove = notif;
                         }
                     } else if (notif.title.contains("Daily Reminder")) {
                         DailyReminders.disable((DailyReminders.ReminderType) notif.metadata);
+                        toRemove = notif;
+                    } else if (notif.title.contains("Boop")) {
+                        if (client.getConnection() == null) return false;
+                        client.getConnection().sendCommand("party invite " + notif.subtitle.split(" ")[0]);
                         toRemove = notif;
                     } else {
                         toRemove = notif;

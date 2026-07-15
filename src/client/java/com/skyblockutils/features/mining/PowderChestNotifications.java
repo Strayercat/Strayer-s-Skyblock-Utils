@@ -12,7 +12,6 @@ import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -92,12 +91,7 @@ public class PowderChestNotifications implements SoundEventListener {
             return;
         }
 
-        if (client.player == null) return;
-        ItemStack stack = client.player.getMainHandItem();
-        String mainHandItemName = stack.getItem().getName(stack).getString().toLowerCase();
-
-        if (mainHandItemName.contains("drill") || mainHandItemName.contains("pickaxe"))
-            scanForChests(client, ScanContext.BASIC_SCAN);
+        scanForChests(client, ScanContext.BASIC_SCAN);
     }
 
     private static void recordTargetedChest(Minecraft client) {
