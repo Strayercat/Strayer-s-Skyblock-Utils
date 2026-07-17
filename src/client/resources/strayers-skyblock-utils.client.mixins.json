@@ -21,6 +21,7 @@
     "EntityColorMixin",
     "EntityGlowingMixin",
     "HudMixin",
+    "AbstractRecipeBookScreenMixin",
     "PingDebugMonitorAccessor",
     "PingDebugMonitorInvoker",
     "ScreenshotRecorderMixin"

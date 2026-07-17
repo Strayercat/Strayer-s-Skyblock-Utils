@@ -111,11 +111,17 @@ public class OnScreenNotification {
 
         public Builder subtitle(List<?> lines) {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < lines.size(); i++) {
-                if (i > 0) sb.append("\n");
-                Object line = lines.get(i);
-                sb.append(line instanceof Component c ? toLegacyString(c) : line.toString());
+            boolean first = true;
+
+            for (Object line : lines) {
+                String text = line instanceof Component c ? toLegacyString(c) : line.toString();
+                if (text.isBlank()) continue;
+
+                if (!first) sb.append("\n");
+                sb.append(text);
+                first = false;
             }
+
             this.subtitle = sb.toString();
             return this;
         }
@@ -428,7 +434,9 @@ public class OnScreenNotification {
     public static String toLegacyString(Component component) {
         StringBuilder sb = new StringBuilder();
         component.visit((style, text) -> {
-            sb.append(styleToLegacyCodes(style)).append(text);
+            if (!text.isEmpty()) {
+                sb.append(styleToLegacyCodes(style)).append(text);
+            }
             return Optional.empty();
         }, Style.EMPTY);
         return sb.toString();

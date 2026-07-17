@@ -63,6 +63,11 @@ public class ModConfig {
     public boolean powderChestNotification = true;
     public int powderChestNotificationTime = 60;
 
+    //Foraging
+    public boolean treeGiftNotification = true;
+    public int treeGiftNotificationTime = 60;
+    public boolean phantomTitle = true;
+
     // Chat filters & glowing players
     private final Map<String, Boolean> chatFilters = new HashMap<>();
     private List<GlowingPlayer> glowingPlayers = new ArrayList<>();
@@ -170,6 +175,9 @@ public class ModConfig {
             INSTANCE.glaciteWaypoints = loaded.glaciteWaypoints != null ? loaded.glaciteWaypoints : GlaciteWaypoints.BOTH;
             INSTANCE.powderChestNotification = loaded.powderChestNotification;
             INSTANCE.powderChestNotificationTime = loaded.powderChestNotificationTime;
+            INSTANCE.treeGiftNotification = loaded.treeGiftNotification;
+            INSTANCE.treeGiftNotificationTime = loaded.treeGiftNotificationTime;
+            INSTANCE.phantomTitle = loaded.phantomTitle;
             INSTANCE.glowingPlayers = loaded.glowingPlayers != null ? new ArrayList<>(loaded.glowingPlayers) : new ArrayList<>();
             INSTANCE.dailyReminders = loaded.dailyReminders;
             INSTANCE.lastReset = loaded.lastReset != null ? loaded.lastReset : new Date(0);

@@ -3,7 +3,6 @@ package com.skyblockutils.utils;
 import com.skyblockutils.config.ModConfig;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.jspecify.annotations.Nullable;
 
 public class SSU {
     public static Component getName() {
@@ -18,9 +17,9 @@ public class SSU {
         int colorStart = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_START);
         int colorEnd = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_END);
         MutableComponent result = Component.empty();
-        if (!fullName) result.append(Component.literal("§7["));
+        result.append(Component.literal("§7["));
         result.append(gradientText(fullName ? "Strayer's Skyblock Utils" : "Skyblock Utils", colorStart, colorEnd));
-        if (!fullName) result.append(Component.literal("§7] "));
+        result.append(Component.literal("§7] "));
         return result;
     }
 

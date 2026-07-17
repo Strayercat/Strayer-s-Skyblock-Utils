@@ -106,6 +106,6 @@ public class UpdateChecker {
                                 )
                 );
 
-        client.execute(() -> ModFunctions.displayComponentMessageWithHeader(message));
+        client.execute(() -> ModFunctions.displayComponentMessageWithFullName(message));
     }
 }

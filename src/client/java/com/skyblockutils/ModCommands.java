@@ -48,13 +48,13 @@ public class ModCommands {
                 .then(ClientCommands.literal("autorejoin")
                         .executes(context -> {
                             if (!AutoRejoin.autoRejoinEnabled) {
-                                ModFunctions.displayTextMessageWithHeader("§cPlease specify a floor");
+                                ModFunctions.displayTextMessageWithName("§cPlease specify a floor");
                                 return 1;
                             }
 
                             AutoRejoin.autoRejoinEnabled = false;
                             AutoRejoin.currentFloor = "";
-                            ModFunctions.displayTextMessageWithHeader("§cAuto-rejoin disabled");
+                            ModFunctions.displayTextMessageWithName("§cAuto-rejoin disabled");
                             ModConfig.save();
                             return 1;
                         })
@@ -72,15 +72,15 @@ public class ModCommands {
                                     if (floor.equals("off")) {
                                         AutoRejoin.autoRejoinEnabled = false;
                                         AutoRejoin.currentFloor = "";
-                                        ModFunctions.displayTextMessageWithHeader("§cAuto-rejoin disabled");
+                                        ModFunctions.displayTextMessageWithName("§cAuto-rejoin disabled");
                                         ModConfig.save();
                                     } else if (floor.matches("^[mf][1-7]$")) {
                                         AutoRejoin.autoRejoinEnabled = true;
                                         AutoRejoin.currentFloor = floor.toUpperCase();
-                                        ModFunctions.displayTextMessageWithHeader("§aAuto-rejoin enabled for " + floor.toUpperCase());
+                                        ModFunctions.displayTextMessageWithName("§aAuto-rejoin enabled for " + floor.toUpperCase());
                                         ModConfig.save();
                                     } else {
-                                        ModFunctions.displayTextMessageWithHeader("§cInvalid floor! Use m1-m7 or f1-f7, or off to disable");
+                                        ModFunctions.displayTextMessageWithName("§cInvalid floor! Use m1-m7 or f1-f7, or off to disable");
                                         return 0;
                                     }
                                     return 1;
@@ -110,7 +110,7 @@ public class ModCommands {
                                             String name = StringArgumentType.getString(context, "username");
                                             PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> {
                                                 if (formattedName == null) {
-                                                    ModFunctions.displayTextMessageWithHeader("§cPlayer " + name + " not found :c");
+                                                    ModFunctions.displayTextMessageWithName("§cPlayer " + name + " not found :c");
                                                     return;
                                                 }
                                                 GlowingPlayers.add(formattedName, 0xFFAA00, false, null);
@@ -157,7 +157,7 @@ public class ModCommands {
                         .then(ClientCommands.literal("clear")
                                 .executes(context -> {
                                     GlowingPlayers.clearAll();
-                                    ModFunctions.displayTextMessageWithHeader("§aCleared all glowing players.");
+                                    ModFunctions.displayTextMessageWithName("§aCleared all glowing players.");
                                     return 1;
                                 })
                         )
@@ -165,14 +165,14 @@ public class ModCommands {
                                 .executes(context -> {
                                     List<GlowingPlayers.GlowingPlayer> glowingPlayers = ModConfig.INSTANCE.getGlowingPlayers();
                                     if (glowingPlayers.isEmpty()) {
-                                        ModFunctions.displayTextMessageWithHeader("§cYou didn't add any glowing players!");
+                                        ModFunctions.displayTextMessageWithName("§cYou didn't add any glowing players!");
                                         return 1;
                                     }
                                     StringBuilder players = new StringBuilder();
                                     for (GlowingPlayers.GlowingPlayer glowingPlayer : glowingPlayers) {
                                         players.append(glowingPlayer.username).append(", ");
                                     }
-                                    ModFunctions.displayTextMessageWithHeader("§rThese players are glowing: \n" + players);
+                                    ModFunctions.displayTextMessageWithName("§rThese players are glowing: \n" + players);
                                     return 1;
                                 })
                         )
@@ -194,7 +194,7 @@ public class ModCommands {
                             return 1;
                         }))
                         .then(ClientCommands.literal("teehee").executes(context -> {
-                            ModFunctions.displayTextMessageWithHeader("§rNya! Mreow Mrpp Meow!");
+                            ModFunctions.displayTextMessageWithName("§rNya! Mreow Mrpp Meow!");
                             return 1;
                         }))
                         .then(ClientCommands.literal("location").executes(context -> {
@@ -245,7 +245,7 @@ public class ModCommands {
                         .executes(ctx -> {
                             List<String> previousInvites = PartyInviteNotifications.previousInvites;
                             if (!previousInvites.isEmpty()) {
-                                ModFunctions.displayTextMessageWithHeader("Here are the last 10 received party invites (newest to oldest):");
+                                ModFunctions.displayTextMessageWithName("Here are the last 10 received party invites (newest to oldest):");
                                 List<String> lastTenInvites = new ArrayList<>(
                                         previousInvites.subList(Math.max(0, previousInvites.size() - 10), previousInvites.size())
                                                 .stream()
@@ -255,7 +255,7 @@ public class ModCommands {
                                 Collections.reverse(lastTenInvites);
                                 client.gui.hud.getChat().addClientSystemMessage(Component.literal(String.join(", ", lastTenInvites).trim()));
                             } else {
-                                ModFunctions.displayTextMessageWithHeader("§cNobody has invited you to their party this session.");
+                                ModFunctions.displayTextMessageWithName("§cNobody has invited you to their party this session.");
                             }
                             return 1;
                         })
@@ -276,9 +276,9 @@ public class ModCommands {
                                     try {
                                         DailyReminders.ReminderType type = DailyReminders.ReminderType.valueOf(typeArg);
                                         DailyReminders.disable(type);
-                                        ModFunctions.displayTextMessageWithHeader("§cDisabled reminder: " + typeArg);
+                                        ModFunctions.displayTextMessageWithName("§cDisabled reminder: " + typeArg);
                                     } catch (IllegalArgumentException e) {
-                                        ModFunctions.displayTextMessageWithHeader("§cUnknown reminder type: " + typeArg);
+                                        ModFunctions.displayTextMessageWithName("§cUnknown reminder type: " + typeArg);
                                         return 0;
                                     }
                                     return 1;

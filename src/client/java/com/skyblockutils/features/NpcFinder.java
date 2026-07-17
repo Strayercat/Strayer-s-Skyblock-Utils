@@ -1,5 +1,3 @@
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
@@ -108,9 +106,11 @@ public class NpcFinder {
         allSkyblockNpcs.put("Bingo|Hub", new Npc("Bingo", "Hub", new BlockPos(2, 70, -92))); //TODO
         allSkyblockNpcs.put("Alixer|Hub", new Npc("Alixer", "Hub", new BlockPos(0, 70, -93))); //TODO
         allSkyblockNpcs.put("Oringo|Hub", new Npc("Oringo", "Hub", new BlockPos(-3, 70, -43))); //TODO
-        allSkyblockNpcs.put("Fear Mongerer|Hub", new Npc("Fear Mongerer", "Hub", new BlockPos(-2, 70, -43))); //TODO
+        allSkyblockNpcs.put("Fear Mongerer|Hub", new Npc("Fear Mongerer", "Hub", new BlockPos(-32, 70, 6)));
         allSkyblockNpcs.put("Tyashoi Alchemist|Hub", new Npc("Tyashoi Alchemist", "Hub", new BlockPos(41, 68, -55))); //TODO
         allSkyblockNpcs.put("Hoppity|Hub", new Npc("Hoppity", "Hub", new BlockPos(56, 71, -2)));
+        allSkyblockNpcs.put("Susan|Hub", new Npc("Susan", "Hub", new BlockPos(-1, 80, 25)));
+        allSkyblockNpcs.put("Feast Chef Ted|Hub", new Npc("Feast Chef Ted", "Hub", new BlockPos(84, 73, -78)));
 
         // The Barn
         allSkyblockNpcs.put("Farmhand|The Barn", new Npc("Farmhand", "The Barn", new BlockPos(144, 74, -241)));
@@ -195,7 +195,9 @@ public class NpcFinder {
         allSkyblockNpcs.put("Emissary Lissandra|Dwarven Mines", new Npc("Emissary Lissandra", "Dwarven Mines", new BlockPos(2, 122, 237)));
         allSkyblockNpcs.put("Dr. Stone|Dwarven Mines", new Npc("Dr. Stone", "Dwarven Mines", new BlockPos(28, 121, 238)));
         allSkyblockNpcs.put("Lift Operator|Dwarven Mines", new Npc("Lift Operator", "Dwarven Mines", new BlockPos(-80, 201, -124)));
-        allSkyblockNpcs.put("Matigold|Dwarven Mines", new Npc("Marigold", "Dwarven Mines", new BlockPos(181, 151, 60)));
+        allSkyblockNpcs.put("Marigold|Dwarven Mines", new Npc("Marigold", "Dwarven Mines", new BlockPos(181, 151, 60)));
+        allSkyblockNpcs.put("Forge Foreman|Dwarven Mines", new Npc("Forge Foreman", "Dwarven Mines", new BlockPos(-2, 150, -68)));
+        allSkyblockNpcs.put("Forger|Dwarven Mines", new Npc("Forger", "Dwarven Mines", new BlockPos(23, 152, -57)));
 
         // Crystal Hollows
         allSkyblockNpcs.put("King Yolkar|Crystal Hollows", new Npc("King Yolkar", "Crystal Hollows", new BlockPos(20000, 20000, 20000)));
@@ -219,7 +221,8 @@ public class NpcFinder {
         allSkyblockNpcs.put("Bramass Beastslayer|Spider's Den", new Npc("Bramass Beastslayer", "Spider's Den", new BlockPos(-272, 114, -197)));
         allSkyblockNpcs.put("Archaeologist|Spider's Den", new Npc("Archaeologist", "Spider's Den", new BlockPos(-361, 112, -291)));
         allSkyblockNpcs.put("Spider Tamer|Spider's Den", new Npc("Spider Tamer", "Spider's Den", new BlockPos(-299, 62, -195)));
-        // TODO ike and michael
+        allSkyblockNpcs.put("Michael|Spider's Den", new Npc("Michael", "Spider's Den", new BlockPos(-264, 95, -284)));
+        allSkyblockNpcs.put("Ike|Spider's Den", new Npc("Ike", "Spider's Den", new BlockPos(-260, 95, -284)));
 
         // The End
         allSkyblockNpcs.put("Pearl Dealer|The End", new Npc("Pearl Dealer", "The End", new BlockPos(-505, 102, -285)));
@@ -351,7 +354,8 @@ public class NpcFinder {
         allSkyblockNpcs.put("Roddy|Backwater Bayou", new Npc("Roddy", "Backwater Bayou", new BlockPos(23, 79, -24)));
         allSkyblockNpcs.put("Hattie|Backwater Bayou", new Npc("Hattie", "Backwater Bayou", new BlockPos(17, 72, 14)));
         allSkyblockNpcs.put("Carly|Backwater Bayou", new Npc("Carly", "Backwater Bayou", new BlockPos(38, 71, 6)));
-        allSkyblockNpcs.put("Researcher Gilbert|Backwater Bayou", new Npc("", "Backwater Bayou", new BlockPos(27, 60, -26)));
+        allSkyblockNpcs.put("Researcher Gilbert|Backwater Bayou", new Npc("Researcher Gilbert", "Backwater Bayou", new BlockPos(27, 60, -26)));
+        allSkyblockNpcs.put("Captain Baha|Backwater Bayou", new Npc("Captain Baha", "Backwater Bayou", new BlockPos(-22, 76, -9)));
 
         // Lotus Atoll
         allSkyblockNpcs.put("Researcher Betty|Lotus Atoll", new Npc("Researcher Betty", "Lotus Atoll", new BlockPos(-11, 72, 3)));
@@ -387,6 +391,9 @@ public class NpcFinder {
         allSkyblockNpcs.put("Nemo|Galatea", new Npc("Nemo", "Galatea", new BlockPos(-619, 87, -6)));
         allSkyblockNpcs.put("Amaury|Galatea", new Npc("Amaury", "Galatea", new BlockPos(-578, 115, 2)));
         allSkyblockNpcs.put("Talia|Galatea", new Npc("Talia", "Galatea", new BlockPos(-615, 108, 2)));
+        allSkyblockNpcs.put("Oden|Galatea", new Npc("Oden", "Galatea", new BlockPos(-584, 114, -40)));
+        allSkyblockNpcs.put("Dax|Galatea", new Npc("Dax", "Galatea", new BlockPos(-705, 94, 33)));
+        allSkyblockNpcs.put("Captain Baha|Galatea", new Npc("Captain Baha", "Galatea", new BlockPos(-26, 74, 3)));
     }
 
     public static int COLOR_WAYPOINT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.WAYPOINT);
@@ -400,12 +407,12 @@ public class NpcFinder {
 
         String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
         if (!npc.location().equals(currentLocation)) {
-            ModFunctions.displayTextMessageWithHeader("§cYou need to be in §eThe " + npc.location() + " §cto display this waypoint.");
+            ModFunctions.displayTextMessageWithFullName("§cYou need to be in §eThe " + npc.location() + " §cto display this waypoint.");
             return;
         }
 
         addToBeMarked(npc);
-        ModFunctions.displayTextMessageWithHeader("§aWaypoint displayed.");
+        ModFunctions.displayTextMessageWithFullName("§aWaypoint displayed.");
     }
 
     private static final List<Npc> toBeMarked = new ArrayList<>();
@@ -435,7 +442,7 @@ public class NpcFinder {
 
     public static void handleCommand(String npcName) {
         if (!StrayersSkyblockUtilsClient.isInSkyblock) {
-            ModFunctions.displayTextMessageWithHeader("§cYou must be in skyblock to use this feature.");
+            ModFunctions.displayTextMessageWithFullName("§cYou must be in skyblock to use this feature.");
             return;
         }
 
@@ -444,12 +451,12 @@ public class NpcFinder {
                 .toList();
 
         if (matches.isEmpty()) {
-            ModFunctions.displayTextMessageWithHeader("§cNo NPC found with name: " + npcName);
+            ModFunctions.displayTextMessageWithFullName("§cNo NPC found with name: " + npcName);
             return;
         }
 
         MutableComponent message = Component.empty()
-                .append(SSU.getName())
+                .append(SSU.getFullName())
                 .append(Component.literal(matches.getFirst().name + " can be found in these locations:\n"));
 
         for (int i = 0; i < matches.size(); i++) {

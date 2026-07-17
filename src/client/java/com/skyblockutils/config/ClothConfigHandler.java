@@ -27,6 +27,7 @@ public class ClothConfigHandler {
         ConfigEntryBuilder eb = builder.entryBuilder();
 
         buildGeneralCategory(builder, eb);
+        buildPerSkillCategory(builder, eb);
         buildHudCategory(builder, eb);
         buildChatFiltersCategory(builder, eb);
         buildEventsCategory(builder, eb);
@@ -126,9 +127,15 @@ public class ClothConfigHandler {
                 .addButton(Component.literal("Glowing Players GUI"), 120, CustomEntry.Alignment.LEFT, () ->
                                 GlowingPlayersGui.configScreenRequested = true
                         , Component.literal("Open the glowing players config GUI")));
+    }
 
-        general.addEntry(buildDungeonsSubcategory(eb).build());
-        general.addEntry(buildMiningSubcategory(eb).build());
+    // Per skill
+    public static void buildPerSkillCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
+        ConfigCategory perSkill = builder.getOrCreateCategory(Component.literal("Per Skill"));
+
+        perSkill.addEntry(buildDungeonsSubcategory(eb).build());
+        perSkill.addEntry(buildMiningSubcategory(eb).build());
+        perSkill.addEntry(buildForagingSubcategory(eb).build());
     }
 
     private static SubCategoryBuilder buildDungeonsSubcategory(ConfigEntryBuilder eb) {
@@ -173,6 +180,24 @@ public class ClothConfigHandler {
         return mining;
     }
 
+    private static SubCategoryBuilder buildForagingSubcategory(ConfigEntryBuilder eb) {
+        SubCategoryBuilder foraging = eb.startSubCategory(Component.literal("Foraging"));
+
+        foraging.add(eb.startBooleanToggle(Component.literal("Tree Gift Notifications"), ModConfig.INSTANCE.treeGiftNotification)
+                .setDefaultValue(true).setTooltip(Component.literal("Send tree gifts as SSU notifications"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.treeGiftNotification = v).build());
+
+        foraging.add(eb.startIntSlider(Component.literal("Tree Gift Notification Time (tick)"), ModConfig.INSTANCE.treeGiftNotificationTime, 20, 100)
+                .setDefaultValue(60).setTooltip(Component.literal("Time in ticks of the tree gift notification"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.treeGiftNotificationTime = v).build());
+
+        foraging.add(eb.startBooleanToggle(Component.literal("Phantom Title"), ModConfig.INSTANCE.phantomTitle)
+                .setDefaultValue(true).setTooltip(Component.literal("Display a title when spawning a phanflare/phanpyre/dreadwing"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.phantomTitle = v).build());
+
+        return foraging;
+    }
+
     // HUD Settings
     public static void buildHudCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory hud = builder.getOrCreateCategory(Component.literal("HUD Settings"));
@@ -213,7 +238,7 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Show your real local time in the HUD"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudTime = v).build());
 
-        time.add(eb.startSelector(Component.literal("Time Format"), new String[]{"24H", "12H"}, ModConfig.INSTANCE.hudTime12hFormat ? "12H" : "24H")
+        time.add(eb.startSelector(Component.literal("Time Format"), new String[]{"24H", "12H" }, ModConfig.INSTANCE.hudTime12hFormat ? "12H" : "24H")
                 .setDefaultValue("24H").setTooltip(Component.literal("Whether to display time in 12-hour or 24-hour format"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudTime12hFormat = v.equals("12H")).build());
 

@@ -16,6 +16,9 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Corleone reminders via keybinds (reminds you 1 minute after killing it)
 - Umber and tungsten veins waypoints while in the glacite tunnels
 - Powder chest notifications - Replaces the chat message with an SSU notification
+### Foraging
+- Tree Gift Notifications
+- Phantom Titles
 ### Chat
 - Chat filter toggles (Incomplete)
 - Printing coordinates to chat via keybinds
@@ -40,6 +43,7 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Spooky Festival chest titles + loot notifications
 - Daily task reminders
 - Boop party invites
+- Vanilla recipe book redirects to skyblock recipe book
 </details>
 
 ## Dependencies
@@ -47,7 +51,7 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Mod Menu - Recommended
 
 ## REPORTING ISSUES
-Please keep in mind that this is the first mod I develop and release and I am still just getting used to the Minecraft modding environment. Just like anyone in my position, I'm bound to make mistakes, introduce bugs or make your game crash :p. If you find a bug, please let me know so I can release a fix ASAP.
+Please keep in mind that this is the first mod I develop and release, and I am still just getting used to the Minecraft modding environment. Just like anyone in my position, I'm bound to make mistakes, introduce bugs or make your game crash :p. If you find a bug, please let me know, so I can release a fix ASAP.
 
 Modrinth download: https://modrinth.com/mod/strayers-skyblock-utils
-To report issues, head to the github repo (https://github.com/Strayercat/Strayer-s-Skyblock-Utils), then in the "Issues" tab and click "New issue". Describe your problem as clearly as possible, if necessary attach screenshots and make sure to mention your version of the mod.
+To report issues, head to the GitHub repo (https://github.com/Strayercat/Strayer-s-Skyblock-Utils), then in the "Issues" tab and click "New issue". Describe your problem as clearly as possible, if necessary attach screenshots and make sure to mention your version of the mod.

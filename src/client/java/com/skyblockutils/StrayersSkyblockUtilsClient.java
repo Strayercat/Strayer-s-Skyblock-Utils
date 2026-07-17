@@ -7,6 +7,7 @@ import com.skyblockutils.features.chat.ChatCommands;
 import com.skyblockutils.features.chat.ChatFilter;
 import com.skyblockutils.features.chat.FancyEmotes;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
+import com.skyblockutils.features.foraging.TreeGiftNotifications;
 import com.skyblockutils.features.mining.PowderChestNotifications;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
@@ -125,9 +126,10 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
             boolean powderChestMessage = PowderChestNotifications.parseChestReward(message);
             boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
+            boolean treeGiftMessage = TreeGiftNotifications.handleMessage(message);
 
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
-            return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage && spookyFestMessage;
+            return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);

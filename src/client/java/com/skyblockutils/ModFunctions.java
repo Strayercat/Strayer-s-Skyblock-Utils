@@ -129,13 +129,25 @@ public class ModFunctions {
         }
     }
 
-    public static void displayTextMessageWithHeader(String message) {
+    public static void displayTextMessageWithName(String message) {
         Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
                 Component.empty().append(SSU.getFullName()).append(Component.literal(message).withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT)))
         );
     }
 
-    public static void displayComponentMessageWithHeader(Component message) {
+    public static void displayComponentMessageWithName(Component message) {
+        Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
+                Component.empty().append(SSU.getFullName()).append(message)
+        );
+    }
+
+    public static void displayTextMessageWithFullName(String message) {
+        Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
+                Component.empty().append(SSU.getFullName()).append(Component.literal(message).withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT)))
+        );
+    }
+
+    public static void displayComponentMessageWithFullName(Component message) {
         Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
                 Component.empty().append(SSU.getFullName()).append(message)
         );
