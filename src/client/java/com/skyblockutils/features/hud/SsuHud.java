@@ -162,6 +162,7 @@ public class SsuHud {
         if (ModConfig.INSTANCE.hudDailies) {
             if (!ModFunctions.isInDungeons(client)) {
                 if (anyGeneralInfo) addDivider(lines);
+                lines.add(HudLine.of("Daily Tasks: ", COLOR_TITLE));
                 for (DailyReminders.ReminderType type : DailyReminders.ReminderType.values()) {
                     lines.add(HudLine.of(type + ": " + (ModConfig.INSTANCE.completedTypes.contains(type) ? "§aCompleted" : "§cIncomplete"), COLOR_TEXT));
                 }

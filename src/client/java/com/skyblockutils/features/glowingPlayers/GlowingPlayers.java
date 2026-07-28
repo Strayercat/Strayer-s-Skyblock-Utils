@@ -63,7 +63,7 @@ public class GlowingPlayers {
                         .tickTime(60)
                         .send();
             } else {
-                ModFunctions.displayTextMessageWithHeader("§c" + username + " is already glowing!");
+                ModFunctions.displayTextMessageWithName("§c" + username + " is already glowing!");
             }
             return;
         }
@@ -74,7 +74,7 @@ public class GlowingPlayers {
                 client.execute(() -> {
                     if (uuid != null) {
                         ModConfig.INSTANCE.addGlowingPlayer(new GlowingPlayer(username, uuid, color));
-                        if (!fromGui) ModFunctions.displayTextMessageWithHeader("§a" + username + " is now glowing!");
+                        if (!fromGui) ModFunctions.displayTextMessageWithName("§a" + username + " is now glowing!");
                         ModConfig.save();
                         if (onSuccess != null) onSuccess.run();
                     } else {
@@ -85,7 +85,7 @@ public class GlowingPlayers {
                                     .tickTime(100)
                                     .send();
                         } else {
-                            ModFunctions.displayTextMessageWithHeader("§cPlayer " + username + " not found :c");
+                            ModFunctions.displayTextMessageWithName("§cPlayer " + username + " not found :c");
                         }
                     }
                 })
@@ -94,12 +94,12 @@ public class GlowingPlayers {
 
     public static void remove(String username, boolean fromGui) {
         if (!isPlayerGlowing(username)) {
-            if(!fromGui) ModFunctions.displayTextMessageWithHeader("§c" + username + " already wasn't glowing");
+            if(!fromGui) ModFunctions.displayTextMessageWithName("§c" + username + " already wasn't glowing");
             return;
         }
 
         ModConfig.INSTANCE.removeGlowingPlayer(username);
-        if(!fromGui) ModFunctions.displayTextMessageWithHeader("§a" + username + " is no longer glowing");
+        if(!fromGui) ModFunctions.displayTextMessageWithName("§a" + username + " is no longer glowing");
         ModConfig.save();
     }
 

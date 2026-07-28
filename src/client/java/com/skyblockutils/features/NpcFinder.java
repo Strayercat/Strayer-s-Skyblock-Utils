@@ -101,11 +101,11 @@ public class NpcFinder {
         allSkyblockNpcs.put("The Handler|Hub", new Npc("The Handler", "Hub", new BlockPos(40, 73, 1)));
         allSkyblockNpcs.put("Vincent|Hub", new Npc("Vincent", "Hub", new BlockPos(79, 75, 53)));
         allSkyblockNpcs.put("Biblio|Hub", new Npc("Biblio", "Hub", new BlockPos(8, 80, 10)));
-        allSkyblockNpcs.put("Jerry|Hub", new Npc("Jerry", "Hub", new BlockPos(-33, 70, 7))); //TODO
+        allSkyblockNpcs.put("Jerry|Hub", new Npc("Jerry", "Hub", new BlockPos(-33, 70, 7)));
         allSkyblockNpcs.put("Baker|Hub", new Npc("Baker", "Hub", new BlockPos(8, 71, -95))); //TODO
         allSkyblockNpcs.put("Bingo|Hub", new Npc("Bingo", "Hub", new BlockPos(2, 70, -92))); //TODO
         allSkyblockNpcs.put("Alixer|Hub", new Npc("Alixer", "Hub", new BlockPos(0, 70, -93))); //TODO
-        allSkyblockNpcs.put("Oringo|Hub", new Npc("Oringo", "Hub", new BlockPos(-3, 70, -43))); //TODO
+        allSkyblockNpcs.put("Oringo|Hub", new Npc("Oringo", "Hub", new BlockPos(-34, 70, 5)));
         allSkyblockNpcs.put("Fear Mongerer|Hub", new Npc("Fear Mongerer", "Hub", new BlockPos(-32, 70, 6)));
         allSkyblockNpcs.put("Tyashoi Alchemist|Hub", new Npc("Tyashoi Alchemist", "Hub", new BlockPos(41, 68, -55))); //TODO
         allSkyblockNpcs.put("Hoppity|Hub", new Npc("Hoppity", "Hub", new BlockPos(56, 71, -2)));
@@ -366,6 +366,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Researcher Kay|Lotus Atoll", new Npc("Researcher Kay", "Lotus Atoll", new BlockPos(23, 84, -50)));
         allSkyblockNpcs.put("Researcher Tay|Lotus Atoll", new Npc("Researcher Tay", "Lotus Atoll", new BlockPos(26, 142, -60)));
         allSkyblockNpcs.put("Researcher Timmy|Lotus Atoll", new Npc("Researcher Timmy", "Lotus Atoll", new BlockPos(11, 76, 30)));
+        allSkyblockNpcs.put("Captain Baha|Lotus Atoll", new Npc("Captain Baha", "Lotus Atoll", new BlockPos(-26, 74, 3)));
 
         // Galatea
         allSkyblockNpcs.put("Hina|Galatea", new Npc("Hina", "Galatea", new BlockPos(-553, 111, -16)));
@@ -393,7 +394,21 @@ public class NpcFinder {
         allSkyblockNpcs.put("Talia|Galatea", new Npc("Talia", "Galatea", new BlockPos(-615, 108, 2)));
         allSkyblockNpcs.put("Oden|Galatea", new Npc("Oden", "Galatea", new BlockPos(-584, 114, -40)));
         allSkyblockNpcs.put("Dax|Galatea", new Npc("Dax", "Galatea", new BlockPos(-705, 94, 33)));
-        allSkyblockNpcs.put("Captain Baha|Galatea", new Npc("Captain Baha", "Galatea", new BlockPos(-26, 74, 3)));
+
+        // Torrhus Canyon
+        allSkyblockNpcs.put("Helia|Torrhus Canyon", new Npc("Helia", "Torrhus Canyon", new BlockPos(-690, 94, 155)));
+        allSkyblockNpcs.put("Safari Shill|Torrhus Canyon", new Npc("Safari Shill", "Torrhus Canyon", new BlockPos(-697, 95, 177)));
+        allSkyblockNpcs.put("Safari Receptionist|Torrhus Canyon", new Npc("Safari Receptionist", "Torrhus Canyon", new BlockPos(-719, 100, 178)));
+        allSkyblockNpcs.put("Safari Manager|Torrhus Canyon", new Npc("Safari Manager", "Torrhus Canyon", new BlockPos(-732, 100, 185)));
+        allSkyblockNpcs.put("Andrea|Torrhus Canyon", new Npc("Andrea", "Torrhus Canyon", new BlockPos(-711, 109, 178)));
+        allSkyblockNpcs.put("Archie|Torrhus Canyon", new Npc("Archie", "Torrhus Canyon", new BlockPos(-706, 109, 165)));
+        allSkyblockNpcs.put("Miria|Torrhus Canyon", new Npc("Miria", "Torrhus Canyon", new BlockPos(-654, 99, 220)));
+        allSkyblockNpcs.put("Honey|Torrhus Canyon", new Npc("Honey", "Torrhus Canyon", new BlockPos(-627, 100, 226)));
+        allSkyblockNpcs.put("Forager Daniel|Torrhus Canyon", new Npc("Forager Daniel", "Torrhus Canyon", new BlockPos(-639, 96, 246)));
+        allSkyblockNpcs.put("Sanger|Torrhus Canyon", new Npc("Sanger", "Torrhus Canyon", new BlockPos(-746, 94, 261)));
+        allSkyblockNpcs.put("Treehugger Timothy|Torrhus Canyon", new Npc("Treehugger Timothy", "Torrhus Canyon", new BlockPos(-541, 111, 276)));
+        allSkyblockNpcs.put("Forager Rowan|Torrhus Canyon", new Npc("Forager Rowan", "Torrhus Canyon", new BlockPos(-725, 138, 228)));
+        allSkyblockNpcs.put("Dory|Torrhus Canyon", new Npc("Dory", "Torrhus Canyon", new BlockPos(-645, 162, 194)));
     }
 
     public static int COLOR_WAYPOINT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.WAYPOINT);

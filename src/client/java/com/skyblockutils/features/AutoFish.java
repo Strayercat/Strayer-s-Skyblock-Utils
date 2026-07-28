@@ -24,7 +24,7 @@ public class AutoFish {
         if (!autoFishEnabled || client.player == null || client.gameMode == null || client.level == null)
             return;
         if (!(client.player.getMainHandItem().getItem() instanceof FishingRodItem)) {
-            ModFunctions.displayTextMessageWithHeader(("§cAutofish toggled off"));
+            ModFunctions.displayTextMessageWithName(("§cAutofish toggled off"));
             resetAutoFish();
             return;
         }
@@ -70,14 +70,14 @@ public class AutoFish {
         if (!autoFishEnabled) {
             if (client.player.getMainHandItem().getItem() instanceof FishingRodItem) {
                 autoFishEnabled = true;
-                ModFunctions.displayTextMessageWithHeader("§aAutofish toggled on");
+                ModFunctions.displayTextMessageWithName("§aAutofish toggled on");
             } else {
-                ModFunctions.displayTextMessageWithHeader("§cYou must hold a fishing rod in your main hand to use Autofish");
+                ModFunctions.displayTextMessageWithName("§cYou must hold a fishing rod in your main hand to use Autofish");
             }
         } else {
             resetAutoFish();
             if (client.player.fishing != null) client.gameMode.useItem(client.player, InteractionHand.MAIN_HAND);
-            ModFunctions.displayTextMessageWithHeader("§cAutofish toggled off");
+            ModFunctions.displayTextMessageWithName("§cAutofish toggled off");
         }
     }
 

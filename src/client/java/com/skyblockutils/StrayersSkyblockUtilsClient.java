@@ -106,24 +106,25 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         });
 
         ClientReceiveMessageEvents.GAME.register((message, _) -> {
-            if (!isInSkyblock) return;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
+            PartyCommands.handlePartyCommands(cleanMessage);
+            PartyInfo.handlePartyMessages(cleanMessage);
+            if (!isInSkyblock) return;
             DowntimeTracker.trackDowntime(cleanMessage);
             DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);
             AutoRejoin.autoRejoin(cleanMessage);
             ChatCommands.handleCommands(cleanMessage);
-            PartyCommands.handlePartyCommands(cleanMessage);
-            PartyInfo.handlePartyMessages(cleanMessage);
         });
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, _) -> {
-            if (!isInSkyblock) return true;
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
+            boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
+            boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(message);
+
+            if (!isInSkyblock) return partyListMessages && partyMsgFilter;
 
             PowderChestNotifications.handleMessage(message);
 
-            boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(message);
-            boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
             boolean powderChestMessage = PowderChestNotifications.parseChestReward(message);
             boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
             boolean treeGiftMessage = TreeGiftNotifications.handleMessage(message);

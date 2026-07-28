@@ -309,6 +309,9 @@ public class ModFunctions {
             // Lotus Atoll
             case "Lotus Atoll", "Lotus Easter's Cave", "Tewtil Tunnel", "Lotus Highlands" -> "Lotus Atoll";
 
+            // Torrhus Canyon
+            case "Torrhus Canyon", "Spring Path", "Safari Zone Entrance", "Torrhus Springs", "Torrhus Heights", "Miria's Hut", "Spring Shallows" -> "Torrhus Canyon";
+
             default -> location;
         };
     }

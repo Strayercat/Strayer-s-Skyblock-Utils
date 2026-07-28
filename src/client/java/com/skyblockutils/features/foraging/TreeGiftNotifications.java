@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Style;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +26,7 @@ public class TreeGiftNotifications {
 
     public static boolean handleMessage(Component message) {
         if (!ModConfig.INSTANCE.treeGiftNotification) return true;
-        if (!Objects.equals(ModFunctions.mapLocationToGeneralArea(SideBarUtils.location), "Galatea")) return true;
+        if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Galatea")) return true;
 
         if (message.getString().startsWith("▬▬▬▬")) {
             if (!reading) {
@@ -42,9 +41,12 @@ public class TreeGiftNotifications {
             return false;
         }
 
-        buffer.add(message);
+        if (reading) {
+            buffer.add(message);
+            return false;
+        }
 
-        return false;
+        return true;
     }
 
     private static void parseBuffer() {

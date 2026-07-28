@@ -201,6 +201,10 @@ public class ModCommands {
                             context.getSource().sendFeedback(Component.literal("§6" + SideBarUtils.location));
                             return 1;
                         }))
+                        .then(ClientCommands.literal("generallocation").executes(context -> {
+                            context.getSource().sendFeedback(Component.literal("§6" + ModFunctions.mapLocationToGeneralArea(SideBarUtils.location)));
+                            return 1;
+                        }))
                         .then(ClientCommands.literal("coordinates")
                                 .then(ClientCommands.literal("add").executes(context -> {
                                     MarkCoordinates.addCoordinates();

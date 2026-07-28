@@ -28,7 +28,7 @@ import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class DailyReminders {
     public enum ReminderType {
-        ISLE, COMMISSION, MATRIARCH
+        ISLE, COMMISSIONS, MATRIARCH
     }
 
     private static final ZoneId EST_ZONE = ZoneId.of("America/New_York");
@@ -43,7 +43,7 @@ public class DailyReminders {
 
     public static void init() {
         dailyLocationMap.put(ReminderType.ISLE, List.of("Crimson Isle"));
-        dailyLocationMap.put(ReminderType.COMMISSION, List.of("Dwarven Mines", "Crystal Hollows", "Glacite Mineshafts"));
+        dailyLocationMap.put(ReminderType.COMMISSIONS, List.of("Dwarven Mines", "Crystal Hollows", "Glacite Mineshafts"));
         dailyLocationMap.put(ReminderType.MATRIARCH, List.of("Crimson Isle"));
     }
 
@@ -86,7 +86,7 @@ public class DailyReminders {
                     continue;
                 }
 
-                if (type == ReminderType.COMMISSION) {
+                if (type == ReminderType.COMMISSIONS) {
                     if (!(client.gui.screen() instanceof AbstractContainerScreen<?> containerScreen)) continue;
                     if (!containerScreen.getTitle().getString().contains("Commissions")) continue;
 
@@ -198,7 +198,7 @@ public class DailyReminders {
 
         String messageToSend = switch (type) {
             case ISLE -> "You haven't completed your isle dailies! ";
-            case COMMISSION -> "You haven't completed your daily commissions! ";
+            case COMMISSIONS -> "You haven't completed your daily commissions! ";
             case MATRIARCH -> "Don't forget to grab your heavy pearls from the Matriarch! ";
         };
 

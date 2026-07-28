@@ -25,15 +25,15 @@ public class PuffTracker {
             puffTrackerEnabled = false;
             currentScheduledAction.cancel(true);
             puffsAroundPlayer.clear();
-            ModFunctions.displayTextMessageWithHeader("§cPuff Timer toggled off");
+            ModFunctions.displayTextMessageWithName("§cPuff Timer toggled off");
         } else {
             if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Rift")) {
-                ModFunctions.displayTextMessageWithHeader("§cYou must be in The Rift to use Puff Timer");
+                ModFunctions.displayTextMessageWithName("§cYou must be in The Rift to use Puff Timer");
                 return;
             }
 
             puffTrackerEnabled = true;
-            ModFunctions.displayTextMessageWithHeader("§aPuff Timer toggled on");
+            ModFunctions.displayTextMessageWithName("§aPuff Timer toggled on");
         }
     }
 
