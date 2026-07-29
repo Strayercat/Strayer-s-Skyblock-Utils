@@ -22,6 +22,7 @@ import com.skyblockutils.features.party.PartyCommands;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.party.PartyListParser;
+import com.skyblockutils.features.textures.F7VoidLava;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
@@ -48,6 +49,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ModConfig.load();
         GuiBlocker.init();
         DailyReminders.init();
+        F7VoidLava.register();
 
         ClientCommandRegistrationCallback.EVENT.register(ModCommands::register);
 

@@ -11,7 +11,8 @@
     "GameRendererMixin",
     "InGameHudMixin",
     "MouseMixin",
-    "WorldTimeMixin"
+    "WorldTimeMixin",
+    "ModelManagerAccessor"
   ],
   "injectors": {
     "defaultRequire": 0

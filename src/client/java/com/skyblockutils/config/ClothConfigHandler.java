@@ -154,6 +154,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(false).setTooltip(Component.literal("Reminds you that auto-rejoin is still enabled every time a run ends"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.autoRejoinReminders = v).build());
 
+        dungeons.add(eb.startBooleanToggle(Component.literal("F7/M7 Void Lava"), ModConfig.INSTANCE.f7VoidLava)
+                .setDefaultValue(false).setTooltip(Component.literal("Have a custom void texture for F7 or M7 boss lava"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.f7VoidLava = v).build());
+
         return dungeons;
     }
 
@@ -238,7 +242,7 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Show your real local time in the HUD"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudTime = v).build());
 
-        time.add(eb.startSelector(Component.literal("Time Format"), new String[]{"24H", "12H" }, ModConfig.INSTANCE.hudTime12hFormat ? "12H" : "24H")
+        time.add(eb.startSelector(Component.literal("Time Format"), new String[]{"24H", "12H"}, ModConfig.INSTANCE.hudTime12hFormat ? "12H" : "24H")
                 .setDefaultValue("24H").setTooltip(Component.literal("Whether to display time in 12-hour or 24-hour format"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudTime12hFormat = v.equals("12H")).build());
 

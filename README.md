@@ -12,6 +12,7 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Dungeon join commands in "!M7" format
 - Floor auto-rejoin via /ssu autorejoin (floor("m7" format))
 - Downtime tracker via !dt/dt (reason(optional))
+- Custom Void lava texture in F7 and M7 boss rooms (removes the fire overlay too)
 ### Mining
 - Corleone reminders via keybinds (reminds you 1 minute after killing it)
 - Umber and tungsten veins waypoints while in the glacite tunnels

@@ -41,6 +41,7 @@ public class ModConfig {
     public boolean downtimeTracker = true;
     public boolean dungeonPartyCommands = true;
     public boolean autoRejoinReminders = false;
+    public boolean f7VoidLava = true;
 
     // HUD
     public boolean hudEnabled = true;
@@ -158,6 +159,7 @@ public class ModConfig {
             INSTANCE.downtimeTracker = loaded.downtimeTracker;
             INSTANCE.dungeonPartyCommands = loaded.dungeonPartyCommands;
             INSTANCE.autoRejoinReminders = loaded.autoRejoinReminders;
+            INSTANCE.f7VoidLava = loaded.f7VoidLava;
             INSTANCE.hudEnabled = loaded.hudEnabled;
             INSTANCE.hudScale = loaded.hudScale;
             INSTANCE.hudTime = loaded.hudTime;
