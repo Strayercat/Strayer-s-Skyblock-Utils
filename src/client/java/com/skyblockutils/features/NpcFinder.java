@@ -28,7 +28,7 @@ public class NpcFinder {
 
     static {
         // Hub
-        allSkyblockNpcs.put("Adventurer|Hub", new Npc("Adventurer", "Hub", new BlockPos(-50, 70, -67)));
+        allSkyblockNpcs.put("Combat Merchant|Hub", new Npc("Combat Merchant", "Hub", new BlockPos(-50, 70, -67)));
         allSkyblockNpcs.put("Alda|Hub", new Npc("Alda", "Hub", new BlockPos(71, 81, -60)));
         allSkyblockNpcs.put("Karis|Hub", new Npc("Karis", "Hub", new BlockPos(65, 82, -60)));
         allSkyblockNpcs.put("Hub Selector|Hub", new Npc("Hub Selector", "Hub", new BlockPos(-6, 70, -23)));
@@ -103,8 +103,8 @@ public class NpcFinder {
         allSkyblockNpcs.put("Biblio|Hub", new Npc("Biblio", "Hub", new BlockPos(8, 80, 10)));
         allSkyblockNpcs.put("Jerry|Hub", new Npc("Jerry", "Hub", new BlockPos(-33, 70, 7)));
         allSkyblockNpcs.put("Baker|Hub", new Npc("Baker", "Hub", new BlockPos(8, 71, -95))); //TODO
-        allSkyblockNpcs.put("Bingo|Hub", new Npc("Bingo", "Hub", new BlockPos(2, 70, -92))); //TODO
-        allSkyblockNpcs.put("Alixer|Hub", new Npc("Alixer", "Hub", new BlockPos(0, 70, -93))); //TODO
+        allSkyblockNpcs.put("Bingo|Hub", new Npc("Bingo", "Hub", new BlockPos(3, 79, 4)));
+        allSkyblockNpcs.put("Alixer|Hub", new Npc("Alixer", "Hub", new BlockPos(-2, 79, 4)));
         allSkyblockNpcs.put("Oringo|Hub", new Npc("Oringo", "Hub", new BlockPos(-34, 70, 5)));
         allSkyblockNpcs.put("Fear Mongerer|Hub", new Npc("Fear Mongerer", "Hub", new BlockPos(-32, 70, 6)));
         allSkyblockNpcs.put("Tyashoi Alchemist|Hub", new Npc("Tyashoi Alchemist", "Hub", new BlockPos(41, 68, -55))); //TODO

@@ -6,20 +6,24 @@ import net.minecraft.network.chat.MutableComponent;
 
 public class SSU {
     public static Component getName() {
-        return buildPrefix(false);
+        return buildPrefix(false, false);
     }
 
     public static Component getFullName() {
-        return buildPrefix(true);
+        return buildPrefix(true, false);
     }
 
-    private static Component buildPrefix(boolean fullName) {
+    public static Component getHudTitle() {
+        return buildPrefix(true, true);
+    }
+
+    private static Component buildPrefix(boolean fullName, boolean forHud) {
         int colorStart = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_START);
         int colorEnd = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_END);
         MutableComponent result = Component.empty();
-        result.append(Component.literal("§7["));
+        if (!forHud) result.append(Component.literal("§7["));
         result.append(gradientText(fullName ? "Strayer's Skyblock Utils" : "Skyblock Utils", colorStart, colorEnd));
-        result.append(Component.literal("§7] "));
+        if (!forHud) result.append(Component.literal("§7] "));
         return result;
     }
 

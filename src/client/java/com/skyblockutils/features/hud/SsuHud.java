@@ -121,7 +121,7 @@ public class SsuHud {
 
     private static @NotNull List<HudLine> getHudLines(Minecraft client, String location) {
         List<HudLine> lines = new ArrayList<>();
-        lines.add(HudLine.rich(SSU.getFullName()));
+        lines.add(HudLine.rich(SSU.getHudTitle()));
         addDivider(lines);
 
         boolean anyGeneralInfo = false;
