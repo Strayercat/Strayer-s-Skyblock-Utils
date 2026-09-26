@@ -10,21 +10,24 @@
     "EntityTrackerUpdateMixin",
     "GameRendererMixin",
     "InGameHudMixin",
+    "ModelManagerAccessor",
     "MouseMixin",
-    "WorldTimeMixin",
-    "ModelManagerAccessor"
+    "WorldTimeMixin"
   ],
   "injectors": {
     "defaultRequire": 0
   },
   "mixins": [
+    "AbstractRecipeBookScreenMixin",
     "CameraMixin",
     "EntityColorMixin",
     "EntityGlowingMixin",
+    "EntityRendererMixin",
     "HudMixin",
-    "AbstractRecipeBookScreenMixin",
     "PingDebugMonitorAccessor",
     "PingDebugMonitorInvoker",
-    "ScreenshotRecorderMixin"
+    "PlayerTabOverlayMixin",
+    "ScreenshotRecorderMixin",
+    "SkyblockerPlayerElementMixin"
   ]
 }

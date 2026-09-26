@@ -26,13 +26,15 @@ public class ChatCommands {
 
         if (!ModConfig.INSTANCE.statCommands) return;
         if (messageContent.equalsIgnoreCase("!tps"))
-            sendMessageInChannel("Tps: " + String.format("%.1f", ModFunctions.tps), messageChannel);
+            sendMessageInChannel("TPS: " + String.format("%.1f", ModFunctions.tps), messageChannel);
         if (messageContent.equalsIgnoreCase("!ping"))
             sendMessageInChannel("Ping: " + ModFunctions.ping, messageChannel);
         if (messageContent.equalsIgnoreCase("!fps"))
-            sendMessageInChannel("Fps: ".concat(String.valueOf(Minecraft.getInstance().getFps())), messageChannel);
+            sendMessageInChannel("FPS: ".concat(String.valueOf(Minecraft.getInstance().getFps())), messageChannel);
+        if (messageContent.equalsIgnoreCase("!ssu"))
+            sendMessageInChannel("Goat!", messageChannel);
 
-        if(messageChannel.equals("all")) return;
+        if (messageChannel.equals("all")) return;
 
         // Silly messages
         if (!ModConfig.INSTANCE.chatCommands) return;

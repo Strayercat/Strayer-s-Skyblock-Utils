@@ -5,7 +5,7 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
 import com.skyblockutils.features.chat.ChatCommands;
 import com.skyblockutils.features.chat.ChatFilter;
-import com.skyblockutils.features.chat.FancyEmotes;
+import com.skyblockutils.features.chat.ChatModifications;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.foraging.TreeGiftNotifications;
 import com.skyblockutils.features.mining.PowderChestNotifications;
@@ -26,6 +26,7 @@ import com.skyblockutils.features.textures.F7VoidLava;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.TabListIndicator;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -86,6 +87,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
             ScreenshotManager.tick();
             PowderChestNotifications.tick();
+            TabListIndicator.tick(client);
 
             if (client.level == null) return;
 
@@ -135,7 +137,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
         });
 
-        ClientSendMessageEvents.MODIFY_CHAT.register(FancyEmotes::fancyEmotes);
+        ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::fancyEmotes);
 
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> PowderChestNotifications.handleChestclick(hitResult));
     }

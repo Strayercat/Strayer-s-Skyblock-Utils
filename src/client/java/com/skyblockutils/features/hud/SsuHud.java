@@ -10,6 +10,7 @@ import com.skyblockutils.utils.FunFacts;
 import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.TabListIndicator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -38,6 +39,8 @@ public class SsuHud {
     private static final int BASE_LINE_HEIGHT = 12;
     private static final int BASE_DIVIDER_HEIGHT = 6;
     private static final int BASE_PADDING = 10;
+    private static final int GEM_SIZE = 8;
+    private static final int GEM_VISIBLE_WIDTH = 7;
 
     private static final int COLOR_TEXT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT);
     private static final int COLOR_MAIN = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
@@ -91,6 +94,9 @@ public class SsuHud {
         context.fill(unscaledRenderX, 0, unscaledRenderX + unscaledHudWidth, 1, COLOR_MAIN);
         context.fill(unscaledRenderX, unscaledHudHeight - 1, unscaledRenderX + unscaledHudWidth, unscaledHudHeight, COLOR_MAIN);
 
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, TabListIndicator.BADGE_BIG,
+                unscaledRenderX + unscaledHudWidth - 5 - GEM_VISIBLE_WIDTH, unscaledRenderY, GEM_SIZE, GEM_SIZE);
+
         for (HudLine line : lines) {
             if (line.isDivider()) {
                 int lineY = unscaledRenderY + 1;
@@ -106,9 +112,10 @@ public class SsuHud {
             }
         }
 
+        context.pose().popMatrix();
+
         if (ModConfig.INSTANCE.customSidebar || !ModConfig.INSTANCE.cat) return;
 
-        context.pose().popMatrix();
         context.pose().pushMatrix();
         float imageScale = (1.0f / 6.0f) * scale;
         context.pose().scale(imageScale, imageScale);

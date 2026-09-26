@@ -5,6 +5,7 @@ import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -19,42 +20,69 @@ import java.util.regex.Pattern;
 
 public class TreeGiftNotifications {
     private static boolean reading = false;
+    private static int ticksReading = 0;
+    private static final int MAX_READ_TICKS = 2;
     private static final List<Component> buffer = new ArrayList<>();
     private static Component separator;
 
     private static final Pattern PERCENT_SUFFIX = Pattern.compile("\\s*\\(\\d+(?:\\.\\d+)?%\\)");
 
+    static {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (reading && ++ticksReading > MAX_READ_TICKS) abort();
+        });
+    }
+
     public static boolean handleMessage(Component message) {
-        if (!ModConfig.INSTANCE.treeGiftNotification) return true;
-        if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Galatea")) return true;
+        String text = message.getString();
+        boolean isSeparator = text.startsWith("▬▬▬▬");
 
-        if (message.getString().startsWith("▬▬▬▬")) {
-            if (!reading) {
-                buffer.clear();
-                separator = message;
-                reading = true;
-            } else {
-                reading = false;
-                parseBuffer();
+        if (!reading) {
+            if (!isSeparator) return true;
+            if (!ModConfig.INSTANCE.treeGiftNotification) return true;
+            String area = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
+            if (!area.equals("Galatea") && !area.equals("Torrhus Canyon")) return true;
+            start(message);
+            return false;
+        }
+
+        if (buffer.isEmpty() && !text.trim().equals("TREE GIFT")) {
+            abort();
+            if (isSeparator) {
+                start(message);
+                return false;
             }
+            return true;
+        }
 
+        if (isSeparator) {
+            reading = false;
+            parseBuffer();
             return false;
         }
 
-        if (reading) {
-            buffer.add(message);
-            return false;
-        }
+        buffer.add(message);
+        return false;
+    }
 
-        return true;
+    private static void start(Component sep) {
+        buffer.clear();
+        separator = sep;
+        ticksReading = 0;
+        reading = true;
+    }
+
+    private static void abort() {
+        reading = false;
+        Minecraft client = Minecraft.getInstance();
+        client.gui.hud.getChat().addClientSystemMessage(separator);
+        for (Component swallowedMessage : buffer) {
+            client.gui.hud.getChat().addClientSystemMessage(swallowedMessage);
+        }
+        buffer.clear();
     }
 
     private static void parseBuffer() {
-        if (!buffer.getFirst().getString().trim().equals("TREE GIFT")) {
-            replaySwallowedMessages();
-            return;
-        }
-
         List<Component> fullList = new ArrayList<>();
 
         for (Component el : buffer) {
@@ -73,11 +101,7 @@ public class TreeGiftNotifications {
             }
         }
 
-        OnScreenNotification.builder()
-                .title("§2TREE GIFT")
-                .subtitle(fullList)
-                .tickTime(ModConfig.INSTANCE.treeGiftNotificationTime)
-                .send();
+        OnScreenNotification.builder().title("§2TREE GIFT").subtitle(fullList).tickTime(ModConfig.INSTANCE.treeGiftNotificationTime).send();
 
         if (!ModConfig.INSTANCE.phantomTitle) return;
 
@@ -185,15 +209,5 @@ public class TreeGiftNotifications {
         text = text.replace("Experience", "XP");
         Component piece = Component.literal(text).setStyle(style);
         return result == null ? piece.copy() : result.append(piece);
-    }
-
-    private static void replaySwallowedMessages() {
-        Minecraft client = Minecraft.getInstance();
-
-        client.gui.hud.getChat().addClientSystemMessage(separator);
-        for (Component swallowedMessage : buffer) {
-            client.gui.hud.getChat().addClientSystemMessage(swallowedMessage);
-        }
-        client.gui.hud.getChat().addClientSystemMessage(separator);
     }
 }

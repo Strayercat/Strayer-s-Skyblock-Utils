@@ -2,6 +2,7 @@ package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.chat.ChatModifications;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -82,6 +84,15 @@ public class ChatHudMixin {
     )
     private void onAddServerSystemMessage(Component message, CallbackInfo ci) {
         filterScreenshotMessage(message, ci);
+    }
+
+    @ModifyVariable(
+            at = @At("HEAD"),
+            method = "addServerSystemMessage(Lnet/minecraft/network/chat/Component;)V",
+            argsOnly = true,
+            name = "message")
+    private Component addChatBadge(Component message) {
+        return ChatModifications.withChatBadge(message);
     }
 
     @Unique
