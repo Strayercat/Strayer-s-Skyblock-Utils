@@ -28,7 +28,7 @@ public class TreeGiftNotifications {
     private static final Pattern PERCENT_SUFFIX = Pattern.compile("\\s*\\(\\d+(?:\\.\\d+)?%\\)");
 
     static {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        ClientTickEvents.END_CLIENT_TICK.register(_ -> {
             if (reading && ++ticksReading > MAX_READ_TICKS) abort();
         });
     }

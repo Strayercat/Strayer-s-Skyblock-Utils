@@ -1,0 +1,11 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "skyblockutils:gui/sprites/ssu_gem_big.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7A5"]
+    }
+  ]
+}

@@ -10,19 +10,20 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class UpdateChecker {
     private static final String CURRENT_VERSION = "4.7.2";
-    private static final String UPDATE_URL = "https://raw.githubusercontent.com/Strayercat/Strayer-s-Skyblock-Utils/main/update.json";
+    private static final URI UPDATE_URI = URI.create("https://raw.githubusercontent.com/Strayercat/Strayer-s-Skyblock-Utils/main/update.json");
     private static final String MOD_URL = "https://modrinth.com/mod/strayers-skyblock-utils/versions";
+    private static final HttpClient HTTP = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
     private static boolean userNotified = false;
     private static boolean initialized = false;
 
@@ -37,21 +38,16 @@ public class UpdateChecker {
         try {
             String gameVersion = SharedConstants.getCurrentVersion().id();
 
-            HttpURLConnection conn = (HttpURLConnection) new URL(UPDATE_URL).openConnection();
-            conn.setRequestMethod("GET");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
-            conn.setRequestProperty("User-Agent", "SkyblockUtils/" + CURRENT_VERSION);
+            HttpRequest req = HttpRequest.newBuilder(UPDATE_URI)
+                    .timeout(Duration.ofSeconds(5))
+                    .header("User-Agent", "SkyblockUtils/" + CURRENT_VERSION)
+                    .GET()
+                    .build();
 
-            if (conn.getResponseCode() != 200) return null;
+            HttpResponse<String> res = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() != 200) return null;
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) sb.append(line);
-            reader.close();
-
-            JsonObject json = JsonParser.parseString(sb.toString()).getAsJsonObject();
+            JsonObject json = JsonParser.parseString(res.body()).getAsJsonObject();
 
             if (!json.has(gameVersion)) return null;
 

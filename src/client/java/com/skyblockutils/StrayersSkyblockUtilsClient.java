@@ -139,6 +139,6 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::fancyEmotes);
 
-        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> PowderChestNotifications.handleChestclick(hitResult));
+        UseBlockCallback.EVENT.register((_, _, _, hitResult) -> PowderChestNotifications.handleChestclick(hitResult));
     }
 }
