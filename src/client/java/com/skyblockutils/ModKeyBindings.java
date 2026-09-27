@@ -50,6 +50,12 @@ public class ModKeyBindings {
             GLFW.GLFW_KEY_Y,
             SSU_CATEGORY);
 
+    public static final KeyMapping SYSTEM_CHAT_HISTORY_KEY = new KeyMapping(
+            "key.ssu.systemChatHistory",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_H,
+            SSU_CATEGORY);
+
     public static void init() {
         KeyMappingHelper.registerKeyMapping(CORLEONE_TIMER_KEY);
         KeyMappingHelper.registerKeyMapping(AUTOFISH_KEY);
@@ -58,5 +64,6 @@ public class ModKeyBindings {
         KeyMappingHelper.registerKeyMapping(CHAT_PEEK_KEY);
         KeyMappingHelper.registerKeyMapping(ZOOM_KEY);
         KeyMappingHelper.registerKeyMapping(PUFF_TIMER_KEY);
+        KeyMappingHelper.registerKeyMapping(SYSTEM_CHAT_HISTORY_KEY);
     }
 }

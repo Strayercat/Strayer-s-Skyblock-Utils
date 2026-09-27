@@ -9,44 +9,53 @@ import net.minecraft.sounds.SoundEvents;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class SpookyMessageHandler {
-    private static final List<String> allowedLoot = List.of("Green Candy", "Purple Candy", "Ectoplasm", "Blast o' Lantern", "Candy Corn", "Pumpkin Guts", "Rock Candy", "Spooky Cupcake", "Bat Person Talisman", "Vampirism VI", "Candy the Fish");
-    private static boolean expecingLoot = false;
-    private static boolean notificationSent = false;
+    private static final List<String> allowedLoot = List.of("Green Candy", "Purple Candy", "Ectoplasm", "Blast o' Lantern", "Candy Corn", "Pumpkin Guts", "Rock Candy", "Spooky Cupcake", "Bat Person Talisman", "Enchanted Book (Vampirism VI)", "Candy the Fish");
+    private static final Pattern AMOUNT_SUFFIX = Pattern.compile("\\s*x[\\d,]+$");
+    private static boolean expectingLoot = false;
+    private static ScheduledFuture<?> pendingNotification = null;
     private static final List<Component> buffer = new ArrayList<>();
 
     public static boolean handleMessage(Component message) {
-        if (message.getString().equals("SPOOKY! A Trick or Treat Chest has appeared!") && ModConfig.INSTANCE.spookyChestTitle) {
+        String text = message.getString();
+
+        if (text.equals("SPOOKY! A Trick or Treat Chest has appeared!") && ModConfig.INSTANCE.spookyChestTitle) {
             ModFunctions.showTitle(Minecraft.getInstance(), "§6SPOOKY", 30, true);
             return false;
         }
 
-        if (message.getString().matches("TRICK! A .* has tricked you!") && ModConfig.INSTANCE.spookyTrickJumpscare) {
+        if (text.matches("TRICK! A .* has tricked you!") && ModConfig.INSTANCE.spookyTrickJumpscare) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return true;
             mc.player.playSound(SoundEvents.LIGHTNING_BOLT_THUNDER);
             ModFunctions.showTitle(Minecraft.getInstance(), "§4BOO!", 10, false);
         }
 
-        if (ModConfig.INSTANCE.spookyLootNotification && message.getString().equals("TREAT! Your Trick or Treat Chest rewarded you with:")) {
-            buffer.clear();
-            expecingLoot = true;
+        if (ModConfig.INSTANCE.spookyLootNotification && text.equals("TREAT! Your Trick or Treat Chest rewarded you with:")) {
+            synchronized (buffer) {
+                buffer.clear();
+            }
+            expectingLoot = true;
             return false;
         }
 
-        if (!expecingLoot || message.getString().contains(":")) return true;
+        if (!expectingLoot || text.contains(":")) return true;
 
-        if (allowedLoot.contains(message.getString().replaceAll("x\\d", "").trim())) {
-            buffer.add(message);
+        String itemName = AMOUNT_SUFFIX.matcher(text.trim()).replaceAll("").trim();
 
-            if (!notificationSent) {
-                notificationSent = true;
-                scheduler.schedule(() -> sendNotification(), 200, TimeUnit.MILLISECONDS);
+        if (allowedLoot.contains(itemName)) {
+            synchronized (buffer) {
+                buffer.add(message);
             }
+
+            if (pendingNotification != null) pendingNotification.cancel(false);
+            pendingNotification = scheduler.schedule(SpookyMessageHandler::sendNotification, 250, TimeUnit.MILLISECONDS);
 
             return false;
         }
@@ -55,9 +64,17 @@ public class SpookyMessageHandler {
     }
 
     private static void sendNotification() {
-        expecingLoot = false;
-        notificationSent = false;
+        List<Component> rewards;
+        synchronized (buffer) {
+            rewards = new ArrayList<>(buffer);
+            buffer.clear();
+        }
 
-        OnScreenNotification.builder().title("Spooky Chest Rewards").subtitle(buffer).send();
+        expectingLoot = false;
+        pendingNotification = null;
+
+        Minecraft.getInstance().execute(() ->
+                OnScreenNotification.builder().title("Spooky Chest Rewards").subtitle(rewards).send()
+        );
     }
 }

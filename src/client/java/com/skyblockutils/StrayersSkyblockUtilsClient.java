@@ -6,6 +6,7 @@ import com.skyblockutils.features.*;
 import com.skyblockutils.features.chat.ChatCommands;
 import com.skyblockutils.features.chat.ChatFilter;
 import com.skyblockutils.features.chat.ChatModifications;
+import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.foraging.TreeGiftNotifications;
 import com.skyblockutils.features.mining.PowderChestNotifications;
@@ -63,12 +64,11 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> ModFunctions.connectionEventDataReset("Leave"));
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, _) -> SsuHud.onHudRender(context, SideBarUtils.location));
-
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_screenshot_manager"), (context, _) -> ScreenshotManager.buildScreenshotHud(context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_system_messages"), (context, _) -> SeparatedChat.render(context));
         HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> {
             if (isInSkyblock && ModConfig.INSTANCE.customSidebar) CustomSidebar.displayCustomSidebar(context);
         });
-
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_screenshot_manager"), (context, _) -> ScreenshotManager.buildScreenshotHud(context));
 
         LevelRenderEvents.END_MAIN.register(context -> {
             GlaciteTunnelsWaypoints.onWorldRender(context);
@@ -87,7 +87,6 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
             ScreenshotManager.tick();
             PowderChestNotifications.tick();
-            TabListIndicator.tick(client);
 
             if (client.level == null) return;
 
@@ -101,11 +100,13 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             if (!isInSkyblock) return;
 
             AutoFish.autoFish(client);
+            TabListIndicator.tick(client);
             CorlTimer.corlTimerTick(client);
             PuffTracker.tick(client);
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
             PartyListParser.handleOnJoinCommand();
             SideBarUtils.updateLocation();
+            SeparatedChat.tickAllMessages();
             DailyReminders.tick(client);
         });
 
@@ -120,7 +121,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ChatCommands.handleCommands(cleanMessage);
         });
 
-        ClientReceiveMessageEvents.ALLOW_GAME.register((message, _) -> {
+        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(message);
@@ -132,9 +133,12 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             boolean powderChestMessage = PowderChestNotifications.parseChestReward(message);
             boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
             boolean treeGiftMessage = TreeGiftNotifications.handleMessage(message);
-
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
-            return chatFilter && partyMsgFilter && partyListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
+
+            boolean allowed = chatFilter && partyMsgFilter && partyListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
+            if (!allowed) return false;
+
+            return SeparatedChat.handleMessage(message, overlay);
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::fancyEmotes);

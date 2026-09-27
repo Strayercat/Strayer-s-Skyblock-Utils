@@ -36,6 +36,7 @@ public class ModConfig {
     public boolean cat = true;
     public boolean partyGlow = true;
     public boolean screenshotHud = true;
+    public boolean cancelSwings = false;
 
     // Dungeons
     public boolean downtimeTracker = true;
@@ -70,6 +71,7 @@ public class ModConfig {
     public boolean phantomTitle = true;
 
     // Chat filters & glowing players
+    public boolean separateMessage = false;
     private final Map<String, Boolean> chatFilters = new HashMap<>();
     private List<GlowingPlayer> glowingPlayers = new ArrayList<>();
 
@@ -182,6 +184,8 @@ public class ModConfig {
             INSTANCE.phantomTitle = loaded.phantomTitle;
             INSTANCE.glowingPlayers = loaded.glowingPlayers != null ? new ArrayList<>(loaded.glowingPlayers) : new ArrayList<>();
             INSTANCE.dailyReminders = loaded.dailyReminders;
+            INSTANCE.separateMessage = loaded.separateMessage;
+            INSTANCE.cancelSwings = loaded.cancelSwings;
             INSTANCE.lastReset = loaded.lastReset != null ? loaded.lastReset : new Date(0);
             INSTANCE.disabledTypes = loaded.disabledTypes != null ? loaded.disabledTypes : new ArrayList<>();
             INSTANCE.completedTypes = loaded.completedTypes != null ? loaded.completedTypes : new ArrayList<>();

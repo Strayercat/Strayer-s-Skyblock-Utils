@@ -75,6 +75,14 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Sends a clickable notification to invite whoever boops you"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.boopPartyInvites = v).build());
 
+        general.addEntry(eb.startBooleanToggle(Component.literal("Separate Message"), ModConfig.INSTANCE.separateMessage)
+                .setDefaultValue(false).setTooltip(Component.literal("Separates server sent messages and user sent messages in 2 different HUDs"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.separateMessage = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Component.literal("Cancel Arm Swings"), ModConfig.INSTANCE.cancelSwings)
+                .setDefaultValue(false).setTooltip(Component.literal("Removes the first person arm swing animation"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.cancelSwings = v).build());
+
         general.addEntry(eb.startBooleanToggle(Component.literal("Fancy Emotes"), ModConfig.INSTANCE.fancyEmotes)
                 .setDefaultValue(true).setTooltip(Component.literal("Transforms <3 into ♥ and such"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.fancyEmotes = v).build());

@@ -1,6 +1,7 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.ModKeyBindings;
+import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.hud.ScreenshotManager;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.ZoomState;
@@ -28,7 +29,6 @@ public class MouseMixin {
 
                 int button = buttonInfo.button();
 
-
                 boolean consumedByNotification = OnScreenNotification.handleNotificationClicks((int) mouseX, (int) mouseY, button, sw, sh);
 
                 if (button == 0) ScreenshotManager.onMouseClick(mouseX, mouseY);
@@ -43,6 +43,11 @@ public class MouseMixin {
     @Inject(at = @At("HEAD"), method = "onScroll", cancellable = true)
     private void onScroll(long handle, double xoffset, double yoffset, CallbackInfo ci) {
         Minecraft client = Minecraft.getInstance();
+
+        if (SeparatedChat.onScroll(yoffset)) {
+            ci.cancel();
+            return;
+        }
 
         if (ModKeyBindings.CHAT_PEEK_KEY.isDown() && client.gui.screen() == null) {
             client.gui.hud.getChat().scrollChat((int) (yoffset * 7));

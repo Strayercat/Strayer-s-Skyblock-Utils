@@ -24,6 +24,7 @@
     "EntityGlowingMixin",
     "EntityRendererMixin",
     "HudMixin",
+    "LivingEntityMixin",
     "PingDebugMonitorAccessor",
     "PingDebugMonitorInvoker",
     "PlayerTabOverlayMixin",
