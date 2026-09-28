@@ -5,6 +5,7 @@
   "client": [
     "BossBarHudMixin",
     "BossHealthOverlayAccessor",
+    "ChatComponentAccessor",
     "ChatHudMixin",
     "EntitiesDestroyMixin",
     "EntityTrackerUpdateMixin",

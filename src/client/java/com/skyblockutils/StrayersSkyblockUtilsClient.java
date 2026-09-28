@@ -9,6 +9,7 @@ import com.skyblockutils.features.chat.ChatModifications;
 import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.foraging.TreeGiftNotifications;
+import com.skyblockutils.features.guild.GuildListParser;
 import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.features.mining.PowderChestNotifications;
 import com.skyblockutils.features.dungeons.AutoRejoin;
@@ -107,6 +108,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             PuffTracker.tick(client);
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
             PartyListParser.handleOnJoinCommand();
+            GuildListParser.tick();
             SideBarUtils.updateLocation();
             SeparatedChat.tickAllMessages();
             SeparatedChatHud.tick();
@@ -127,9 +129,10 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
+            boolean guildListMessages = GuildListParser.handleMessage(cleanMessage);
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(message);
 
-            if (!isInSkyblock) return partyListMessages && partyMsgFilter;
+            if (!isInSkyblock) return partyListMessages && guildListMessages && partyMsgFilter;
 
             PowderChestNotifications.handleMessage(message);
 
@@ -138,7 +141,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             boolean treeGiftMessage = TreeGiftNotifications.handleMessage(message);
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
 
-            boolean allowed = chatFilter && partyMsgFilter && partyListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
+            boolean allowed = chatFilter && partyMsgFilter && partyListMessages && guildListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
             if (!allowed) return false;
 
             return SeparatedChat.handleMessage(message, overlay);

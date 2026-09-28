@@ -1,10 +1,10 @@
 package com.skyblockutils.features.party;
 
+import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +27,7 @@ public class PartyInfo {
             leader = null;
             members.clear();
             memberUuids.clear();
+            SSUIndicator.setPartyMembers(List.of());
         }
 
         if (message.contains("has left the party") ||
@@ -36,10 +37,7 @@ public class PartyInfo {
                 message.contains("was removed from your party because they disconnected.") ||
                 message.contains("The party was transferred to")) {
 
-            scheduler.schedule(() -> {
-                PartyListParser.expectingPartyList = true;
-                Objects.requireNonNull(Minecraft.getInstance().getConnection()).sendCommand("party list");
-            }, 500, TimeUnit.MILLISECONDS);
+            scheduler.schedule(() -> Minecraft.getInstance().execute(PartyListParser::requestList), 500, TimeUnit.MILLISECONDS);
         }
     }
 }

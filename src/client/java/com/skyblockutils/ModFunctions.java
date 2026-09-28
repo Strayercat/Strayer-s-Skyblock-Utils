@@ -8,6 +8,7 @@ import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.mining.PowderChestNotifications;
+import com.skyblockutils.features.guild.GuildListParser;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.PingDebugMonitorAccessor;
@@ -41,6 +42,7 @@ public class ModFunctions {
         } else {
             StrayersSkyblockUtilsClient.isInSkyblock = false;
             AutoRejoin.resetAutoRejoin();
+            SSUIndicator.disconnect();
         }
 
         playerWelcomedToIsland = false;
@@ -48,6 +50,7 @@ public class ModFunctions {
         CorlTimer.corlTimerEnabled = false;
         PuffTracker.puffTrackerEnabled = false;
         PartyListParser.onJoinCommandHandled = false;
+        GuildListParser.onJoinCommandHandled = false;
 
         DowntimeTracker.resetDowntimeTracker();
         CorlTimer.resetCorlTimer();

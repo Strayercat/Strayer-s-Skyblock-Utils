@@ -1,23 +1,40 @@
 package com.skyblockutils.features.party;
 
 import com.skyblockutils.utils.PlayerLookup;
+import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class PartyListParser {
+    private static final long REFRESH_MS = 10 * 60_000;
+    private static final long EXPECT_TIMEOUT_MS = 5_000;
 
     public static boolean expectingPartyList = false;
     public static boolean onJoinCommandHandled = false;
     private static boolean reading = false;
+    private static long expectingSince = 0;
+    private static long lastRequest = 0;
     private static final List<String> buffer = new ArrayList<>();
 
     public static void handleOnJoinCommand() {
-        if (onJoinCommandHandled) return;
-        expectingPartyList = true;
-        Objects.requireNonNull(Minecraft.getInstance().getConnection()).sendCommand("party list");
+        long now = System.currentTimeMillis();
+        if (expectingPartyList && !reading && now - expectingSince > EXPECT_TIMEOUT_MS) expectingPartyList = false;
+        if (expectingPartyList) return;
+        if (onJoinCommandHandled && now - lastRequest < REFRESH_MS) return;
+
         onJoinCommandHandled = true;
+        requestList();
+    }
+
+    public static void requestList() {
+        if (Minecraft.getInstance().getConnection() == null) return;
+        long now = System.currentTimeMillis();
+        expectingPartyList = true;
+        expectingSince = now;
+        lastRequest = now;
+        Minecraft.getInstance().getConnection().sendCommand("party list");
     }
 
     public static boolean handleMessage(String message) {
@@ -70,6 +87,10 @@ public class PartyListParser {
         }
 
         PartyInfo.isInParty = !PartyInfo.members.isEmpty();
+
+        List<String> watched = new ArrayList<>(PartyInfo.members);
+        if (PartyInfo.leader != null) watched.add(PartyInfo.leader);
+        SSUIndicator.setPartyMembers(watched);
     }
 
     private static String extractName(String line) {
@@ -119,5 +140,6 @@ public class PartyListParser {
         PartyInfo.isInParty = false;
         PartyInfo.leader = null;
         PartyInfo.members.clear();
+        SSUIndicator.setPartyMembers(List.of());
     }
 }
