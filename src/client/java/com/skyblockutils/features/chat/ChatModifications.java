@@ -27,7 +27,7 @@ public class ChatModifications {
 
     public static Component withChatBadge(Component message) {
         String text = message.getString().replaceAll("§.", "");
-        if (text.startsWith(SSUIndicator.BADGE_GLYPH)) return message;
+        if (SSUIndicator.hasBadge(text)) return message;
 
         Matcher m = CHAT_SENDER.matcher(text);
         if (!m.find()) return message;
@@ -39,7 +39,7 @@ public class ChatModifications {
             return message;
         }
 
-        return badge(message);
+        return badge(message, sender);
     }
 
     public static void badgeExistingMessages(String senderKey) {
@@ -52,7 +52,7 @@ public class ChatModifications {
             GuiMessage message = messages.get(i);
             if (!senderKey.equals(senderOf(message.content()))) continue;
 
-            messages.set(i, new GuiMessage(message.addedTime(), badge(message.content()), message.signature(), GuiMessageSource.SYSTEM_SERVER, message.tag()));
+            messages.set(i, new GuiMessage(message.addedTime(), badge(message.content(), senderKey), message.signature(), GuiMessageSource.SYSTEM_SERVER, message.tag()));
             changed = true;
         }
 
@@ -67,15 +67,15 @@ public class ChatModifications {
 
     private static String senderOf(Component message) {
         String text = message.getString().replaceAll("§.", "");
-        if (text.startsWith(SSUIndicator.BADGE_GLYPH)) return null;
+        if (SSUIndicator.hasBadge(text)) return null;
 
         Matcher m = CHAT_SENDER.matcher(text);
         if (!m.find() || "NPC".equals(m.group(3))) return null;
         return m.group(4).toLowerCase(Locale.ROOT);
     }
 
-    private static Component badge(Component message) {
-        MutableComponent out = Component.literal(SSUIndicator.BADGE_GLYPH + " ").withColor(0xFFFFFF);
+    private static Component badge(Component message, String sender) {
+        MutableComponent out = Component.literal(SSUIndicator.glyphFor(sender) + " ").withColor(0xFFFFFF);
         return out.append(message);
     }
 }

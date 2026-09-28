@@ -15,7 +15,8 @@ public class EntityRendererMixin {
     @ModifyReturnValue(method = "getNameTag", at = @At("RETURN"))
     private @Nullable Component ssu$addNametagBadge(@Nullable Component original, Entity entity) {
         if (original == null || !(entity instanceof Player player)) return original;
-        if (!SSUIndicator.isUser(player.getName().getString())) return original;
-        return SSUIndicator.withNametagBadge(original);
+        String name = player.getName().getString();
+        if (!SSUIndicator.isUser(name)) return original;
+        return SSUIndicator.withNametagBadge(original, name);
     }
 }

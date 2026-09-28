@@ -6,6 +6,7 @@
     "BossBarHudMixin",
     "BossHealthOverlayAccessor",
     "ChatComponentAccessor",
+    "ChatGlyphAnimationMixin",
     "ChatHudMixin",
     "EntitiesDestroyMixin",
     "EntityTrackerUpdateMixin",

@@ -20,6 +20,7 @@ public class PlayerTabOverlayMixin {
     private void ssu$drawBadge(GuiGraphicsExtractor graphics, Identifier texture, int x, int y, int size, boolean hat, boolean flip, int color,
                                Operation<Void> original, @Local(name = "info") PlayerInfo info) {
         original.call(graphics, texture, x, y, size, hat, flip, color);
-        if (SSUIndicator.isUser(info)) SSUIndicator.drawBadge(graphics, x, y, size);
+        String name = SSUIndicator.extractName(info);
+        if (SSUIndicator.isUser(name)) SSUIndicator.drawBadge(graphics, name, x, y, size);
     }
 }

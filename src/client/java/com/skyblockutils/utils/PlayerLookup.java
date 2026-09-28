@@ -36,6 +36,18 @@ public class PlayerLookup {
         return getProfile(username).thenApply(profile -> profile == null ? null : profile.name());
     }
 
+    public static CompletableFuture<String> getNameByUuid(UUID uuid) {
+        String url = "https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", "");
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
+
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    if (response.statusCode() != 200) return null;
+                    return JsonParser.parseString(response.body()).getAsJsonObject().get("name").getAsString();
+                })
+                .exceptionally(_ -> null);
+    }
+
     public static UUID formatMojangUuid(String id) {
         return UUID.fromString(
                 id.substring(0, 8) + "-" +

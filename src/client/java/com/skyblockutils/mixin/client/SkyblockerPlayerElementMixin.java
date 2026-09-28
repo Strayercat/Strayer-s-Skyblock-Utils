@@ -34,6 +34,6 @@ public class SkyblockerPlayerElementMixin {
 
     @Inject(method = "extractRenderState", at = @At("TAIL"), require = 0)
     private void ssu$drawBadge(GuiGraphicsExtractor graphics, int x, int y, CallbackInfo ci) {
-        if (SSUIndicator.isUser(ssu$playerName)) SSUIndicator.drawBadge(graphics, x, y, iconDim);
+        if (SSUIndicator.isUser(ssu$playerName)) SSUIndicator.drawBadge(graphics, ssu$playerName, x, y, iconDim);
     }
 }

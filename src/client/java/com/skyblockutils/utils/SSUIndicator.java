@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +32,20 @@ public class SSUIndicator {
 
     public static final Identifier BADGE = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem");
     public static final Identifier BADGE_BIG = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_big");
+    public static final Identifier BADGE_SPECIAL = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_special");
+
+    private static final int SPECIAL_GLYPH_BASE = 0xE7B0;
+    private static final int SPECIAL_GLYPH_FRAMES = 20;
+    private static final long SPECIAL_GLYPH_FRAME_MS = 200;
+    public static final String SPECIAL_GLYPH = Character.toString(SPECIAL_GLYPH_BASE);
+
+    private static final List<UUID> SPECIAL_UUIDS = List.of(
+            UUID.fromString("c9a6bc66-dab2-4edb-8eda-361d4bbb7869"),
+            UUID.fromString("0a26c085-5a00-4cd7-b5fe-2ea077a89577")
+    );
+    private static final long SPECIAL_RETRY_MS = 5 * 60_000;
+    private static final Map<UUID, String> specialNames = new ConcurrentHashMap<>();
+    private static long lastSpecialLookup = -SPECIAL_RETRY_MS;
     public static final String BADGE_GLYPH = "";
 
     private static final Pattern SB_TAB_NAME = Pattern.compile("\\[\\d+] (?:\\[[^]]+] )?(\\w{3,16})");
@@ -74,6 +90,7 @@ public class SSUIndicator {
         ticksOutOfWorld = 0;
 
         long now = System.currentTimeMillis();
+        resolveSpecialNames(now);
         if (socket == null && !connecting && now >= nextAttempt) connect(client);
 
         if (++ticks % 20 != 0) return;
@@ -104,7 +121,7 @@ public class SSUIndicator {
         String key = name.toLowerCase(Locale.ROOT);
         long now = System.currentTimeMillis();
         chatSeen.put(key, now);
-        if (isKnown(key, now)) queued.add(key);
+        if (needsQuery(key, now)) queued.add(key);
     }
 
     public static void setPartyMembers(Collection<String> names) {
@@ -115,15 +132,54 @@ public class SSUIndicator {
         replaceWatch(guildWatch, names);
     }
 
-    public static void drawBadge(GuiGraphicsExtractor graphics, int headX, int headY, int headSize) {
-        int scale = Math.max(1, headSize / 8);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BADGE, headX + headSize - 4 * scale, headY - scale, 5 * scale, 4 * scale);
+    public static boolean isSpecial(String name) {
+        return name != null && specialNames.containsValue(name.toLowerCase(Locale.ROOT));
     }
 
-    public static Component withNametagBadge(Component name) {
-        if (name.getString().startsWith(BADGE_GLYPH)) return name;
-        MutableComponent out = Component.literal(BADGE_GLYPH + " ").withColor(0xFFFFFF);
+    public static void drawBadge(GuiGraphicsExtractor graphics, String name, int headX, int headY, int headSize) {
+        int scale = Math.max(1, headSize / 8);
+        Identifier sprite = isSpecial(name) ? BADGE_SPECIAL : BADGE;
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, headX + headSize - 4 * scale, headY - scale, 5 * scale, 4 * scale);
+    }
+
+    private static void resolveSpecialNames(long now) {
+        if (specialNames.size() == SPECIAL_UUIDS.size() || now - lastSpecialLookup < SPECIAL_RETRY_MS) return;
+        lastSpecialLookup = now;
+
+        for (UUID uuid : SPECIAL_UUIDS) {
+            if (specialNames.containsKey(uuid)) continue;
+            PlayerLookup.getNameByUuid(uuid).thenAccept(name -> {
+                if (name != null) specialNames.put(uuid, name.toLowerCase(Locale.ROOT));
+            });
+        }
+    }
+
+    public static Component withNametagBadge(Component name, String playerName) {
+        if (hasBadge(name.getString())) return name;
+        String glyph = isSpecial(playerName) ? Character.toString(currentSpecialGlyph()) : BADGE_GLYPH;
+        MutableComponent out = Component.literal(glyph + " ").withColor(0xFFFFFF);
         return out.append(name);
+    }
+
+    public static String glyphFor(String name) {
+        return isSpecial(name) ? SPECIAL_GLYPH : BADGE_GLYPH;
+    }
+
+    public static boolean hasBadge(String text) {
+        return !text.isEmpty() && (text.startsWith(BADGE_GLYPH) || isSpecialGlyph(text.codePointAt(0)));
+    }
+
+    public static boolean isSpecialGlyph(int codepoint) {
+        return codepoint >= SPECIAL_GLYPH_BASE && codepoint < SPECIAL_GLYPH_BASE + SPECIAL_GLYPH_FRAMES;
+    }
+
+    public static int currentSpecialGlyph() {
+        return SPECIAL_GLYPH_BASE + (int) ((System.currentTimeMillis() / SPECIAL_GLYPH_FRAME_MS) % SPECIAL_GLYPH_FRAMES);
+    }
+
+    public static FormattedCharSequence animateSpecialGlyphs(FormattedCharSequence sequence) {
+        return sink -> sequence.accept((index, style, codepoint) ->
+                sink.accept(index, style, isSpecialGlyph(codepoint) ? currentSpecialGlyph() : codepoint));
     }
 
     public static void disconnect() {
@@ -155,11 +211,11 @@ public class SSUIndicator {
             if (name == null || !VALID_NAME.matcher(name).matches()) continue;
             String key = name.toLowerCase(Locale.ROOT);
             watch.add(key);
-            if (isKnown(key, now)) queued.add(key);
+            if (needsQuery(key, now)) queued.add(key);
         }
     }
 
-    private static boolean isKnown(String key, long now) {
+    private static boolean needsQuery(String key, long now) {
         if (confirmed.containsKey(key) || probation.containsKey(key) || nonUsers.contains(key) || inFlight.contains(key)) return false;
         Long until = negativeUntil.get(key);
         return until == null || until <= now;
@@ -314,8 +370,8 @@ public class SSUIndicator {
         }
         requeueOnReady.clear();
 
-        for (String key : partyWatch) if (isKnown(key, now)) queued.add(key);
-        for (String key : guildWatch) if (isKnown(key, now)) queued.add(key);
+        for (String key : partyWatch) if (needsQuery(key, now)) queued.add(key);
+        for (String key : guildWatch) if (needsQuery(key, now)) queued.add(key);
     }
 
     private static void connect(Minecraft client) {
