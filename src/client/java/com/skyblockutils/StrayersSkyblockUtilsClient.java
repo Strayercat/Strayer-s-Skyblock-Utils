@@ -58,9 +58,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register(ModCommands::register);
 
-        ClientPlayConnectionEvents.JOIN.register((handler, _, client) -> {
+        ClientPlayConnectionEvents.JOIN.register((handler, _, _) -> {
             if (!handler.getConnection().getRemoteAddress().toString().contains("hypixel.net")) return;
-            AutoFish.registerListener(client);
             ModFunctions.connectionEventDataReset("Join");
         });
 
