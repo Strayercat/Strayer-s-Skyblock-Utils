@@ -56,28 +56,15 @@ public class GlowingPlayers {
 
     public static void add(String username, int color, boolean fromGui, Runnable onSuccess) {
         if (isPlayerGlowing(username)) {
-            if (fromGui) {
-                OnScreenNotification.builder()
-                        .title("Already Glowing")
-                        .subtitle(username + " is already glowing")
-                        .tickTime(60)
-                        .send();
-            } else {
-                ModFunctions.displayTextMessageWithName("§c" + username + " is already glowing!");
-            }
+            alreadyGlowing(username, fromGui);
             return;
         }
 
         Minecraft client = Minecraft.getInstance();
 
-        PlayerLookup.getUuidOffline(username).thenAccept(uuid ->
+        PlayerLookup.getProfile(username).thenAccept(profile ->
                 client.execute(() -> {
-                    if (uuid != null) {
-                        ModConfig.INSTANCE.addGlowingPlayer(new GlowingPlayer(username, uuid, color));
-                        if (!fromGui) ModFunctions.displayTextMessageWithName("§a" + username + " is now glowing!");
-                        ModConfig.save();
-                        if (onSuccess != null) onSuccess.run();
-                    } else {
+                    if (profile == null) {
                         if (fromGui) {
                             OnScreenNotification.builder()
                                     .title("Player Not Found")
@@ -85,21 +72,44 @@ public class GlowingPlayers {
                                     .tickTime(100)
                                     .send();
                         } else {
-                            ModFunctions.displayTextMessageWithName("§cPlayer " + username + " not found :c");
+                            ModFunctions.sendSystemMessage("§cPlayer " + username + " not found :c", false);
                         }
+                        return;
                     }
+
+                    if (isPlayerGlowing(profile.name())) {
+                        alreadyGlowing(profile.name(), fromGui);
+                        return;
+                    }
+
+                    ModConfig.INSTANCE.addGlowingPlayer(new GlowingPlayer(profile.name(), profile.uuid(), color));
+                    if (!fromGui) ModFunctions.sendSystemMessage("§a" + profile.name() + " is now glowing!", false);
+                    ModConfig.save();
+                    if (onSuccess != null) onSuccess.run();
                 })
         );
     }
 
+    private static void alreadyGlowing(String username, boolean fromGui) {
+        if (fromGui) {
+            OnScreenNotification.builder()
+                    .title("Already Glowing")
+                    .subtitle(username + " is already glowing")
+                    .tickTime(60)
+                    .send();
+        } else {
+            ModFunctions.sendSystemMessage("§c" + username + " is already glowing!", false);
+        }
+    }
+
     public static void remove(String username, boolean fromGui) {
         if (!isPlayerGlowing(username)) {
-            if(!fromGui) ModFunctions.displayTextMessageWithName("§c" + username + " already wasn't glowing");
+            if (!fromGui) ModFunctions.sendSystemMessage("§c" + username + " already wasn't glowing", false);
             return;
         }
 
         ModConfig.INSTANCE.removeGlowingPlayer(username);
-        if(!fromGui) ModFunctions.displayTextMessageWithName("§a" + username + " is no longer glowing");
+        if (!fromGui) ModFunctions.sendSystemMessage("§a" + username + " is no longer glowing", false);
         ModConfig.save();
     }
 

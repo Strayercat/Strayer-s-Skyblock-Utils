@@ -11,8 +11,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 
 import java.util.ArrayList;
@@ -102,7 +100,7 @@ public class NpcFinder {
         allSkyblockNpcs.put("Vincent|Hub", new Npc("Vincent", "Hub", new BlockPos(79, 75, 53)));
         allSkyblockNpcs.put("Biblio|Hub", new Npc("Biblio", "Hub", new BlockPos(8, 80, 10)));
         allSkyblockNpcs.put("Jerry|Hub", new Npc("Jerry", "Hub", new BlockPos(-33, 70, 7)));
-        allSkyblockNpcs.put("Baker|Hub", new Npc("Baker", "Hub", new BlockPos(8, 71, -95))); //TODO
+        allSkyblockNpcs.put("Baker|Hub", new Npc("Baker", "Hub", new BlockPos(-37, 70, -16)));
         allSkyblockNpcs.put("Bingo|Hub", new Npc("Bingo", "Hub", new BlockPos(3, 79, 4)));
         allSkyblockNpcs.put("Alixer|Hub", new Npc("Alixer", "Hub", new BlockPos(-2, 79, 4)));
         allSkyblockNpcs.put("Oringo|Hub", new Npc("Oringo", "Hub", new BlockPos(-34, 70, 5)));
@@ -422,12 +420,12 @@ public class NpcFinder {
 
         String currentLocation = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
         if (!npc.location().equals(currentLocation)) {
-            ModFunctions.displayTextMessageWithFullName("§cYou need to be in §eThe " + npc.location() + " §cto display this waypoint.");
+            ModFunctions.sendSystemMessage("§cYou need to be in §eThe " + npc.location() + " §cto display this waypoint.", false);
             return;
         }
 
         addToBeMarked(npc);
-        ModFunctions.displayTextMessageWithFullName("§aWaypoint displayed.");
+        ModFunctions.sendSystemMessage("§aWaypoint displayed.", false);
     }
 
     private static final List<Npc> toBeMarked = new ArrayList<>();
@@ -457,7 +455,7 @@ public class NpcFinder {
 
     public static void handleCommand(String npcName) {
         if (!StrayersSkyblockUtilsClient.isInSkyblock) {
-            ModFunctions.displayTextMessageWithFullName("§cYou must be in skyblock to use this feature.");
+            ModFunctions.sendSystemMessage("§cYou must be in skyblock to use this feature.", false);
             return;
         }
 
@@ -466,7 +464,7 @@ public class NpcFinder {
                 .toList();
 
         if (matches.isEmpty()) {
-            ModFunctions.displayTextMessageWithFullName("§cNo NPC found with name: " + npcName);
+            ModFunctions.sendSystemMessage("§cNo NPC found with name: " + npcName, false);
             return;
         }
 

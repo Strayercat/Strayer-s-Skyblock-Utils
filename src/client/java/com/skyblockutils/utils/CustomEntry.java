@@ -50,7 +50,7 @@ public class CustomEntry extends AbstractConfigListEntry<Object> {
     }
 
     public CustomEntry addButton(Component label, int width, Alignment alignment, Runnable onClick) {
-        return addButton(label, width, alignment, 4, onClick, new Component[0]);
+        return addButton(label, width, alignment, 4, onClick);
     }
 
     public CustomEntry addButton(Component label, int width, Alignment alignment, Runnable onClick, Component... tooltip) {

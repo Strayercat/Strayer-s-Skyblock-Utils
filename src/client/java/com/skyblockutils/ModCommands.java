@@ -48,13 +48,13 @@ public class ModCommands {
                 .then(ClientCommands.literal("autorejoin")
                         .executes(context -> {
                             if (!AutoRejoin.autoRejoinEnabled) {
-                                ModFunctions.displayTextMessageWithName("§cPlease specify a floor");
+                                ModFunctions.sendSystemMessage("§cPlease specify a floor", false);
                                 return 1;
                             }
 
                             AutoRejoin.autoRejoinEnabled = false;
                             AutoRejoin.currentFloor = "";
-                            ModFunctions.displayTextMessageWithName("§cAuto-rejoin disabled");
+                            ModFunctions.sendSystemMessage("§cAuto-rejoin disabled", false);
                             ModConfig.save();
                             return 1;
                         })
@@ -72,15 +72,15 @@ public class ModCommands {
                                     if (floor.equals("off")) {
                                         AutoRejoin.autoRejoinEnabled = false;
                                         AutoRejoin.currentFloor = "";
-                                        ModFunctions.displayTextMessageWithName("§cAuto-rejoin disabled");
+                                        ModFunctions.sendSystemMessage("§cAuto-rejoin disabled", false);
                                         ModConfig.save();
                                     } else if (floor.matches("^[mf][1-7]$")) {
                                         AutoRejoin.autoRejoinEnabled = true;
                                         AutoRejoin.currentFloor = floor.toUpperCase();
-                                        ModFunctions.displayTextMessageWithName("§aAuto-rejoin enabled for " + floor.toUpperCase());
+                                        ModFunctions.sendSystemMessage("§aAuto-rejoin enabled for " + floor.toUpperCase(), false);
                                         ModConfig.save();
                                     } else {
-                                        ModFunctions.displayTextMessageWithName("§cInvalid floor! Use m1-m7 or f1-f7, or off to disable");
+                                        ModFunctions.sendSystemMessage("§cInvalid floor! Use m1-m7 or f1-f7, or off to disable", false);
                                         return 0;
                                     }
                                     return 1;
@@ -108,13 +108,7 @@ public class ModCommands {
                                         })
                                         .executes(context -> {
                                             String name = StringArgumentType.getString(context, "username");
-                                            PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> {
-                                                if (formattedName == null) {
-                                                    ModFunctions.displayTextMessageWithName("§cPlayer " + name + " not found :c");
-                                                    return;
-                                                }
-                                                GlowingPlayers.add(formattedName, 0xFFAA00, false, null);
-                                            });
+                                            GlowingPlayers.add(name, 0xFFAA00, false, null);
                                             return 1;
                                         })
                                         .then(ClientCommands.argument("color", StringArgumentType.string())
@@ -157,7 +151,7 @@ public class ModCommands {
                         .then(ClientCommands.literal("clear")
                                 .executes(context -> {
                                     GlowingPlayers.clearAll();
-                                    ModFunctions.displayTextMessageWithName("§aCleared all glowing players.");
+                                    ModFunctions.sendSystemMessage("§aCleared all glowing players.", false);
                                     return 1;
                                 })
                         )
@@ -165,14 +159,14 @@ public class ModCommands {
                                 .executes(context -> {
                                     List<GlowingPlayers.GlowingPlayer> glowingPlayers = ModConfig.INSTANCE.getGlowingPlayers();
                                     if (glowingPlayers.isEmpty()) {
-                                        ModFunctions.displayTextMessageWithName("§cYou didn't add any glowing players!");
+                                        ModFunctions.sendSystemMessage("§cYou didn't add any glowing players!", false);
                                         return 1;
                                     }
                                     StringBuilder players = new StringBuilder();
                                     for (GlowingPlayers.GlowingPlayer glowingPlayer : glowingPlayers) {
                                         players.append(glowingPlayer.username).append(", ");
                                     }
-                                    ModFunctions.displayTextMessageWithName("§rThese players are glowing: \n" + players);
+                                    ModFunctions.sendSystemMessage("§rThese players are glowing: \n" + players, false);
                                     return 1;
                                 })
                         )
@@ -194,7 +188,7 @@ public class ModCommands {
                             return 1;
                         }))
                         .then(ClientCommands.literal("teehee").executes(context -> {
-                            ModFunctions.displayTextMessageWithName("§rNya! Mreow Mrpp Meow!");
+                            ModFunctions.sendSystemMessage("§rNya! Mreow Mrpp Meow!", false);
                             return 1;
                         }))
                         .then(ClientCommands.literal("location").executes(context -> {
@@ -249,7 +243,7 @@ public class ModCommands {
                         .executes(ctx -> {
                             List<String> previousInvites = PartyInviteNotifications.previousInvites;
                             if (!previousInvites.isEmpty()) {
-                                ModFunctions.displayTextMessageWithName("Here are the last 10 received party invites (newest to oldest):");
+                                ModFunctions.sendSystemMessage("Here are the last 10 received party invites (newest to oldest):", false);
                                 List<String> lastTenInvites = new ArrayList<>(
                                         previousInvites.subList(Math.max(0, previousInvites.size() - 10), previousInvites.size())
                                                 .stream()
@@ -259,7 +253,7 @@ public class ModCommands {
                                 Collections.reverse(lastTenInvites);
                                 client.gui.hud.getChat().addClientSystemMessage(Component.literal(String.join(", ", lastTenInvites).trim()));
                             } else {
-                                ModFunctions.displayTextMessageWithName("§cNobody has invited you to their party this session.");
+                                ModFunctions.sendSystemMessage("§cNobody has invited you to their party this session.", false);
                             }
                             return 1;
                         })
@@ -280,9 +274,9 @@ public class ModCommands {
                                     try {
                                         DailyReminders.ReminderType type = DailyReminders.ReminderType.valueOf(typeArg);
                                         DailyReminders.disable(type);
-                                        ModFunctions.displayTextMessageWithName("§cDisabled reminder: " + typeArg);
+                                        ModFunctions.sendSystemMessage("§cDisabled reminder: " + typeArg, false);
                                     } catch (IllegalArgumentException e) {
-                                        ModFunctions.displayTextMessageWithName("§cUnknown reminder type: " + typeArg);
+                                        ModFunctions.sendSystemMessage("§cUnknown reminder type: " + typeArg, false);
                                         return 0;
                                     }
                                     return 1;

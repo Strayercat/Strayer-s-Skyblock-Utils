@@ -64,15 +64,15 @@ public class CorlTimer {
     public static void toggleCorlTimer() {
         if (corlTimerEnabled) {
             corlTimerEnabled = false;
-            ModFunctions.displayTextMessageWithName("§cCorleone Timer toggled off");
+            ModFunctions.sendSystemMessage("§cCorleone Timer toggled off", false);
         } else {
             if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows")) {
-                ModFunctions.displayTextMessageWithName("§cYou must be in the Crystal Hollows to use Corleone Timer");
+                ModFunctions.sendSystemMessage("§cYou must be in the Crystal Hollows to use Corleone Timer", false);
                 return;
             }
 
             corlTimerEnabled = true;
-            ModFunctions.displayTextMessageWithName("§aCorleone Timer toggled on");
+            ModFunctions.sendSystemMessage("§aCorleone Timer toggled on", false);
         }
     }
 

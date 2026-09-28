@@ -1,8 +1,8 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.ModKeyBindings;
-import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.hud.ScreenshotManager;
+import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.ZoomState;
 import net.minecraft.client.Minecraft;
@@ -44,7 +44,7 @@ public class MouseMixin {
     private void onScroll(long handle, double xoffset, double yoffset, CallbackInfo ci) {
         Minecraft client = Minecraft.getInstance();
 
-        if (SeparatedChat.onScroll(yoffset)) {
+        if (SeparatedChatHud.onScroll(yoffset)) {
             ci.cancel();
             return;
         }

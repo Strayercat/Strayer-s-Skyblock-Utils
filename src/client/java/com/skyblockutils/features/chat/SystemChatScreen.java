@@ -1,7 +1,8 @@
 package com.skyblockutils.features.chat;
 
-import com.skyblockutils.ModKeyBindings;
+import com.skyblockutils.features.hud.SeparatedChatHud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -13,8 +14,36 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 public class SystemChatScreen extends Screen {
+    private EditBox searchBox;
+
     public SystemChatScreen() {
         super(Component.literal("System Chat"));
+    }
+
+    @Override
+    protected void init() {
+        int[] bounds = SeparatedChatHud.searchBarBounds(this.width);
+        this.searchBox = new EditBox(this.font, bounds[0] + 2, bounds[1] + 2, bounds[2] - 4, bounds[3], Component.literal("Search"));
+        this.searchBox.setMaxLength(100);
+        this.searchBox.setBordered(false);
+        this.searchBox.setCanLoseFocus(false);
+        this.searchBox.setHint(Component.literal("Search..."));
+        this.searchBox.setValue(SeparatedChatHud.searchQuery());
+        this.searchBox.setResponder(value -> {
+            SeparatedChatHud.setSearch(value);
+            this.updateSearchColor();
+        });
+        this.updateSearchColor();
+        this.addRenderableWidget(this.searchBox);
+    }
+
+    @Override
+    protected void setInitialFocus() {
+        this.setInitialFocus(this.searchBox);
+    }
+
+    private void updateSearchColor() {
+        this.searchBox.setTextColor(SeparatedChatHud.hasNoMatch() ? 0xFFFF5555 : 0xFFE0E0E0);
     }
 
     @Override
@@ -23,14 +52,15 @@ public class SystemChatScreen extends Screen {
 
     @Override
     public void extractRenderState(final @NotNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
-        SeparatedChat.renderPinned(graphics);
+        SeparatedChatHud.renderPinned(graphics);
+        int[] bounds = SeparatedChatHud.searchBarBounds(this.width);
+        graphics.fill(bounds[0], bounds[1], bounds[0] + bounds[2], bounds[1] + bounds[3], this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
         super.extractRenderState(graphics, mouseX, mouseY, a);
     }
 
     @Override
     public boolean keyPressed(final KeyEvent event) {
-        if (event.isConfirmation() || ModKeyBindings.SYSTEM_CHAT_HISTORY_KEY.matches(event)) {
-            SeparatedChat.ignoreKeyUntilRelease();
+        if (event.isConfirmation()) {
             this.onClose();
             return true;
         }
@@ -39,9 +69,9 @@ public class SystemChatScreen extends Screen {
 
     @Override
     public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-        if (event.button() == 0) {
+        if (event.button() == 0 && !this.searchBox.isMouseOver(event.x(), event.y())) {
             boolean insert = this.minecraft.hasShiftDown();
-            Style clicked = SeparatedChat.findStyleAt(event.x(), event.y(), insert);
+            Style clicked = SeparatedChatHud.findStyleAt(event.x(), event.y(), insert);
             if (clicked != null && this.handleComponentClicked(clicked, insert)) return true;
         }
         return super.mouseClicked(event, doubleClick);
@@ -49,8 +79,13 @@ public class SystemChatScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
-        SeparatedChat.scrollHistory(Mth.clamp(scrollY, -1.0, 1.0));
+        SeparatedChatHud.scrollHistory(Mth.clamp(scrollY, -1.0, 1.0));
         return true;
+    }
+
+    @Override
+    public void removed() {
+        SeparatedChatHud.resetPinnedState();
     }
 
     private boolean handleComponentClicked(final Style clicked, final boolean insert) {

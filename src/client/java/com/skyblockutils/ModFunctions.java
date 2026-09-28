@@ -2,6 +2,7 @@ package com.skyblockutils;
 
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
+import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.hud.SsuHud;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.AutoRejoin;
@@ -129,28 +130,19 @@ public class ModFunctions {
         }
     }
 
-    public static void displayTextMessageWithName(String message) {
-        Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
-                Component.empty().append(SSU.getFullName()).append(Component.literal(message).withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT)))
-        );
+    public static void sendSystemMessage(String message, boolean fullName) {
+        sendSystemMessage(Component.literal(message).withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT)), fullName);
     }
 
-    public static void displayComponentMessageWithName(Component message) {
-        Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
-                Component.empty().append(SSU.getFullName()).append(message)
-        );
-    }
+    public static void sendSystemMessage(Component message, boolean fullName) {
+        Component prefix = fullName ? SSU.getFullName() : SSU.getName();
+        Component full = Component.empty().append(prefix).append(message);
 
-    public static void displayTextMessageWithFullName(String message) {
-        Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
-                Component.empty().append(SSU.getFullName()).append(Component.literal(message).withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT)))
-        );
-    }
-
-    public static void displayComponentMessageWithFullName(Component message) {
-        Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
-                Component.empty().append(SSU.getFullName()).append(message)
-        );
+        if (ModConfig.INSTANCE.separateMessage && StrayersSkyblockUtilsClient.isInSkyblock) {
+            SeparatedChat.addMessage(full);
+        } else {
+            Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(full);
+        }
     }
 
     public static Boolean isInSkyblock(Minecraft client) {
@@ -310,7 +302,8 @@ public class ModFunctions {
             case "Lotus Atoll", "Lotus Easter's Cave", "Tewtil Tunnel", "Lotus Highlands" -> "Lotus Atoll";
 
             // Torrhus Canyon
-            case "Torrhus Canyon", "Spring Path", "Safari Zone Entrance", "Torrhus Springs", "Torrhus Heights", "Miria's Hut", "Spring Shallows" -> "Torrhus Canyon";
+            case "Torrhus Canyon", "Spring Path", "Safari Zone Entrance", "Torrhus Springs", "Torrhus Heights",
+                 "Miria's Hut", "Spring Shallows" -> "Torrhus Canyon";
 
             default -> location;
         };

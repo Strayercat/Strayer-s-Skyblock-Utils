@@ -9,6 +9,7 @@ import com.skyblockutils.features.chat.ChatModifications;
 import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.foraging.TreeGiftNotifications;
+import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.features.mining.PowderChestNotifications;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
@@ -66,7 +67,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, _) -> SsuHud.onHudRender(context, SideBarUtils.location));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_screenshot_manager"), (context, _) -> ScreenshotManager.buildScreenshotHud(context));
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_system_messages"), (context, _) -> SeparatedChat.render(context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_system_messages"), (context, _) -> SeparatedChatHud.render(context));
         HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> {
             if (isInSkyblock && ModConfig.INSTANCE.customSidebar) CustomSidebar.displayCustomSidebar(context);
         });
@@ -108,6 +109,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             PartyListParser.handleOnJoinCommand();
             SideBarUtils.updateLocation();
             SeparatedChat.tickAllMessages();
+            SeparatedChatHud.tick();
             DailyReminders.tick(client);
         });
 

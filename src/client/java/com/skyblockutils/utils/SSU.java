@@ -22,7 +22,7 @@ public class SSU {
         int colorEnd = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_END);
         MutableComponent result = Component.empty();
         if (!forHud) result.append(Component.literal("§7["));
-        result.append(gradientText(fullName ? "Strayer's Skyblock Utils" : "Skyblock Utils", colorStart, colorEnd));
+        result.append(gradientText(fullName ? "Strayer's Skyblock Utils" : "SSU", colorStart, colorEnd));
         if (!forHud) result.append(Component.literal("§7] "));
         return result;
     }

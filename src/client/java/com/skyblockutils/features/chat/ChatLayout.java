@@ -19,14 +19,14 @@ public final class ChatLayout {
 
     private ChatLayout() {}
 
-    enum LineType { NORMAL, CENTERED, SEPARATOR }
+    public enum LineType { NORMAL, CENTERED, SEPARATOR }
 
-    record Segment(Style style, String text) {}
+    private record Segment(Style style, String text) {}
 
-    record ParsedLine(LineType type, Component component, Style style, String codes, char separatorChar) {}
+    public record ParsedLine(LineType type, Component component, Style style, String codes, char separatorChar) {}
 
-    record ParsedMessage(List<ParsedLine> lines) {
-        boolean hasLayoutLines() {
+    public record ParsedMessage(List<ParsedLine> lines) {
+        public boolean hasLayoutLines() {
             for (ParsedLine line : lines) {
                 if (line.type() != LineType.NORMAL) return true;
             }
@@ -34,18 +34,18 @@ public final class ChatLayout {
         }
     }
 
-    static float chatScale() {
+    public static float chatScale() {
         return Minecraft.getInstance().options.chatScale().get().floatValue();
     }
 
-    static int wrapWidth() {
+    public static int wrapWidth() {
         float scale = chatScale();
         if (scale <= 0) return 1;
         int chatWidth = ChatComponent.getWidth(Minecraft.getInstance().options.chatWidth().get());
         return Math.max(1, Mth.floor(chatWidth / scale));
     }
 
-    static ParsedMessage parse(Component message) {
+    public static ParsedMessage parse(Component message) {
         List<List<Segment>> rawLines = new ArrayList<>();
         rawLines.add(new ArrayList<>());
 
@@ -66,7 +66,7 @@ public final class ChatLayout {
         return new ParsedMessage(lines);
     }
 
-    static int contentWidth(ParsedMessage message, int wrap, Font font) {
+    public static int contentWidth(ParsedMessage message, int wrap, Font font) {
         int width = 0;
         for (ParsedLine line : message.lines()) {
             if (line.type() == LineType.SEPARATOR) continue;
@@ -77,7 +77,7 @@ public final class ChatLayout {
         return width;
     }
 
-    static Component separator(ParsedLine line, int width, Font font) {
+    public static Component separator(ParsedLine line, int width, Font font) {
         String unit = String.valueOf(line.separatorChar());
         int unitWidth = font.width(Component.literal(line.codes() + unit).setStyle(line.style()));
         if (unitWidth <= 0) unitWidth = 4;
@@ -85,7 +85,7 @@ public final class ChatLayout {
         return Component.literal(line.codes() + unit.repeat(count)).setStyle(line.style());
     }
 
-    static Component toChatComponent(ParsedMessage message, int width, Font font) {
+    public static Component toChatComponent(ParsedMessage message, int width, Font font) {
         MutableComponent out = Component.empty();
         int spaceWidth = Math.max(1, font.width(" "));
         List<ParsedLine> lines = message.lines();
