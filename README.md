@@ -24,9 +24,11 @@ SSU started as a personal project. I wanted to make something for myself to help
 - Chat filter toggles (Incomplete)
 - Printing coordinates to chat via keybinds
 - Fancy emotes (o/ into ( ﾟ◡ﾟ)/ and such)
+- Server chat and user chat separation
+- Chat separator width fix (for non-default chat widths)
 ### Glowing players
 - Glowing players via /ssu glowingPlayers
-- Config hud for editting glowing players
+- Config hud for editing glowing players
 - Automatic party members glow
 ### Party
 - Party commands (!pt, !warp and such)
