@@ -27,7 +27,7 @@ import com.skyblockutils.features.textures.F7VoidLava;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
-import com.skyblockutils.utils.TabListIndicator;
+import com.skyblockutils.utils.SSUIndicator;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -40,6 +40,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionResult;
 
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public static boolean isInSkyblock = false;
@@ -100,7 +101,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             if (!isInSkyblock) return;
 
             AutoFish.autoFish(client);
-            TabListIndicator.tick(client);
+            SSUIndicator.tick(client);
             CorlTimer.corlTimerTick(client);
             PuffTracker.tick(client);
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
@@ -142,7 +143,11 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::fancyEmotes);
+        ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : ChatModifications.fitToChat(message));
 
-        UseBlockCallback.EVENT.register((_, _, _, hitResult) -> PowderChestNotifications.handleChestclick(hitResult));
+        UseBlockCallback.EVENT.register((_, _, _, hitResult) -> {
+            PowderChestNotifications.handleChestClick(hitResult);
+            return InteractionResult.PASS;
+        });
     }
 }

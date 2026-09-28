@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
     @Inject(at = @At("HEAD"), method = "renderItemInHand", cancellable = true)
-    private void cancelHand(CameraRenderState cameraRenderState, float tickProgress, Matrix4fc positionMatrix, CallbackInfo ci) {
+    private void cancelHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix, CallbackInfo ci) {
         if (ZoomState.isZooming) {
             ci.cancel();
         }

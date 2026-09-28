@@ -474,7 +474,7 @@ public class OnScreenNotification {
         return result;
     }
 
-    public static boolean handleNotificationClicks(int mouseX, int mouseY, int button, int screenWidth, int screenHeight) {
+    public static boolean handleNotificationClicks(int mouseX, int mouseY, int button) {
         Minecraft client = Minecraft.getInstance();
         if (client.gui.screen() == null) return false;
 

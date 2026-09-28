@@ -11,7 +11,6 @@ import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -55,10 +54,10 @@ public class PowderChestNotifications implements SoundEventListener {
         }
     }
 
-    public static InteractionResult handleChestclick(BlockHitResult hitResult) {
+    public static void handleChestClick(BlockHitResult hitResult) {
         if (!ModConfig.INSTANCE.powderChestNotification
                 || !ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows"))
-            return InteractionResult.PASS;
+            return;
 
         BlockPos pos = hitResult.getBlockPos().immutable();
 
@@ -72,7 +71,6 @@ public class PowderChestNotifications implements SoundEventListener {
         }
 
         RECENT_CHEST_TARGETS.clear();
-        return InteractionResult.PASS;
     }
 
     public static void tick() {

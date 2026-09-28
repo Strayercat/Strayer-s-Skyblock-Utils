@@ -312,6 +312,6 @@ public class F7VoidLava {
             BlockState aboveState = level.getBlockState(pos.above());
             return fluidType.isSame(aboveState.getFluidState().getType()) ? 1.0F : fluidState.getOwnHeight();
         }
-        return !state.isSolid() ? 0.0F : -1.0F;
+        return !state.isSolidRender() ? 0.0F : -1.0F;
     }
 }

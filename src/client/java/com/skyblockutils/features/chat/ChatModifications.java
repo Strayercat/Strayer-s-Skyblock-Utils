@@ -1,6 +1,7 @@
 package com.skyblockutils.features.chat;
 
-import com.skyblockutils.utils.TabListIndicator;
+import com.skyblockutils.utils.SSUIndicator;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -21,19 +22,25 @@ public class ChatModifications {
 
     public static Component withChatBadge(Component message) {
         String text = message.getString().replaceAll("§.", "");
-        if (text.startsWith(TabListIndicator.BADGE_GLYPH)) return message;
+        if (text.startsWith(SSUIndicator.BADGE_GLYPH)) return message;
 
         Matcher m = CHAT_SENDER.matcher(text);
         if (!m.find()) return message;
         if ("NPC".equals(m.group(1))) return message;
 
         String sender = m.group(2);
-        if (!TabListIndicator.isUser(sender)) {
-            TabListIndicator.requestCheck(sender);
+        if (!SSUIndicator.isUser(sender)) {
+            SSUIndicator.requestCheck(sender);
             return message;
         }
 
-        MutableComponent out = Component.literal(TabListIndicator.BADGE_GLYPH + " ").withColor(0xFFFFFF);
+        MutableComponent out = Component.literal(SSUIndicator.BADGE_GLYPH + " ").withColor(0xFFFFFF);
         return out.append(message);
+    }
+
+    public static Component fitToChat(Component message) {
+        ChatLayout.ParsedMessage parsed = ChatLayout.parse(message);
+        if (!parsed.hasLayoutLines()) return message;
+        return ChatLayout.toChatComponent(parsed, ChatLayout.wrapWidth(), Minecraft.getInstance().font);
     }
 }

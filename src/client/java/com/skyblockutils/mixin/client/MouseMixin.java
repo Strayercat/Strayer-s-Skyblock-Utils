@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MouseMixin {
 
     @Inject(at = @At("HEAD"), method = "onButton", cancellable = true)
-    private void onMouseButton(long handle, MouseButtonInfo buttonInfo, int action, CallbackInfo ci) {
+    private void onMouseButton(long handle, MouseButtonInfo rawButtonInfo, int action, CallbackInfo ci) {
         if (action == 1) {
             Minecraft client = Minecraft.getInstance();
             int sw = client.getWindow().getGuiScaledWidth();
@@ -27,9 +27,9 @@ public class MouseMixin {
                 double mouseX = client.mouseHandler.xpos() * client.getWindow().getGuiScaledWidth() / client.getWindow().getWidth();
                 double mouseY = client.mouseHandler.ypos() * client.getWindow().getGuiScaledHeight() / client.getWindow().getHeight();
 
-                int button = buttonInfo.button();
+                int button = rawButtonInfo.button();
 
-                boolean consumedByNotification = OnScreenNotification.handleNotificationClicks((int) mouseX, (int) mouseY, button, sw, sh);
+                boolean consumedByNotification = OnScreenNotification.handleNotificationClicks((int) mouseX, (int) mouseY, button);
 
                 if (button == 0) ScreenshotManager.onMouseClick(mouseX, mouseY);
 

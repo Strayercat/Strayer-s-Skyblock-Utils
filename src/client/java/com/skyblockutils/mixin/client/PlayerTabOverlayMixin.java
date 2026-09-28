@@ -3,7 +3,7 @@ package com.skyblockutils.mixin.client;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.skyblockutils.utils.TabListIndicator;
+import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -20,6 +20,6 @@ public class PlayerTabOverlayMixin {
     private void ssu$drawBadge(GuiGraphicsExtractor graphics, Identifier texture, int x, int y, int size, boolean hat, boolean flip, int color,
                                Operation<Void> original, @Local(name = "info") PlayerInfo info) {
         original.call(graphics, texture, x, y, size, hat, flip, color);
-        if (TabListIndicator.isUser(info)) TabListIndicator.drawBadge(graphics, x, y, size);
+        if (SSUIndicator.isUser(info)) SSUIndicator.drawBadge(graphics, x, y, size);
     }
 }

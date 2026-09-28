@@ -10,7 +10,7 @@ import com.skyblockutils.utils.FunFacts;
 import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.ModStyle;
-import com.skyblockutils.utils.TabListIndicator;
+import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -94,7 +94,7 @@ public class SsuHud {
         context.fill(unscaledRenderX, 0, unscaledRenderX + unscaledHudWidth, 1, COLOR_MAIN);
         context.fill(unscaledRenderX, unscaledHudHeight - 1, unscaledRenderX + unscaledHudWidth, unscaledHudHeight, COLOR_MAIN);
 
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, TabListIndicator.BADGE_BIG,
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, SSUIndicator.BADGE_BIG,
                 unscaledRenderX + unscaledHudWidth - 5 - GEM_VISIBLE_WIDTH, unscaledRenderY, GEM_SIZE, GEM_SIZE);
 
         for (HudLine line : lines) {

@@ -1,7 +1,7 @@
 package com.skyblockutils.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.skyblockutils.utils.TabListIndicator;
+import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -15,7 +15,7 @@ public class EntityRendererMixin {
     @ModifyReturnValue(method = "getNameTag", at = @At("RETURN"))
     private @Nullable Component ssu$addNametagBadge(@Nullable Component original, Entity entity) {
         if (original == null || !(entity instanceof Player player)) return original;
-        if (!TabListIndicator.isUser(player.getName().getString())) return original;
-        return TabListIndicator.withNametagBadge(original);
+        if (!SSUIndicator.isUser(player.getName().getString())) return original;
+        return SSUIndicator.withNametagBadge(original);
     }
 }

@@ -1,6 +1,6 @@
 package com.skyblockutils.mixin.client;
 
-import com.skyblockutils.utils.TabListIndicator;
+import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
@@ -29,11 +29,11 @@ public class SkyblockerPlayerElementMixin {
             require = 0
     )
     private void ssu$captureName(PlayerInfo ple, Component name, boolean large, CallbackInfo ci) {
-        this.ssu$playerName = TabListIndicator.extractName(ple);
+        this.ssu$playerName = SSUIndicator.extractName(ple);
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"), require = 0)
     private void ssu$drawBadge(GuiGraphicsExtractor graphics, int x, int y, CallbackInfo ci) {
-        if (TabListIndicator.isUser(ssu$playerName)) TabListIndicator.drawBadge(graphics, x, y, iconDim);
+        if (SSUIndicator.isUser(ssu$playerName)) SSUIndicator.drawBadge(graphics, x, y, iconDim);
     }
 }

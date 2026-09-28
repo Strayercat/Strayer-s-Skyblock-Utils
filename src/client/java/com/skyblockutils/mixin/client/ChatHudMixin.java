@@ -56,7 +56,7 @@ public class ChatHudMixin {
             at = @At("TAIL"),
             method = "extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/gui/Font;IIILnet/minecraft/client/gui/components/ChatComponent$DisplayMode;Z)V"
     )
-    private void onRenderEnd(GuiGraphicsExtractor context, Font font, int ticks, int mouseX, int mouseY, ChatComponent.DisplayMode displayMode, boolean changeCursorOnInsertions, CallbackInfo ci) {
+    private void onRenderEnd(GuiGraphicsExtractor graphics, Font font, int ticks, int mouseX, int mouseY, ChatComponent.DisplayMode displayMode, boolean changeCursorOnInsertions, CallbackInfo ci) {
         boolean isPeeking = ModKeyBindings.CHAT_PEEK_KEY.isDown();
 
         if (wasPeeking && !isPeeking) {
@@ -65,7 +65,7 @@ public class ChatHudMixin {
         wasPeeking = isPeeking;
 
         Minecraft mc = Minecraft.getInstance();
-        OnScreenNotification.render(context, mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight());
+        OnScreenNotification.render(graphics, mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight());
     }
 
     @Inject(

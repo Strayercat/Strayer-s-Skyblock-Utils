@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TabListIndicator {
+public class SSUIndicator {
     private static final String API = "https://cawcah.duckdns.org/ssu";
     private static final HttpClient HTTP = HttpClient.newHttpClient();
     private static final Gson GSON = new Gson();
