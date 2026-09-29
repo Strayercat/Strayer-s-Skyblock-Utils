@@ -2,6 +2,7 @@ package com.skyblockutils.features.party;
 
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.config.ModConfig;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -11,71 +12,88 @@ import java.util.regex.Pattern;
 
 public class PartyInviteNotifications {
     private static final Pattern USER_SENT_MESSAGE_PATTERN = Pattern.compile("^\\[\\d{1,3}]\\s.*?\\s(?:\\[[A-Z]+\\+])?\\s.+: .+$");
-    private static long partyInviteTimestamp = 0L;
-    private static boolean expectingExpired = false;
-    private static boolean reading = false;
-    private static Component separator = Component.empty();
-    private static final List<Component> buffer = new ArrayList<>();
+    private static final Pattern EXPIRED_PATTERN = Pattern.compile("The party invite from .+ has expired\\.");
+    private static final Pattern SEPARATOR_PATTERN = Pattern.compile("^-{5,}$");
+
+    private static final long EXPIRE_WINDOW_START = 50000L;
+    private static final long EXPIRE_WINDOW_END = 80000L;
+
+    private static final List<Long> inviteTimestamps = new ArrayList<>();
+    private static Component pendingSeparator = null;
+    private static boolean awaitingClosingSeparator = false;
 
     public static List<String> previousInvites = new ArrayList<>();
 
     public static boolean handleNotifications(Component rawMessage) {
-        if (partyInviteTimestamp + 70000 < System.currentTimeMillis()) expectingExpired = false;
+        long now = System.currentTimeMillis();
+        inviteTimestamps.removeIf(t -> t + EXPIRE_WINDOW_END < now);
 
-        String message = rawMessage.getString();
+        String message = ChatFormatting.stripFormatting(rawMessage.getString());
+        String trimmed = message.trim();
+
         assert Minecraft.getInstance().player != null;
-        if (USER_SENT_MESSAGE_PATTERN.matcher(message).find() || message.startsWith("Party >") || message.contains(">"))
-            return true;
-        if (!ModConfig.INSTANCE.partyInviteNotifications) return true;
+        if (USER_SENT_MESSAGE_PATTERN.matcher(message).find() || message.startsWith("Party >") || message.contains(">")) {
+            return flushPendingSeparator();
+        }
+        if (!ModConfig.INSTANCE.partyInviteNotifications) return flushPendingSeparator();
+
         if (message.contains("has invited you to join their party!")) {
-            String username = message.replaceAll("-", "").replaceAll("\\[[^]]*] ?", "").split(" ")[0];
+            flushPendingSeparator();
+
+            String username = message.replaceAll("-", "").replaceAll("\\[[^]]*] ?", "").trim().split("\\s+")[0];
             OnScreenNotification.builder()
                     .title("PARTY INVITE")
                     .subtitle(username + " is inviting you to their party.\nClick here to join.")
-                    .tickTime(1200)
+                    .tickTime(1300)
                     .send();
 
             previousInvites.remove(username);
             previousInvites.add(username);
 
-            expectingExpired = true;
-            partyInviteTimestamp = System.currentTimeMillis();
+            inviteTimestamps.add(now);
             return false;
         }
 
-        if (expectingExpired && partyInviteTimestamp + 58000 < System.currentTimeMillis()) {
-            if (message.startsWith("-----")) {
-                if (!reading) {
-                    buffer.clear();
-                    separator = rawMessage;
-                    reading = true;
-                } else {
-                    reading = false;
-
-                    if (!buffer.getFirst().getString().matches("The party invite from .* has expired\\.")) {
-                        replaySwallowedMessage();
-                    } else {
-                        expectingExpired = false;
-                    }
-                }
-
-                return false;
-            }
-
-            buffer.add(rawMessage);
+        if (EXPIRED_PATTERN.matcher(message).find()) {
+            pendingSeparator = null;
+            consumeInvite();
+            awaitingClosingSeparator = !trimmed.endsWith("-");
             return false;
         }
 
-        return true;
+        boolean isSeparator = SEPARATOR_PATTERN.matcher(trimmed).matches();
+
+        if (awaitingClosingSeparator) {
+            awaitingClosingSeparator = false;
+            if (isSeparator) return false;
+        }
+
+        if (isSeparator && expiryExpected(now)) {
+            flushPendingSeparator();
+            pendingSeparator = rawMessage;
+            return false;
+        }
+
+        return flushPendingSeparator();
     }
 
-    private static void replaySwallowedMessage() {
-        Minecraft client = Minecraft.getInstance();
-
-        client.gui.hud.getChat().addClientSystemMessage(separator);
-        for (Component message : buffer) {
-            client.gui.hud.getChat().addClientSystemMessage(message);
+    private static boolean expiryExpected(long now) {
+        for (long t : inviteTimestamps) {
+            long age = now - t;
+            if (age >= EXPIRE_WINDOW_START && age <= EXPIRE_WINDOW_END) return true;
         }
-        client.gui.hud.getChat().addClientSystemMessage(separator);
+        return false;
+    }
+
+    private static void consumeInvite() {
+        if (!inviteTimestamps.isEmpty()) inviteTimestamps.removeFirst();
+    }
+
+    private static boolean flushPendingSeparator() {
+        if (pendingSeparator != null) {
+            Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(pendingSeparator);
+            pendingSeparator = null;
+        }
+        return true;
     }
 }

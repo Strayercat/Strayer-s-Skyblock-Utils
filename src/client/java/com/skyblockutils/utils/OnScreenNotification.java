@@ -33,6 +33,12 @@ public class OnScreenNotification {
 
     private static final float TEXT_SCALE = 0.8f;
 
+    private static final int INVITE_EXPIRE_TICKS = 100;
+    private static final String EXPIRED_TITLE = "Invite Expired";
+    private static final int ERROR_ACCENT_COLOR = 0xFF5555;
+    private static final int ERROR_BACKGROUND_COLOR = 0x3a1414;
+    private static final int BACKGROUND_COLOR = 0x1a1a1a;
+
     private static final List<String> HOVER_TEXT = List.of("Right click to dismiss", "Middle click to copy");
     private static final List<String> ALREADY_IN_PARTY_TEXT = List.of("Already in a party");
     private static final List<String> COPIED_TEXT = List.of("Copied ✓");
@@ -70,6 +76,30 @@ public class OnScreenNotification {
 
         boolean isClicked(int mouseX, int mouseY) {
             return mouseX >= x && mouseX <= x + WIDTH && mouseY >= y && mouseY <= y + height;
+        }
+
+        boolean isPartyInvite() {
+            return title.contains("PARTY INVITE");
+        }
+
+        boolean isExpiredInvite() {
+            return isPartyInvite() && ticks <= INVITE_EXPIRE_TICKS;
+        }
+
+        String inviter() {
+            return subtitle.split(" ")[0];
+        }
+
+        String displayTitle() {
+            return isExpiredInvite() ? EXPIRED_TITLE : title;
+        }
+
+        int displayTitleColor() {
+            return isExpiredInvite() ? ERROR_ACCENT_COLOR : titleColor;
+        }
+
+        int backgroundColor() {
+            return isExpiredInvite() ? ERROR_BACKGROUND_COLOR : BACKGROUND_COLOR;
         }
     }
 
@@ -168,6 +198,19 @@ public class OnScreenNotification {
         }
     }
 
+    private static List<String> hoverTextFor(Notification notif) {
+        if (notif.isExpiredInvite()) {
+            return Stream.concat(Stream.of("Click to invite " + ChatFormatting.stripFormatting(notif.inviter())), HOVER_TEXT.stream()).toList();
+        } else if (notif.isPartyInvite()) {
+            return Stream.concat(Stream.of("Click to join"), HOVER_TEXT.stream()).toList();
+        } else if (notif.title.contains("Daily Reminder")) {
+            return Stream.concat(Stream.of("Click to ignore for the day"), HOVER_TEXT.stream()).toList();
+        } else if (notif.title.contains("Boop")) {
+            return Stream.concat(Stream.of("Click to party them"), HOVER_TEXT.stream()).toList();
+        }
+        return HOVER_TEXT;
+    }
+
     private static void renderLegacy(GuiGraphicsExtractor context, int screenWidth, int screenHeight) {
         if (notifications.isEmpty()) return;
 
@@ -179,6 +222,8 @@ public class OnScreenNotification {
         double mouseX = mc.mouseHandler.xpos() * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getWidth();
         double mouseY = mc.mouseHandler.ypos() * mc.getWindow().getGuiScaledHeight() / mc.getWindow().getHeight();
 
+        int accentColor = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
+
         for (Notification notif : notifications) {
             notif.x = screenWidth - WIDTH;
             notif.y = screenHeight - notif.height - yOffset;
@@ -187,20 +232,21 @@ public class OnScreenNotification {
             int alphaInt = (int) (alpha * 255) << 24;
 
             boolean isHovered = guiOpen && notif.isClicked((int) mouseX, (int) mouseY);
+            boolean expired = notif.isExpiredInvite();
 
-            context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + notif.height, 0x1a1a1a | alphaInt);
+            context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + notif.height, notif.backgroundColor() | alphaInt);
 
-            int borderColor = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
+            int borderColor = expired ? ERROR_ACCENT_COLOR : accentColor;
             context.fill(notif.x, notif.y, notif.x + WIDTH, notif.y + 2, borderColor | alphaInt);
 
-            var titleLines = wrapText(notif.title);
+            var titleLines = wrapText(notif.displayTitle());
             var subtitleLines = wrapText(notif.subtitle);
 
             int lineY = notif.y + PADDING;
             int lineStep = mc.font.lineHeight + 2;
 
             for (String line : titleLines) {
-                context.text(mc.font, line, notif.x + PADDING, lineY, notif.titleColor | alphaInt, false);
+                context.text(mc.font, line, notif.x + PADDING, lineY, notif.displayTitleColor() | alphaInt, false);
                 lineY += lineStep;
             }
 
@@ -209,45 +255,20 @@ public class OnScreenNotification {
                 lineY += lineStep;
             }
 
+            int overlayTop = notif.y + 2;
+            int overlayBottom = notif.y + notif.height;
+            int overlayAlphaInt = (int) (alpha * 0.85f * 255) << 24;
+
             if (isHovered && !notif.copied) {
-                int overlayTop = notif.y + 2;
-                int overlayBottom = notif.y + notif.height;
-
-                float overlayOpacity = 0.85f;
-                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x, overlayTop, notif.x + WIDTH, overlayBottom, 0x2a2a2a | overlayAlphaInt);
-
-                List<String> hoverText;
-                if (notif.title.contains("PARTY INVITE")) {
-                    hoverText = Stream.concat(Stream.of("Click to join"), HOVER_TEXT.stream()).toList();
-                } else if (notif.title.contains("Daily Reminder")) {
-                    hoverText = Stream.concat(Stream.of("Click to ignore for the day"), HOVER_TEXT.stream()).toList();
-                } else if (notif.title.contains("Boop")) {
-                    hoverText = Stream.concat(Stream.of("Click to party them"), HOVER_TEXT.stream()).toList();
-                } else {
-                    hoverText = HOVER_TEXT;
-                }
-
-                drawCenteredOverlayText(context, mc, hoverText, notif.x, overlayTop, overlayBottom, alphaInt);
+                drawCenteredOverlayText(context, mc, hoverTextFor(notif), notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
             if (notif.error && notif.errorTimestamp + 2000 > System.currentTimeMillis()) {
-                int overlayTop = notif.y + 2;
-                int overlayBottom = notif.y + notif.height;
-
-                float overlayOpacity = 0.85f;
-                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x, overlayTop, notif.x + WIDTH, overlayBottom, 0x5a1a1a | overlayAlphaInt);
-
                 drawCenteredOverlayText(context, mc, ALREADY_IN_PARTY_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
             } else if (notif.copied && notif.copiedTimestamp + 2000 > System.currentTimeMillis()) {
-                int overlayTop = notif.y + 2;
-                int overlayBottom = notif.y + notif.height;
-
-                float overlayOpacity = 0.85f;
-                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x, overlayTop, notif.x + WIDTH, overlayBottom, 0x2a2a2a | overlayAlphaInt);
-
                 drawCenteredOverlayText(context, mc, COPIED_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
@@ -276,13 +297,15 @@ public class OnScreenNotification {
             int alphaInt = (int) (alpha * 255) << 24;
 
             boolean isHovered = guiOpen && notif.isClicked((int) mouseX, (int) mouseY);
+            boolean expired = notif.isExpiredInvite();
+            int accent = expired ? ERROR_ACCENT_COLOR : accentColor;
 
             fillRounded(context, notif.x, notif.y, notif.x + WIDTH, notif.y + notif.height,
-                    accentColor | alphaInt, CORNER_RADIUS);
+                    accent | alphaInt, CORNER_RADIUS);
             fillRounded(context, notif.x + 1, notif.y + 1, notif.x + WIDTH - 1, notif.y + notif.height - 1,
-                    0x1a1a1a | alphaInt, Math.max(0, CORNER_RADIUS - 1));
+                    notif.backgroundColor() | alphaInt, Math.max(0, CORNER_RADIUS - 1));
 
-            var titleLines = wrapText(notif.title);
+            var titleLines = wrapText(notif.displayTitle());
             var subtitleLines = wrapText(notif.subtitle);
 
             int lineY = notif.y + PADDING;
@@ -291,12 +314,12 @@ public class OnScreenNotification {
             for (String line : titleLines) {
                 int scaledWidth = Math.round(mc.font.width(line) * TEXT_SCALE);
                 int lineX = notif.x + (WIDTH - scaledWidth) / 2;
-                drawScaledText(context, mc, line, lineX, lineY, notif.titleColor | alphaInt);
+                drawScaledText(context, mc, line, lineX, lineY, notif.displayTitleColor() | alphaInt);
                 lineY += lineStep;
             }
 
             lineY += DIVIDER_MARGIN;
-            context.fill(notif.x + 1, lineY, notif.x + WIDTH - 1, lineY + DIVIDER_HEIGHT, accentColor | alphaInt);
+            context.fill(notif.x + 1, lineY, notif.x + WIDTH - 1, lineY + DIVIDER_HEIGHT, accent | alphaInt);
             lineY += DIVIDER_HEIGHT + DIVIDER_MARGIN;
 
             for (String line : subtitleLines) {
@@ -304,45 +327,20 @@ public class OnScreenNotification {
                 lineY += lineStep;
             }
 
+            int overlayTop = notif.y + 1;
+            int overlayBottom = notif.y + notif.height - 1;
+            int overlayAlphaInt = (int) (alpha * 0.85f * 255) << 24;
+
             if (isHovered && !notif.copied) {
-                int overlayTop = notif.y + 1;
-                int overlayBottom = notif.y + notif.height - 1;
-
-                float overlayOpacity = 0.85f;
-                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x + 1, overlayTop, notif.x + WIDTH - 1, overlayBottom, 0x2a2a2a | overlayAlphaInt);
-
-                List<String> hoverText;
-                if (notif.title.contains("PARTY INVITE")) {
-                    hoverText = Stream.concat(Stream.of("Click to join"), HOVER_TEXT.stream()).toList();
-                } else if (notif.title.contains("Daily Reminder")) {
-                    hoverText = Stream.concat(Stream.of("Click to ignore for the day"), HOVER_TEXT.stream()).toList();
-                } else if (notif.title.contains("Boop")) {
-                    hoverText = Stream.concat(Stream.of("Click to party them"), HOVER_TEXT.stream()).toList();
-                } else {
-                    hoverText = HOVER_TEXT;
-                }
-
-                drawCenteredOverlayText(context, mc, hoverText, notif.x, overlayTop, overlayBottom, alphaInt);
+                drawCenteredOverlayText(context, mc, hoverTextFor(notif), notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
             if (notif.error && notif.errorTimestamp + 2000 > System.currentTimeMillis()) {
-                int overlayTop = notif.y + 1;
-                int overlayBottom = notif.y + notif.height - 1;
-
-                float overlayOpacity = 0.85f;
-                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x + 1, overlayTop, notif.x + WIDTH - 1, overlayBottom, 0x5a1a1a | overlayAlphaInt);
-
                 drawCenteredOverlayText(context, mc, ALREADY_IN_PARTY_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
             } else if (notif.copied && notif.copiedTimestamp + 2000 > System.currentTimeMillis()) {
-                int overlayTop = notif.y + 1;
-                int overlayBottom = notif.y + notif.height - 1;
-
-                float overlayOpacity = 0.85f;
-                int overlayAlphaInt = (int) (alpha * overlayOpacity * 255) << 24;
                 context.fill(notif.x + 1, overlayTop, notif.x + WIDTH - 1, overlayBottom, 0x2a2a2a | overlayAlphaInt);
-
                 drawCenteredOverlayText(context, mc, COPIED_TEXT, notif.x, overlayTop, overlayBottom, alphaInt);
             }
 
@@ -496,13 +494,17 @@ public class OnScreenNotification {
                 }
 
                 if (button == 0) {
-                    if (notif.title.contains("PARTY INVITE")) {
+                    if (notif.isExpiredInvite()) {
+                        if (client.getConnection() == null) return false;
+                        client.getConnection().sendCommand("party invite " + ChatFormatting.stripFormatting(notif.inviter()));
+                        toRemove = notif;
+                    } else if (notif.isPartyInvite()) {
                         if (PartyInfo.isInParty) {
                             notif.error = true;
                             notif.errorTimestamp = System.currentTimeMillis();
                         } else {
                             if (client.player != null) {
-                                client.player.connection.sendChat("/p accept " + notif.subtitle.split(" ")[0]);
+                                client.player.connection.sendChat("/p accept " + notif.inviter());
                             }
                             toRemove = notif;
                         }
@@ -511,7 +513,7 @@ public class OnScreenNotification {
                         toRemove = notif;
                     } else if (notif.title.contains("Boop")) {
                         if (client.getConnection() == null) return false;
-                        client.getConnection().sendCommand("party invite " + notif.subtitle.split(" ")[0]);
+                        client.getConnection().sendCommand("party invite " + notif.inviter());
                         toRemove = notif;
                     } else {
                         toRemove = notif;
