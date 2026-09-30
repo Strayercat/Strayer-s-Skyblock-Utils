@@ -14,7 +14,8 @@
     "InGameHudMixin",
     "ModelManagerAccessor",
     "MouseMixin",
-    "WorldTimeMixin"
+    "WorldTimeMixin",
+    "SkullBlockEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 0

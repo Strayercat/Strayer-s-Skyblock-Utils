@@ -26,12 +26,17 @@ import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.features.textures.F7VoidLava;
+import com.skyblockutils.render.EggDetector;
+import com.skyblockutils.render.EggClickFilter;
+import com.skyblockutils.render.SkullRefresher;
 import com.skyblockutils.utils.GuiBlocker;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.SSUIndicator;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
@@ -46,6 +51,7 @@ import net.minecraft.world.InteractionResult;
 
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public static boolean isInSkyblock = false;
+    public static boolean isOnHypixel = false;
     private static boolean soundListenerRegistered = false;
 
     @Override
@@ -59,11 +65,16 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(ModCommands::register);
 
         ClientPlayConnectionEvents.JOIN.register((handler, _, _) -> {
-            if (!handler.getConnection().getRemoteAddress().toString().contains("hypixel.net")) return;
+            isOnHypixel = handler.getConnection().getRemoteAddress().toString().contains("hypixel.net");
+            if (!isOnHypixel) return;
             ModFunctions.connectionEventDataReset("Join");
         });
 
-        ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> ModFunctions.connectionEventDataReset("Leave"));
+        ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
+            isOnHypixel = false;
+            EggDetector.clear();
+            ModFunctions.connectionEventDataReset("Leave");
+        });
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, _) -> SsuHud.onHudRender(context, SideBarUtils.location));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_screenshot_manager"), (context, _) -> ScreenshotManager.buildScreenshotHud(context));
@@ -101,6 +112,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             isInSkyblock = skyblockCheck;
             if (!isInSkyblock) return;
 
+            SkullRefresher.tick(client);
             AutoFish.autoFish(client);
             SSUIndicator.tick(client);
             CorlTimer.corlTimerTick(client);
@@ -139,8 +151,9 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
             boolean treeGiftMessage = TreeGiftNotifications.handleMessage(message);
             boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
+            boolean eggMessage = EggClickFilter.handleMessage(cleanMessage);
 
-            boolean allowed = chatFilter && partyMsgFilter && partyListMessages && guildListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
+            boolean allowed = chatFilter && eggMessage && partyMsgFilter && partyListMessages && guildListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
             if (!allowed) return false;
 
             return SeparatedChat.handleMessage(message, overlay);
@@ -149,9 +162,14 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::fancyEmotes);
         ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : ChatModifications.fitToChat(message));
 
-        UseBlockCallback.EVENT.register((_, _, _, hitResult) -> {
+        UseBlockCallback.EVENT.register((_, level, _, hitResult) -> {
             PowderChestNotifications.handleChestClick(hitResult);
+            EggClickFilter.handleClick(level, hitResult);
             return InteractionResult.PASS;
         });
+
+        ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((be, _) -> SkullRefresher.handleBELoad(be));
+        ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((be, _) -> SkullRefresher.handleBEUnload(be));
+        ClientChunkEvents.CHUNK_LOAD.register(SkullRefresher::handleChunkLoad);
     }
 }
