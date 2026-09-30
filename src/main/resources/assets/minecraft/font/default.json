@@ -16,6 +16,62 @@
     },
     {
       "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_gold.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7A7"]
+    },
+    {
+      "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_red.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7A8"]
+    },
+    {
+      "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_green.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7A9"]
+    },
+    {
+      "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_orange.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7AA"]
+    },
+    {
+      "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_pink.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7AB"]
+    },
+    {
+      "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_white.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7AC"]
+    },
+    {
+      "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_black.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7AD"]
+    },
+    {
+      "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_gray.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7AE"]
+    },
+    {
+      "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_special.png",
       "ascent": 7,
       "height": 8,

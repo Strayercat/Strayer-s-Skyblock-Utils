@@ -21,40 +21,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SSUIndicator {
     private static final URI WS_URI = URI.create("wss://cawcah.duckdns.org/ssu/ws");
+    private static final int PROTOCOL = 2;
     private static final HttpClient HTTP = HttpClient.newHttpClient();
 
-    public static final Identifier BADGE = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem");
     public static final Identifier BADGE_BIG = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_big");
-    public static final Identifier BADGE_SPECIAL = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_special");
-    public static final Identifier BADGE_PURPLE = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_purple");
 
     private static final int SPECIAL_GLYPH_BASE = 0xE7B0;
     private static final int SPECIAL_GLYPH_FRAMES = 20;
     private static final long SPECIAL_GLYPH_FRAME_MS = 200;
-    public static final String SPECIAL_GLYPH = Character.toString(SPECIAL_GLYPH_BASE);
-    public static final String PURPLE_GLYPH = "\uE7A6";
-
-    private static final List<UUID> SPECIAL_UUIDS = List.of(
-            UUID.fromString("c9a6bc66-dab2-4edb-8eda-361d4bbb7869"),
-            UUID.fromString("0a26c085-5a00-4cd7-b5fe-2ea077a89577")
-    );
-
-    private static final List<UUID> PURPLE_UUIDS = List.of(
-            UUID.fromString("ee3d1f5b-1d60-45e7-8bea-e9885f740b56"),
-            UUID.fromString("eb4f26ca-0543-449c-bcc5-22c806067f23")
-    );
-
-    private static final long SPECIAL_RETRY_MS = 5 * 60_000;
-    private static final Map<UUID, String> resolvedNames = new ConcurrentHashMap<>();
-    private static long lastSpecialLookup = -SPECIAL_RETRY_MS;
-    public static final String BADGE_GLYPH = "\uE7A5";
 
     private static final Pattern SB_TAB_NAME = Pattern.compile("\\[\\d+] (?:[^\\w\\s\\[]+ )?(?:\\[[^]]+] )*(\\w{3,16})");
     private static final Pattern VALID_NAME = Pattern.compile("^\\w{3,16}$");
@@ -69,6 +49,7 @@ public class SSUIndicator {
     private static final int LEAVE_GRACE_TICKS = 20 * 5;
 
     private static final Map<String, Long> confirmed = new HashMap<>();
+    private static final Map<String, GemColor> colors = new HashMap<>();
     private static final Map<String, Probation> probation = new HashMap<>();
     private static final Set<String> nonUsers = new HashSet<>();
     private static final Map<String, Long> negativeUntil = new HashMap<>();
@@ -98,7 +79,6 @@ public class SSUIndicator {
         ticksOutOfWorld = 0;
 
         long now = System.currentTimeMillis();
-        resolveSpecialNames(now);
         if (socket == null && !connecting && now >= nextAttempt) connect(client);
 
         if (++ticks % 20 != 0) return;
@@ -136,58 +116,30 @@ public class SSUIndicator {
         replaceWatch(guildWatch, names);
     }
 
-    public static boolean isSpecial(String name) {
-        return matchesAny(SPECIAL_UUIDS, name);
-    }
-
-    public static boolean isPurple(String name) {
-        return !isSpecial(name) && matchesAny(PURPLE_UUIDS, name);
-    }
-
-    private static boolean matchesAny(List<UUID> uuids, String name) {
-        if (name == null) return false;
-        String key = name.toLowerCase(Locale.ROOT);
-        for (UUID uuid : uuids) {
-            if (key.equals(resolvedNames.get(uuid))) return true;
-        }
-        return false;
+    public static GemColor colorOf(String name) {
+        if (name == null) return GemColor.BLUE;
+        return colors.getOrDefault(name.toLowerCase(Locale.ROOT), GemColor.BLUE);
     }
 
     public static void drawBadge(GuiGraphicsExtractor graphics, String name, int headX, int headY, int headSize) {
         int scale = Math.max(1, headSize / 8);
-        Identifier sprite = isSpecial(name) ? BADGE_SPECIAL : isPurple(name) ? BADGE_PURPLE : BADGE;
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, headX + headSize - 4 * scale, headY - scale, 5 * scale, 4 * scale);
-    }
-
-    private static void resolveSpecialNames(long now) {
-        if (resolvedNames.size() == SPECIAL_UUIDS.size() + PURPLE_UUIDS.size() || now - lastSpecialLookup < SPECIAL_RETRY_MS) return;
-        lastSpecialLookup = now;
-
-        List<UUID> all = new ArrayList<>(SPECIAL_UUIDS);
-        all.addAll(PURPLE_UUIDS);
-        for (UUID uuid : all) {
-            if (resolvedNames.containsKey(uuid)) continue;
-            PlayerLookup.getNameByUuid(uuid).thenAccept(name -> {
-                if (name != null) resolvedNames.put(uuid, name.toLowerCase(Locale.ROOT));
-            });
-        }
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, colorOf(name).sprite, headX + headSize - 4 * scale, headY - scale, 5 * scale, 4 * scale);
     }
 
     public static Component withNametagBadge(Component name, String playerName) {
         if (hasBadge(name.getString())) return name;
-        String glyph = isSpecial(playerName) ? Character.toString(currentSpecialGlyph()) : glyphFor(playerName);
+        GemColor color = colorOf(playerName);
+        String glyph = color == GemColor.SPECIAL ? Character.toString(currentSpecialGlyph()) : color.glyphString();
         MutableComponent out = Component.literal(glyph + " ").withColor(0xFFFFFF);
         return out.append(name);
     }
 
     public static String glyphFor(String name) {
-        if (isSpecial(name)) return SPECIAL_GLYPH;
-        if (isPurple(name)) return PURPLE_GLYPH;
-        return BADGE_GLYPH;
+        return colorOf(name).glyphString();
     }
 
     public static boolean hasBadge(String text) {
-        return !text.isEmpty() && (text.startsWith(BADGE_GLYPH) || text.startsWith(PURPLE_GLYPH) || isSpecialGlyph(text.codePointAt(0)));
+        return !text.isEmpty() && GemColor.isGemGlyph(text.codePointAt(0));
     }
 
     public static boolean isSpecialGlyph(int codepoint) {
@@ -212,6 +164,7 @@ public class SSUIndicator {
         backoff = MIN_BACKOFF;
 
         confirmed.clear();
+        colors.clear();
         probation.clear();
         nonUsers.clear();
         negativeUntil.clear();
@@ -271,6 +224,7 @@ public class SSUIndicator {
 
     private static void flush(long now) {
         confirmed.keySet().removeIf(key -> !isRelevant(key, now));
+        colors.keySet().retainAll(confirmed.keySet());
         negativeUntil.values().removeIf(until -> until <= now);
         chatSeen.values().removeIf(seen -> now - seen > CHAT_RELEVANCE_MS);
 
@@ -341,24 +295,31 @@ public class SSUIndicator {
         List<String> names = pendingQueries.pollFirst();
         if (names == null) return;
 
-        Set<String> hits = new HashSet<>();
+        Map<String, GemColor> hits = new HashMap<>();
         int i = 0;
         while (i < bytes.length) {
-            int len = bytes[i] & 0xFF;
-            if (i + 1 + len > bytes.length) break;
-            hits.add(new String(bytes, i + 1, len, StandardCharsets.US_ASCII));
-            i += 1 + len;
+            int header = bytes[i] & 0xFF;
+            int len = header & 0x1F;
+            boolean hasColor = (header & 0x80) != 0;
+            int end = i + 1 + len + (hasColor ? 1 : 0);
+            if (end > bytes.length) break;
+            String name = new String(bytes, i + 1, len, StandardCharsets.US_ASCII);
+            hits.put(name, hasColor ? GemColor.byId(bytes[i + 1 + len] & 0xFF) : GemColor.BLUE);
+            i = end;
         }
 
         long now = System.currentTimeMillis();
         for (String key : names) {
             inFlight.remove(key);
-            if (hits.contains(key)) markUser(key, now);
+            GemColor color = hits.get(key);
+            if (color != null) markUser(key, now, color);
             else markNonUser(key, now);
         }
     }
 
-    private static void markUser(String key, long now) {
+    private static void markUser(String key, long now, GemColor color) {
+        if (color == GemColor.BLUE) colors.remove(key);
+        else colors.put(key, color);
         if (confirmed.put(key, now) == null) ChatModifications.badgeExistingMessages(key);
         probation.remove(key);
         nonUsers.remove(key);
@@ -367,6 +328,7 @@ public class SSUIndicator {
 
     private static void markNonUser(String key, long now) {
         confirmed.remove(key);
+        colors.remove(key);
 
         Probation p = probation.get(key);
         if (p != null) {
@@ -424,6 +386,7 @@ public class SSUIndicator {
                 JsonObject auth = new JsonObject();
                 auth.addProperty("type", "auth");
                 auth.addProperty("name", user.getName());
+                auth.addProperty("protocol", PROTOCOL);
                 ws.sendText(auth.toString(), true);
             } catch (Exception e) {
                 ws.sendClose(WebSocket.NORMAL_CLOSURE, "");
@@ -439,6 +402,7 @@ public class SSUIndicator {
         requeueOnReady.addAll(confirmed.keySet());
         requeueOnReady.addAll(inFlight);
         confirmed.clear();
+        colors.clear();
         inFlight.clear();
         pendingQueries.clear();
 

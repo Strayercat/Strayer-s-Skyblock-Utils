@@ -6,5 +6,6 @@
   "key.ssu.sendCoordinates": "Send coordinates in chat",
   "key.ssu.chatPeek": "Chat Peek",
   "key.ssu.zoom": "Zoom",
-  "key.ssu.puffTimer": "Puff Timer"
+  "key.ssu.puffTimer": "Puff Timer",
+  "key.ssu.systemChatHistory": "Server Chat History"
 }
