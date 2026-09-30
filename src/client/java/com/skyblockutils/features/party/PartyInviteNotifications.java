@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class PartyInviteNotifications {
-    private static final Pattern USER_SENT_MESSAGE_PATTERN = Pattern.compile("^\\[\\d{1,3}]\\s.*?\\s(?:\\[[A-Z]+\\+])?\\s.+: .+$");
+    private static final Pattern USER_SENT_MESSAGE_PATTERN = Pattern.compile("^\\[\\d{1,4}] (?:[^\\w\\s\\[]+ )?(?:\\[[^]]+] )*\\w{3,16}(?: \\[[^]]+])?: .+$");
     private static final Pattern EXPIRED_PATTERN = Pattern.compile("The party invite from .+ has expired\\.");
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile("^-{5,}$");
 

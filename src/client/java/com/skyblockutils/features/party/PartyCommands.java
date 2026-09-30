@@ -56,7 +56,7 @@ public class PartyCommands {
     private static void handleBoop(String message) {
         if (!ModConfig.INSTANCE.boopPartyInvites) return;
 
-        String username = message.replaceAll("\\[.*] ", "").split(" ")[1].replaceAll(":", "");
+        String username = message.replaceAll("\\[[^]]+] ", "").split(" ")[1].replaceAll(":", "");
 
         OnScreenNotification.builder()
                 .title("§l§dBoop!")

@@ -33,22 +33,30 @@ public class SSUIndicator {
     public static final Identifier BADGE = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem");
     public static final Identifier BADGE_BIG = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_big");
     public static final Identifier BADGE_SPECIAL = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_special");
+    public static final Identifier BADGE_PURPLE = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_purple");
 
     private static final int SPECIAL_GLYPH_BASE = 0xE7B0;
     private static final int SPECIAL_GLYPH_FRAMES = 20;
     private static final long SPECIAL_GLYPH_FRAME_MS = 200;
     public static final String SPECIAL_GLYPH = Character.toString(SPECIAL_GLYPH_BASE);
+    public static final String PURPLE_GLYPH = "\uE7A6";
 
     private static final List<UUID> SPECIAL_UUIDS = List.of(
             UUID.fromString("c9a6bc66-dab2-4edb-8eda-361d4bbb7869"),
             UUID.fromString("0a26c085-5a00-4cd7-b5fe-2ea077a89577")
     );
-    private static final long SPECIAL_RETRY_MS = 5 * 60_000;
-    private static final Map<UUID, String> specialNames = new ConcurrentHashMap<>();
-    private static long lastSpecialLookup = -SPECIAL_RETRY_MS;
-    public static final String BADGE_GLYPH = "";
 
-    private static final Pattern SB_TAB_NAME = Pattern.compile("\\[\\d+] (?:\\[[^]]+] )?(\\w{3,16})");
+    private static final List<UUID> PURPLE_UUIDS = List.of(
+            UUID.fromString("ee3d1f5b-1d60-45e7-8bea-e9885f740b56"),
+            UUID.fromString("eb4f26ca-0543-449c-bcc5-22c806067f23")
+    );
+
+    private static final long SPECIAL_RETRY_MS = 5 * 60_000;
+    private static final Map<UUID, String> resolvedNames = new ConcurrentHashMap<>();
+    private static long lastSpecialLookup = -SPECIAL_RETRY_MS;
+    public static final String BADGE_GLYPH = "\uE7A5";
+
+    private static final Pattern SB_TAB_NAME = Pattern.compile("\\[\\d+] (?:[^\\w\\s\\[]+ )?(?:\\[[^]]+] )*(\\w{3,16})");
     private static final Pattern VALID_NAME = Pattern.compile("^\\w{3,16}$");
 
     private static final int MAX_NAMES_PER_QUERY = 100;
@@ -112,10 +120,6 @@ public class SSUIndicator {
         return name != null && confirmed.containsKey(name.toLowerCase(Locale.ROOT));
     }
 
-    public static boolean isUser(PlayerInfo info) {
-        return !confirmed.isEmpty() && isUser(extractName(info));
-    }
-
     public static void onChatSender(String name) {
         if (name == null || !VALID_NAME.matcher(name).matches()) return;
         String key = name.toLowerCase(Locale.ROOT);
@@ -133,40 +137,57 @@ public class SSUIndicator {
     }
 
     public static boolean isSpecial(String name) {
-        return name != null && specialNames.containsValue(name.toLowerCase(Locale.ROOT));
+        return matchesAny(SPECIAL_UUIDS, name);
+    }
+
+    public static boolean isPurple(String name) {
+        return !isSpecial(name) && matchesAny(PURPLE_UUIDS, name);
+    }
+
+    private static boolean matchesAny(List<UUID> uuids, String name) {
+        if (name == null) return false;
+        String key = name.toLowerCase(Locale.ROOT);
+        for (UUID uuid : uuids) {
+            if (key.equals(resolvedNames.get(uuid))) return true;
+        }
+        return false;
     }
 
     public static void drawBadge(GuiGraphicsExtractor graphics, String name, int headX, int headY, int headSize) {
         int scale = Math.max(1, headSize / 8);
-        Identifier sprite = isSpecial(name) ? BADGE_SPECIAL : BADGE;
+        Identifier sprite = isSpecial(name) ? BADGE_SPECIAL : isPurple(name) ? BADGE_PURPLE : BADGE;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, headX + headSize - 4 * scale, headY - scale, 5 * scale, 4 * scale);
     }
 
     private static void resolveSpecialNames(long now) {
-        if (specialNames.size() == SPECIAL_UUIDS.size() || now - lastSpecialLookup < SPECIAL_RETRY_MS) return;
+        if (resolvedNames.size() == SPECIAL_UUIDS.size() + PURPLE_UUIDS.size() || now - lastSpecialLookup < SPECIAL_RETRY_MS) return;
         lastSpecialLookup = now;
 
-        for (UUID uuid : SPECIAL_UUIDS) {
-            if (specialNames.containsKey(uuid)) continue;
+        List<UUID> all = new ArrayList<>(SPECIAL_UUIDS);
+        all.addAll(PURPLE_UUIDS);
+        for (UUID uuid : all) {
+            if (resolvedNames.containsKey(uuid)) continue;
             PlayerLookup.getNameByUuid(uuid).thenAccept(name -> {
-                if (name != null) specialNames.put(uuid, name.toLowerCase(Locale.ROOT));
+                if (name != null) resolvedNames.put(uuid, name.toLowerCase(Locale.ROOT));
             });
         }
     }
 
     public static Component withNametagBadge(Component name, String playerName) {
         if (hasBadge(name.getString())) return name;
-        String glyph = isSpecial(playerName) ? Character.toString(currentSpecialGlyph()) : BADGE_GLYPH;
+        String glyph = isSpecial(playerName) ? Character.toString(currentSpecialGlyph()) : glyphFor(playerName);
         MutableComponent out = Component.literal(glyph + " ").withColor(0xFFFFFF);
         return out.append(name);
     }
 
     public static String glyphFor(String name) {
-        return isSpecial(name) ? SPECIAL_GLYPH : BADGE_GLYPH;
+        if (isSpecial(name)) return SPECIAL_GLYPH;
+        if (isPurple(name)) return PURPLE_GLYPH;
+        return BADGE_GLYPH;
     }
 
     public static boolean hasBadge(String text) {
-        return !text.isEmpty() && (text.startsWith(BADGE_GLYPH) || isSpecialGlyph(text.codePointAt(0)));
+        return !text.isEmpty() && (text.startsWith(BADGE_GLYPH) || text.startsWith(PURPLE_GLYPH) || isSpecialGlyph(text.codePointAt(0)));
     }
 
     public static boolean isSpecialGlyph(int codepoint) {

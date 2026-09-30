@@ -9,6 +9,13 @@
     },
     {
       "type": "bitmap",
+      "file": "skyblockutils:font/ssu_gem_big_purple.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE7A6"]
+    },
+    {
+      "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_special.png",
       "ascent": 7,
       "height": 8,

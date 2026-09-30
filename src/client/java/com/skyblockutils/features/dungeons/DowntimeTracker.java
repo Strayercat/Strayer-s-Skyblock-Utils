@@ -22,7 +22,7 @@ public class DowntimeTracker {
 
             if ((messageContent.startsWith("dt") || messageContent.startsWith("!dt"))) {
                 downtimeRequested = true;
-                requesterUsername = message.replaceAll("\\[.+] ", "").split(" ")[2].replaceAll(":", "");
+                requesterUsername = message.replaceAll("\\[[^]]+] ", "").split(" ")[2].replaceAll(":", "");
                 reason = messageContent.replaceAll("^!?dt ?", "").isEmpty() ? "No reason given" : "Reason: " + messageContent.replaceAll("^!?dt ?", "");
                 OnScreenNotification.builder()
                         .title("Downtime Requested")

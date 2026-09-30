@@ -13,7 +13,7 @@ public class GuildListParser {
     private static final long REFRESH_MS = 10 * 60_000;
     private static final long EXPECT_TIMEOUT_MS = 5_000;
     private static final long TRAILING_GRACE_MS = 1_000;
-    private static final Pattern MEMBER = Pattern.compile("^(?:\\[[^]]+] )?(\\w{3,16})$");
+    private static final Pattern MEMBER = Pattern.compile("^(?:\\[[^]]+] )*(\\w{3,16})$");
 
     public static boolean onJoinCommandHandled = false;
     public static final List<String> members = new ArrayList<>();

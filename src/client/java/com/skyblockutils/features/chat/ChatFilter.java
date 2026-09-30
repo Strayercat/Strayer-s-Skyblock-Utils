@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class ChatFilter {
     private static final List<ChatFilterDefinitions.FilterEntry> ALL_FILTERS = ChatFilterDefinitions.getAllEntries();
 
-    private static final Pattern USER_SENT_MESSAGE_PATTERN = Pattern.compile("^\\[\\d{1,3}]\\s.*?\\s(?:\\[[A-Z]+\\+])?\\s.+: .+$");
+    private static final Pattern USER_SENT_MESSAGE_PATTERN = Pattern.compile("^\\[\\d{1,4}] (?:[^\\w\\s\\[]+ )?(?:\\[[^]]+] )*\\w{3,16}(?: \\[[^]]+])?: .+$");
 
     public static boolean filterMessages(String message) {
 

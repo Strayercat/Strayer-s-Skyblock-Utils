@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class ChatModifications {
     private static final Pattern CHAT_SENDER = Pattern.compile(
-            "^(?:(Guild|Party|Officer|Co-op) > |(From) )?(?:\\[\\d+] )?(?:[^\\w\\s\\[]+ )?(?:\\[([^]]+)] )?(\\w{3,16})(?: \\[[^]]+])?: ");
+            "^(?:(Guild|Party|Officer|Co-op) > |(From) )?(?:\\[\\d+] )?(?:[^\\w\\s\\[]+ )?(?:\\[([^]]+)] )*(\\w{3,16})(?: \\[[^]]+])?: ");
 
     public static String fancyEmotes(String message) {
         return message.replace("<3", "❤")
