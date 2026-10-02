@@ -2,6 +2,7 @@ package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,7 +10,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.FishingRodItem;
 
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -102,12 +102,13 @@ public class AutoFish {
 
     private static boolean hasBiteIndicator(Minecraft client, FishingHook hook) {
         if (client.level == null) return false;
-        return !client.level.getEntitiesOfClass(ArmorStand.class, hook.getBoundingBox().inflate(BITE_RADIUS), stand ->
-                stand.isInvisible()
-                        && stand.hasCustomName()
-                        && stand.isCustomNameVisible()
-                        && "!!!".equals(Objects.requireNonNull(stand.getCustomName()).getString())
-        ).isEmpty();
+        return !client.level.getEntitiesOfClass(ArmorStand.class, hook.getBoundingBox().inflate(BITE_RADIUS), stand -> {
+            Component name = stand.getCustomName();
+            return name != null
+                    && stand.isInvisible()
+                    && stand.isCustomNameVisible()
+                    && "!!!".equals(name.getString());
+        }).isEmpty();
     }
 
     private static void reel(Minecraft client) {

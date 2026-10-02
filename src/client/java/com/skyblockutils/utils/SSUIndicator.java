@@ -190,7 +190,8 @@ public class SSUIndicator {
     }
 
     private static boolean needsQuery(String key, long now) {
-        if (confirmed.containsKey(key) || probation.containsKey(key) || nonUsers.contains(key) || inFlight.contains(key)) return false;
+        if (confirmed.containsKey(key) || probation.containsKey(key) || nonUsers.contains(key) || inFlight.contains(key))
+            return false;
         Long until = negativeUntil.get(key);
         return until == null || until <= now;
     }
@@ -203,7 +204,8 @@ public class SSUIndicator {
 
     private static void updateTab(Minecraft client, long now) {
         Set<String> current = new HashSet<>();
-        for (PlayerInfo info : Objects.requireNonNull(client.getConnection()).getOnlinePlayers()) {
+        if (client.getConnection() == null) return;
+        for (PlayerInfo info : client.getConnection().getOnlinePlayers()) {
             String name = extractName(info);
             if (name != null) current.add(name.toLowerCase(Locale.ROOT));
         }
@@ -215,7 +217,8 @@ public class SSUIndicator {
         }
 
         for (String key : current) {
-            if (tab.contains(key) || confirmed.containsKey(key) || probation.containsKey(key) || nonUsers.contains(key)) continue;
+            if (tab.contains(key) || confirmed.containsKey(key) || probation.containsKey(key) || nonUsers.contains(key))
+                continue;
             probation.put(key, new Probation(now));
         }
 

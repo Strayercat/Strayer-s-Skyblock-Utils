@@ -172,14 +172,14 @@ public class OnScreenNotification {
         }
 
         public void send() {
-            notifications.add(new Notification(title, subtitle, tickTime, titleColor, metadata));
+            Minecraft mc = Minecraft.getInstance();
+            mc.execute(() -> {
+                notifications.add(new Notification(title, subtitle, tickTime, titleColor, metadata));
 
-            if (withSound) {
-                Minecraft mc = Minecraft.getInstance();
-                if (mc.player != null) {
+                if (withSound && mc.player != null) {
                     mc.player.playSound(SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value());
                 }
-            }
+            });
         }
     }
 

@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class PowderChestNotifications implements SoundEventListener {
     private enum ScanContext {
@@ -36,6 +35,10 @@ public class PowderChestNotifications implements SoundEventListener {
 
     private static int EXPECTING_LOCKPICK_CHEST = 0;
     private static int EXPECTING_LOOT_CHEST = 0;
+    private static long lastExpectedAt = 0;
+    private static final long EXPECT_WINDOW_MS = 3_000;
+    private static final int MAX_READ_TICKS = 2;
+    private static int ticksReading = 0;
 
     private static boolean reading = false;
     private static final List<Component> buffer = new ArrayList<>();
@@ -63,10 +66,12 @@ public class PowderChestNotifications implements SoundEventListener {
 
         if (LOCKPICK_CHEST_LOCATIONS.contains(pos)) {
             EXPECTING_LOCKPICK_CHEST++;
+            lastExpectedAt = System.currentTimeMillis();
             LOCKPICK_CHEST_LOCATIONS.remove(pos);
             KNOWN_CHEST_LOCATIONS.remove(pos);
         } else if (KNOWN_CHEST_LOCATIONS.contains(pos) && !SideBarUtils.location.equals("Mines of Divan")) {
             EXPECTING_LOOT_CHEST++;
+            lastExpectedAt = System.currentTimeMillis();
             KNOWN_CHEST_LOCATIONS.remove(pos);
         }
 
@@ -74,6 +79,8 @@ public class PowderChestNotifications implements SoundEventListener {
     }
 
     public static void tick() {
+        if (reading && ++ticksReading > MAX_READ_TICKS) abortReading();
+
         if (!ModConfig.INSTANCE.powderChestNotification || !ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows"))
             return;
 
@@ -112,7 +119,7 @@ public class PowderChestNotifications implements SoundEventListener {
 
         pruneStaleChests(client, playerPos, SCAN_RADIUS);
 
-        if (Objects.requireNonNull(context) == ScanContext.BASIC_SCAN) {
+        if (context == ScanContext.BASIC_SCAN) {
             BlockPos.betweenClosedStream(
                             playerPos.offset(-SCAN_RADIUS, -SCAN_RADIUS, -SCAN_RADIUS),
                             playerPos.offset(SCAN_RADIUS, SCAN_RADIUS, SCAN_RADIUS))
@@ -184,10 +191,12 @@ public class PowderChestNotifications implements SoundEventListener {
 
         if (LOCKPICK_CHEST_LOCATIONS.contains(targetedChest)) {
             EXPECTING_LOCKPICK_CHEST++;
+            lastExpectedAt = System.currentTimeMillis();
             LOCKPICK_CHEST_LOCATIONS.remove(targetedChest);
             KNOWN_CHEST_LOCATIONS.remove(targetedChest);
         } else if (KNOWN_CHEST_LOCATIONS.contains(targetedChest) && !SideBarUtils.location.equals("Mines of Divan")) {
             EXPECTING_LOOT_CHEST++;
+            lastExpectedAt = System.currentTimeMillis();
             KNOWN_CHEST_LOCATIONS.remove(targetedChest);
         } else {
             KNOWN_CHEST_LOCATIONS.remove(targetedChest);
@@ -212,6 +221,11 @@ public class PowderChestNotifications implements SoundEventListener {
         if (!ModConfig.INSTANCE.powderChestNotification || !ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows"))
             return true;
 
+        if (!reading && System.currentTimeMillis() - lastExpectedAt > EXPECT_WINDOW_MS) {
+            EXPECTING_LOCKPICK_CHEST = 0;
+            EXPECTING_LOOT_CHEST = 0;
+        }
+
         boolean expectingAny = EXPECTING_LOCKPICK_CHEST > 0 || EXPECTING_LOOT_CHEST > 0;
 
         if (!reading && !expectingAny) return true;
@@ -222,6 +236,7 @@ public class PowderChestNotifications implements SoundEventListener {
                 if (!expectingAny) return true;
 
                 reading = true;
+                ticksReading = 0;
                 buffer.clear();
                 openingBorder = message;
             } else {
@@ -261,11 +276,25 @@ public class PowderChestNotifications implements SoundEventListener {
         }
 
         if (reading) {
+            String text = message.getString().trim();
+            boolean noHeaderYet = buffer.stream().allMatch(c -> c.getString().trim().isEmpty());
+            if (noHeaderYet && !text.isEmpty() && !text.contains("CHEST LOCKPICKED") && !text.contains("LOOT CHEST COLLECTED")) {
+                abortReading();
+                return true;
+            }
             buffer.add(message);
             return false;
         }
 
         return true;
+    }
+
+    private static void abortReading() {
+        reading = false;
+        ChatComponent chatHud = Minecraft.getInstance().gui.hud.getChat();
+        if (openingBorder != null) chatHud.addClientSystemMessage(openingBorder);
+        for (Component line : buffer) chatHud.addClientSystemMessage(line);
+        buffer.clear();
     }
 
     private static boolean isBufferValid(String expectedHeader) {

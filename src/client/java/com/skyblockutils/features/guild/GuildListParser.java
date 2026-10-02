@@ -1,11 +1,14 @@
 package com.skyblockutils.features.guild;
 
 import com.skyblockutils.features.party.PartyListParser;
+import com.skyblockutils.utils.ChatSeparator;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,6 +16,8 @@ public class GuildListParser {
     private static final long REFRESH_MS = 10 * 60_000;
     private static final long EXPECT_TIMEOUT_MS = 5_000;
     private static final long TRAILING_GRACE_MS = 1_000;
+    private static final long MANUAL_WINDOW_MS = 3_000;
+    private static final Pattern MANUAL_COMMAND = Pattern.compile("^(g|guild) (list|online|members|l|o)\\b.*");
     private static final Pattern MEMBER = Pattern.compile("^(?:\\[[^]]+] )*(\\w{3,16})$");
 
     public static boolean onJoinCommandHandled = false;
@@ -20,18 +25,20 @@ public class GuildListParser {
 
     private static boolean expecting = false;
     private static boolean reading = false;
-    private static boolean sawFooter = false;
     private static long expectingSince = 0;
     private static long lastRequest = 0;
     private static long finishedAt = 0;
+    private static long manualUntil = 0;
+    private static boolean sendingOwnCommand = false;
+    private static Component heldSeparator;
+    private static final List<Component> rawBuffer = new ArrayList<>();
     private static final List<String> buffer = new ArrayList<>();
 
     public static void tick() {
         long now = System.currentTimeMillis();
-        if (expecting && now - expectingSince > EXPECT_TIMEOUT_MS) {
+        if (expecting && !reading && now - expectingSince > EXPECT_TIMEOUT_MS) {
+            replayHeld();
             expecting = false;
-            reading = false;
-            buffer.clear();
         }
         if (expecting || PartyListParser.expectingPartyList) return;
         if (onJoinCommandHandled && now - lastRequest < REFRESH_MS) return;
@@ -39,54 +46,70 @@ public class GuildListParser {
         if (Minecraft.getInstance().getConnection() == null) return;
         onJoinCommandHandled = true;
         expecting = true;
-        reading = false;
-        sawFooter = false;
-        buffer.clear();
+        clearHeld();
         expectingSince = now;
         lastRequest = now;
+        sendingOwnCommand = true;
         Minecraft.getInstance().getConnection().sendCommand("guild online");
+        sendingOwnCommand = false;
     }
 
-    public static boolean handleMessage(String message) {
-        boolean isSeparator = message.startsWith("-----");
+    public static void onCommandSent(String command) {
+        if (sendingOwnCommand) return;
+        if (!MANUAL_COMMAND.matcher(command.toLowerCase(Locale.ROOT).trim()).matches()) return;
+
+        manualUntil = System.currentTimeMillis() + MANUAL_WINDOW_MS;
+        if (expecting) {
+            replayHeld();
+            expecting = false;
+        }
+    }
+
+    public static boolean handleMessage(Component message) {
+        if (System.currentTimeMillis() < manualUntil) return true;
+
+        String text = message.getString().replaceAll("§.", "").trim();
+        boolean isSeparator = ChatSeparator.is(message);
 
         if (!expecting) {
             return !(isSeparator && System.currentTimeMillis() - finishedAt < TRAILING_GRACE_MS);
         }
 
-        if (isNotInGuild(message)) {
+        if (text.startsWith("You must be in a guild")) {
+            clearHeld();
             finish(List.of());
             return false;
         }
 
-        if (isSeparator) {
-            if (!reading) {
-                reading = true;
-            } else if (sawFooter) {
-                parseBuffer();
+        if (!reading) {
+            if (isSeparator) {
+                if (heldSeparator != null) replayHeld();
+                heldSeparator = message;
+                return false;
             }
-            return false;
+
+            if (text.startsWith("Guild Name:")) {
+                reading = true;
+                buffer.clear();
+                rawBuffer.clear();
+                buffer.add(text);
+                rawBuffer.add(message);
+                return false;
+            }
+
+            if (heldSeparator != null) replayHeld();
+            return true;
         }
 
-        if (reading) {
-            buffer.add(message);
-            if (message.trim().startsWith("Online Members:")) sawFooter = true;
-            return false;
-        }
-
-        return true;
+        buffer.add(text);
+        rawBuffer.add(message);
+        if (text.startsWith("Online Members:")) finish(parseLines());
+        return false;
     }
 
-    private static void parseBuffer() {
-        if (buffer.stream().noneMatch(line -> line.trim().startsWith("Guild Name:"))) {
-            reading = false;
-            sawFooter = false;
-            buffer.clear();
-            return;
-        }
-
+    private static List<String> parseLines() {
         List<String> parsed = new ArrayList<>();
-        for (String line : buffer) {
+        for (String line : GuildListParser.buffer) {
             line = line.trim();
             if (line.isEmpty()
                     || line.startsWith("Guild Name:")
@@ -100,20 +123,27 @@ public class GuildListParser {
                 if (m.matches()) parsed.add(m.group(1));
             }
         }
-
-        finish(parsed);
+        return parsed;
     }
 
-    private static boolean isNotInGuild(String message) {
-        return message.trim().startsWith("You need to be in a guild");
+    private static void replayHeld() {
+        var chat = Minecraft.getInstance().gui.hud.getChat();
+        if (heldSeparator != null) chat.addClientSystemMessage(heldSeparator);
+        for (Component line : rawBuffer) chat.addClientSystemMessage(line);
+        clearHeld();
+    }
+
+    private static void clearHeld() {
+        reading = false;
+        heldSeparator = null;
+        buffer.clear();
+        rawBuffer.clear();
     }
 
     private static void finish(List<String> parsed) {
         expecting = false;
-        reading = false;
-        sawFooter = false;
+        clearHeld();
         finishedAt = System.currentTimeMillis();
-        buffer.clear();
         members.clear();
         members.addAll(parsed);
         SSUIndicator.setGuildMembers(members);

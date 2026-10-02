@@ -43,14 +43,14 @@ public class ModFunctions {
             StrayersSkyblockUtilsClient.isInSkyblock = false;
             AutoRejoin.resetAutoRejoin();
             SSUIndicator.disconnect();
+            PartyListParser.onJoinCommandHandled = false;
+            GuildListParser.onJoinCommandHandled = false;
         }
 
         playerWelcomedToIsland = false;
         SsuHud.funFactHandled = false;
         CorlTimer.corlTimerEnabled = false;
         PuffTracker.puffTrackerEnabled = false;
-        PartyListParser.onJoinCommandHandled = false;
-        GuildListParser.onJoinCommandHandled = false;
 
         DowntimeTracker.resetDowntimeTracker();
         CorlTimer.resetCorlTimer();

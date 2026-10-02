@@ -139,8 +139,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
-            boolean partyListMessages = PartyListParser.handleMessage(cleanMessage);
-            boolean guildListMessages = GuildListParser.handleMessage(cleanMessage);
+            boolean partyListMessages = PartyListParser.handleMessage(message);
+            boolean guildListMessages = GuildListParser.handleMessage(message);
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(message);
 
             if (!isInSkyblock) return partyListMessages && guildListMessages && partyMsgFilter;
@@ -160,6 +160,10 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::fancyEmotes);
+        ClientSendMessageEvents.COMMAND.register(command -> {
+            PartyListParser.onCommandSent(command);
+            GuildListParser.onCommandSent(command);
+        });
         ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : ChatModifications.fitToChat(message));
 
         UseBlockCallback.EVENT.register((_, level, _, hitResult) -> {
