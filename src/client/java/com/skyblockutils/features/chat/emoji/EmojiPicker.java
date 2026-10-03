@@ -57,6 +57,7 @@ public class EmojiPicker {
     private String query = "";
     private boolean open = false;
     private int scroll = 0;
+    private boolean pickedFromSearch = false;
 
     public boolean isOpen() {
         return open;
@@ -78,6 +79,7 @@ public class EmojiPicker {
 
     private void setQuery(String query) {
         this.query = query;
+        pickedFromSearch = false;
         if (open) rebuild();
     }
 
@@ -253,7 +255,10 @@ public class EmojiPicker {
 
         if (isOverPanel(mouseX, mouseY, screenHeight)) {
             Emoji emoji = emojiAt(mouseX, mouseY, screenHeight);
-            if (emoji != null) insert.accept(emoji.text());
+            if (emoji != null) {
+                insert.accept(emoji.text());
+                if (!query.isEmpty()) pickedFromSearch = true;
+            }
             return true;
         }
 
@@ -294,7 +299,7 @@ public class EmojiPicker {
                 return true;
             }
             case KEY_ENTER, KEY_KP_ENTER -> {
-                if (query.isEmpty()) return false;
+                if (query.isEmpty() || pickedFromSearch) return false;
                 if (!results.isEmpty()) insert.accept(results.getFirst().text());
                 setQuery("");
                 return true;
