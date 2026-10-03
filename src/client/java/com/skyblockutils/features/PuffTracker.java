@@ -71,10 +71,10 @@ public class PuffTracker {
         if (currentScheduledAction != null && !currentScheduledAction.isDone()) {
             currentScheduledAction.cancel(false);
         }
-        currentScheduledAction = scheduler.schedule(() -> {
+        currentScheduledAction = scheduler.schedule(() -> client.execute(() -> {
             if (client.level == null) return;
             ModFunctions.showTitle(client, Component.literal("KILL PUFFS").withColor(ModStyle.getColor(ModStyle.ColorStyle.OCEAN, ModStyle.ColorType.MAIN)), 20, true);
-        }, 75, TimeUnit.SECONDS);
+        }), 75, TimeUnit.SECONDS);
     }
 
     public static void tick(Minecraft client) {

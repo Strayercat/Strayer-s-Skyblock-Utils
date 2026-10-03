@@ -55,7 +55,7 @@ public class SpookyMessageHandler {
             }
 
             if (pendingNotification != null) pendingNotification.cancel(false);
-            pendingNotification = scheduler.schedule(SpookyMessageHandler::sendNotification, 250, TimeUnit.MILLISECONDS);
+            pendingNotification = scheduler.schedule(() -> Minecraft.getInstance().execute(SpookyMessageHandler::sendNotification), 250, TimeUnit.MILLISECONDS);
 
             return false;
         }
@@ -73,8 +73,6 @@ public class SpookyMessageHandler {
         expectingLoot = false;
         pendingNotification = null;
 
-        Minecraft.getInstance().execute(() ->
-                OnScreenNotification.builder().title("Spooky Chest Rewards").subtitle(rewards).send()
-        );
+        OnScreenNotification.builder().title("Spooky Chest Rewards").subtitle(rewards).send();
     }
 }

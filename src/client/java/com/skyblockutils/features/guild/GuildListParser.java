@@ -1,5 +1,6 @@
 package com.skyblockutils.features.guild;
 
+import com.skyblockutils.ModFunctions;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.utils.ChatListCapture;
 import com.skyblockutils.utils.SSUIndicator;
@@ -26,6 +27,7 @@ public class GuildListParser {
     private static long lastRequest = 0;
     private static long manualUntil = 0;
     private static boolean sendingOwnCommand = false;
+    private static boolean awaitingResponse = false;
 
     private static final ChatListCapture capture = new ChatListCapture(
             GuildListParser::isStartLine,
@@ -40,18 +42,24 @@ public class GuildListParser {
 
     public static void tickCapture() {
         capture.tick();
+        if (awaitingResponse && !capture.isExpecting()) {
+            awaitingResponse = false;
+            onJoinCommandHandled = false;
+        }
     }
 
     public static void tick() {
         if (capture.isExpecting() || PartyListParser.isExpecting()) return;
         long now = System.currentTimeMillis();
         if (onJoinCommandHandled && now - lastRequest < REFRESH_MS) return;
-        if (Minecraft.getInstance().getConnection() == null) return;
+        if (ModFunctions.isWorldLoaded()) return;
 
         onJoinCommandHandled = true;
         lastRequest = now;
+        awaitingResponse = true;
         capture.expect();
         sendingOwnCommand = true;
+        if (Minecraft.getInstance().getConnection() == null) return;
         Minecraft.getInstance().getConnection().sendCommand("guild online");
         sendingOwnCommand = false;
     }
@@ -61,6 +69,7 @@ public class GuildListParser {
         if (!MANUAL_COMMAND.matcher(command.toLowerCase(Locale.ROOT).trim()).matches()) return;
 
         manualUntil = System.currentTimeMillis() + MANUAL_WINDOW_MS;
+        awaitingResponse = false;
         capture.cancel();
     }
 
@@ -89,6 +98,7 @@ public class GuildListParser {
     }
 
     private static void onListReceived(List<String> lines) {
+        awaitingResponse = false;
         members.clear();
         if (lines.stream().noneMatch(line -> line.startsWith(NOT_IN_GUILD))) {
             members.addAll(parseLines(lines));

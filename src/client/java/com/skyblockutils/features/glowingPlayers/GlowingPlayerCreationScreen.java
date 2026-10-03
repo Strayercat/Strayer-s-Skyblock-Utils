@@ -190,24 +190,20 @@ public class GlowingPlayerCreationScreen extends Screen {
             String name = this.playerNameField.getValue().trim();
             if (name.isEmpty()) return;
 
-            PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> {
+            PlayerLookup.getFormattedUsername(name).thenAccept(formattedName -> Minecraft.getInstance().execute(() -> {
                 if (formattedName == null || formattedName.isBlank()) {
-                    Minecraft.getInstance().execute(() ->
-                            OnScreenNotification.builder()
-                                    .title("Player Not Found")
-                                    .subtitle("\"" + name + "\" doesn't exist.")
-                                    .tickTime(100)
-                                    .send()
-                    );
+                    OnScreenNotification.builder()
+                            .title("Player Not Found")
+                            .subtitle("\"" + name + "\" doesn't exist.")
+                            .tickTime(100)
+                            .send();
                     return;
                 }
-                GlowingPlayers.add(formattedName, selectedColor, true, () ->
-                        Minecraft.getInstance().execute(() -> {
-                            this.close();
-                            GlowingPlayersGui.refreshScreen(Minecraft.getInstance());
-                        })
-                );
-            });
+                GlowingPlayers.add(formattedName, selectedColor, true, () -> {
+                    this.close();
+                    GlowingPlayersGui.refreshScreen(Minecraft.getInstance());
+                });
+            }));
         }
     }
 

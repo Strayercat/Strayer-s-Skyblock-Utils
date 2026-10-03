@@ -15,7 +15,10 @@ import com.skyblockutils.mixin.client.PingDebugMonitorAccessor;
 import com.skyblockutils.mixin.client.PingDebugMonitorInvoker;
 import com.skyblockutils.utils.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -123,6 +126,10 @@ public class ModFunctions {
     }
 
     public static void showTitle(Minecraft client, Component title, int displayTime, boolean withSound) {
+        if (!client.isSameThread()) {
+            client.execute(() -> showTitle(client, title, displayTime, withSound));
+            return;
+        }
         if (client.player != null) {
             client.gui.hud.setTimes(10, displayTime, 10);
             client.gui.hud.setTitle(title);
@@ -131,6 +138,10 @@ public class ModFunctions {
     }
 
     public static void showTitle(Minecraft client, String title, int displayTime, boolean withSound) {
+        if (!client.isSameThread()) {
+            client.execute(() -> showTitle(client, title, displayTime, withSound));
+            return;
+        }
         if (client.player != null) {
             client.gui.hud.setTimes(10, displayTime, 10);
             client.gui.hud.setTitle(Component.literal(title));
@@ -151,6 +162,14 @@ public class ModFunctions {
         } else {
             Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(full);
         }
+    }
+
+    public static boolean isWorldLoaded() {
+        Minecraft client = Minecraft.getInstance();
+        LocalPlayer player = client.player;
+        ClientLevel level = client.level;
+        if (player == null || level == null || client.getConnection() == null) return true;
+        return !level.getChunkSource().hasChunk(SectionPos.blockToSectionCoord(player.getBlockX()), SectionPos.blockToSectionCoord(player.getBlockZ()));
     }
 
     public static Boolean isInSkyblock(Minecraft client) {

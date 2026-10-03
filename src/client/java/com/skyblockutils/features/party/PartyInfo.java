@@ -17,6 +17,11 @@ public class PartyInfo {
     public static List<UUID> memberUuids = new ArrayList<>();
 
     public static void handlePartyMessages(String message) {
+        if (message.startsWith("You'll be partying with:")) {
+            scheduler.schedule(() -> Minecraft.getInstance().execute(PartyListParser::requestList), 500, TimeUnit.MILLISECONDS);
+            return;
+        }
+
         if (message.contains(":")) return;
 
         if (message.contains("has disbanded the party") ||
@@ -33,6 +38,7 @@ public class PartyInfo {
         if (message.contains("has left the party") ||
                 message.contains("has been removed from the party") ||
                 message.contains("joined the party") ||
+                (message.startsWith("You have joined") && message.contains("'s party")) ||
                 message.contains("joined the dungeon group!") ||
                 message.contains("was removed from your party because they disconnected.") ||
                 message.contains("The party was transferred to")) {

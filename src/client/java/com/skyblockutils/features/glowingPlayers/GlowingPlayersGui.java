@@ -64,9 +64,9 @@ public class GlowingPlayersGui {
                         return hasUnsavedChanges();
                     }
                 }
-                        .addText("Glowing Players", CustomEntry.Alignment.LEFT, 0xFFFFFFFF)
-                        .addButton(Component.literal("+"), 20, CustomEntry.Alignment.RIGHT, () -> GlowingPlayerCreationScreen.openScreen(Minecraft.getInstance().gui.screen()), Component.literal("Add Glowing Player"))
-                        .addButton(Component.literal("⟳"), 20, CustomEntry.Alignment.RIGHT, () -> refreshScreen(Minecraft.getInstance()), Component.literal("Reload GUI"))
+                .addText("Glowing Players", CustomEntry.Alignment.LEFT, 0xFFFFFFFF)
+                .addButton(Component.literal("+"), 20, CustomEntry.Alignment.RIGHT, () -> GlowingPlayerCreationScreen.openScreen(Minecraft.getInstance().gui.screen()), Component.literal("Add Glowing Player"))
+                .addButton(Component.literal("⟳"), 20, CustomEntry.Alignment.RIGHT, () -> refreshScreen(Minecraft.getInstance()), Component.literal("Reload GUI"))
         );
 
         for (GlowingPlayer p : ModConfig.INSTANCE.getGlowingPlayers()) {

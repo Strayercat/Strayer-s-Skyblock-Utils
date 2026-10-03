@@ -1,10 +1,12 @@
 package com.skyblockutils.features.party;
 
+import com.skyblockutils.ModFunctions;
 import com.skyblockutils.features.guild.GuildListParser;
 import com.skyblockutils.utils.ChatListCapture;
 import com.skyblockutils.utils.PlayerLookup;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
@@ -22,6 +24,8 @@ public class PartyListParser {
     private static long manualUntil = 0;
     private static boolean sendingOwnCommand = false;
     private static boolean requestPending = false;
+    private static ClientLevel lastLevel;
+    private static boolean awaitingResponse = false;
 
     private static final ChatListCapture capture = new ChatListCapture(
             PartyListParser::isStartLine,
@@ -35,13 +39,24 @@ public class PartyListParser {
     }
 
     public static void tickCapture() {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level != lastLevel) {
+            lastLevel = level;
+            if (level != null) onJoinCommandHandled = false;
+        }
+
         capture.tick();
+        if (awaitingResponse && !capture.isExpecting()) {
+            awaitingResponse = false;
+            onJoinCommandHandled = false;
+        }
         if (requestPending && !GuildListParser.isExpecting()) requestList();
     }
 
     public static void handleOnJoinCommand() {
         if (capture.isExpecting() || GuildListParser.isExpecting()) return;
         if (onJoinCommandHandled && System.currentTimeMillis() - lastRequest < REFRESH_MS) return;
+        if (ModFunctions.isWorldLoaded()) return;
 
         onJoinCommandHandled = true;
         requestList();
@@ -56,6 +71,7 @@ public class PartyListParser {
 
         requestPending = false;
         lastRequest = System.currentTimeMillis();
+        awaitingResponse = true;
         capture.expect();
         sendingOwnCommand = true;
         Minecraft.getInstance().getConnection().sendCommand("party list");
@@ -67,6 +83,7 @@ public class PartyListParser {
         if (!MANUAL_COMMAND.matcher(command.toLowerCase(Locale.ROOT).trim()).matches()) return;
 
         manualUntil = System.currentTimeMillis() + MANUAL_WINDOW_MS;
+        awaitingResponse = false;
         capture.cancel();
     }
 
@@ -88,6 +105,7 @@ public class PartyListParser {
     }
 
     private static void onListReceived(List<String> lines) {
+        awaitingResponse = false;
         parseLines(lines);
         getMemberUuids();
     }
@@ -157,14 +175,14 @@ public class PartyListParser {
         }
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenRun(() -> {
+                .thenRun(() -> Minecraft.getInstance().execute(() -> {
                     for (CompletableFuture<UUID> future : futures) {
                         UUID uuid = future.join();
                         if (uuid != null) {
                             PartyInfo.memberUuids.add(uuid);
                         }
                     }
-                });
+                }));
     }
 
     private static void resetPartyInfo() {

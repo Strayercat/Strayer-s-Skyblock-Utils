@@ -54,11 +54,12 @@ public class AutoRejoin {
                 return;
             }
 
-            scheduler.schedule(() -> {
+            scheduler.schedule(() -> Minecraft.getInstance().execute(() -> {
+                if (Minecraft.getInstance().player == null) return;
                 partialParty = false;
                 GuiBlocker.shouldHideScreen = true;
                 Minecraft.getInstance().player.connection.sendCommand("joindungeon " + ((currentFloor.startsWith("M") ? "MASTER_" : "") + "CATACOMBS_FLOOR_" + DungeonPartyCommands.translations.get(Character.getNumericValue(currentFloor.charAt(1)))));
-            }, 2, TimeUnit.SECONDS);
+            }), 2, TimeUnit.SECONDS);
         }
     }
 

@@ -31,7 +31,14 @@ public class UpdateChecker {
         if (initialized) return;
         initialized = true;
         userNotified = false;
-        scheduler.schedule(() -> checkForUpdate(client), 1, TimeUnit.MINUTES);
+        scheduleCheck(client);
+    }
+
+    private static void scheduleCheck(Minecraft client) {
+        scheduler.schedule(() -> {
+            String latestVersion = fetchLatestVersion();
+            client.execute(() -> onVersionFetched(client, latestVersion));
+        }, 1, TimeUnit.MINUTES);
     }
 
     private static String fetchLatestVersion() {
@@ -58,20 +65,18 @@ public class UpdateChecker {
         }
     }
 
-    private static void checkForUpdate(Minecraft client) {
-        String latestVersion = fetchLatestVersion();
-
+    private static void onVersionFetched(Minecraft client, String latestVersion) {
         if (latestVersion == null || !isNewer(latestVersion)) return;
 
         if (client.level != null) {
             userNotified = true;
-            sendUpdateMessage(client, latestVersion);
+            sendUpdateMessage(latestVersion);
             return;
         }
 
         if (userNotified) return;
 
-        scheduler.schedule(() -> checkForUpdate(client), 1, TimeUnit.MINUTES);
+        scheduleCheck(client);
     }
 
     private static boolean isNewer(String latest) {
@@ -87,7 +92,7 @@ public class UpdateChecker {
         return false;
     }
 
-    private static void sendUpdateMessage(Minecraft client, String latestVersion) {
+    private static void sendUpdateMessage(String latestVersion) {
         Component message = Component.literal("")
                 .append(Component.literal("Update available: ")
                         .withStyle(s -> s.withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT) & 0xFFFFFF)))
@@ -102,6 +107,6 @@ public class UpdateChecker {
                                 )
                 );
 
-        client.execute(() -> ModFunctions.sendSystemMessage(message, true));
+        ModFunctions.sendSystemMessage(message, true);
     }
 }

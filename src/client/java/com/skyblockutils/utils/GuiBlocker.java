@@ -26,9 +26,7 @@ public class GuiBlocker {
                         });
                     }
 
-                    scheduler.schedule(() -> {
-                        shouldHideScreen = false;
-                    }, 1500, TimeUnit.MILLISECONDS);
+                    scheduler.schedule(() -> client.execute(() -> shouldHideScreen = false), 1500, TimeUnit.MILLISECONDS);
                 }
 
                 if (ModConfig.INSTANCE.autoHoppityEggs && title.matches("^chocolate .+ egg$")) {

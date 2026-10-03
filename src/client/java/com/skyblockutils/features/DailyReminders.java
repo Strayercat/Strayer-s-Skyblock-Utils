@@ -58,11 +58,11 @@ public class DailyReminders {
                     alreadyReminded.add(type);
 
                     if (ModConfig.INSTANCE.dailyReminders) {
-                        scheduler.schedule(() -> {
+                        scheduler.schedule(() -> client.execute(() -> {
                             if (!ModConfig.INSTANCE.disabledTypes.contains(type) && !ModConfig.INSTANCE.completedTypes.contains(type)) {
                                 sendReminder(client, type);
                             }
-                        }, 2, TimeUnit.SECONDS);
+                        }), 2, TimeUnit.SECONDS);
                     }
                 }
 

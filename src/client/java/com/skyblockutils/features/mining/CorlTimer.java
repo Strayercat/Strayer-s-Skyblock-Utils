@@ -40,11 +40,11 @@ public class CorlTimer {
                 corlUUID = null;
                 waitTime = true;
 
-                scheduler.schedule(() -> {
+                scheduler.schedule(() -> client.execute(() -> {
                     if (client.level == null || !corlTimerEnabled) return;
                     ModFunctions.showTitle(client, Component.literal("CORL").withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 20, true);
                     waitTime = false;
-                }, 1, TimeUnit.MINUTES);
+                }), 1, TimeUnit.MINUTES);
             }
             return;
         }
