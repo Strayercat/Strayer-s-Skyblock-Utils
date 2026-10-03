@@ -137,7 +137,7 @@ public class ChatFilterDefinitions {
         shops.addSubCategory(bazaar);
 
         FilterCategory npcShop = new FilterCategory("NPC Shop", "NPC sell related messages");
-        npcShop.addEntry(new FilterEntry("itemSold", "Item Sold", "Filter 'You sold [item] [x]x for [amount] Coins!' messages", "^You sold .+ x.+ for .+ Coins!$"));
+        npcShop.addEntry(new FilterEntry("itemSold", "Item Sold", "Filter 'You sold [item] [x]x for [amount] Coins!' messages", "^You sold .+ x.+ for .+ Coins?!$"));
         npcShop.addEntry(new FilterEntry("itemCantBeSold", "Can't Be Sold", "Filter 'That item cannot be sold!' messages", "^That item cannot be sold!$"));
         shops.addSubCategory(npcShop);
 

@@ -16,6 +16,8 @@ import java.util.Optional;
 public final class ChatLayout {
     private static final String SEPARATOR_CHARS = "-=▬━─_";
     private static final int MIN_SEPARATOR_LENGTH = 5;
+    private static final int MIN_CENTER_PADDING = 2;
+    private static final int CENTER_PADDING_TOLERANCE = 1;
 
     private ChatLayout() {}
 
@@ -128,11 +130,22 @@ public final class ChatLayout {
             return new ParsedLine(LineType.SEPARATOR, null, first.style(), activeCodes("", first.text()), c);
         }
 
-        if (plain.startsWith("  ") && !trimmed.isEmpty()) {
+        if (isCentered(plain, trimmed)) {
             return new ParsedLine(LineType.CENTERED, rebuild(segments, true), null, null, ' ');
         }
 
         return new ParsedLine(LineType.NORMAL, rebuild(segments, false), null, null, ' ');
+    }
+
+    private static boolean isCentered(String plain, String trimmed) {
+        if (trimmed.isEmpty()) return false;
+        int leading = 0;
+        while (leading < plain.length() && plain.charAt(leading) == ' ') leading++;
+        if (leading < MIN_CENTER_PADDING) return false;
+
+        int trailing = 0;
+        while (trailing < plain.length() && plain.charAt(plain.length() - 1 - trailing) == ' ') trailing++;
+        return Math.abs(leading - trailing) <= CENTER_PADDING_TOLERANCE;
     }
 
     private static boolean isSeparator(String plain, String trimmed, List<Segment> segments, String raw) {

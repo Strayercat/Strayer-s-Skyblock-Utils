@@ -1,6 +1,7 @@
 package com.skyblockutils.features.party;
 
-import com.skyblockutils.utils.ChatSeparator;
+import com.skyblockutils.features.guild.GuildListParser;
+import com.skyblockutils.utils.ChatListCapture;
 import com.skyblockutils.utils.PlayerLookup;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
@@ -12,26 +13,35 @@ import java.util.regex.Pattern;
 
 public class PartyListParser {
     private static final long REFRESH_MS = 10 * 60_000;
-    private static final long EXPECT_TIMEOUT_MS = 5_000;
     private static final long MANUAL_WINDOW_MS = 3_000;
     private static final Pattern MANUAL_COMMAND = Pattern.compile("^((p|party) (list|l)|pl)\\b.*");
+    private static final Pattern PARTY_LINE = Pattern.compile("^Party (Members \\(\\d+\\)|Leader:|Moderators:|Members:).*");
 
-    public static boolean expectingPartyList = false;
     public static boolean onJoinCommandHandled = false;
-    private static boolean reading = false;
-    private static long expectingSince = 0;
     private static long lastRequest = 0;
     private static long manualUntil = 0;
     private static boolean sendingOwnCommand = false;
-    private static Component separator;
-    private static final List<Component> rawBuffer = new ArrayList<>();
-    private static final List<String> buffer = new ArrayList<>();
+    private static boolean requestPending = false;
+
+    private static final ChatListCapture capture = new ChatListCapture(
+            PartyListParser::isStartLine,
+            PartyListParser::isListLine,
+            PartyListParser::onListReceived,
+            false
+    );
+
+    public static boolean isExpecting() {
+        return capture.isExpecting();
+    }
+
+    public static void tickCapture() {
+        capture.tick();
+        if (requestPending && !GuildListParser.isExpecting()) requestList();
+    }
 
     public static void handleOnJoinCommand() {
-        long now = System.currentTimeMillis();
-        if (expectingPartyList && !reading && now - expectingSince > EXPECT_TIMEOUT_MS) expectingPartyList = false;
-        if (expectingPartyList) return;
-        if (onJoinCommandHandled && now - lastRequest < REFRESH_MS) return;
+        if (capture.isExpecting() || GuildListParser.isExpecting()) return;
+        if (onJoinCommandHandled && System.currentTimeMillis() - lastRequest < REFRESH_MS) return;
 
         onJoinCommandHandled = true;
         requestList();
@@ -39,10 +49,14 @@ public class PartyListParser {
 
     public static void requestList() {
         if (Minecraft.getInstance().getConnection() == null) return;
-        long now = System.currentTimeMillis();
-        expectingPartyList = true;
-        expectingSince = now;
-        lastRequest = now;
+        if (GuildListParser.isExpecting()) {
+            requestPending = true;
+            return;
+        }
+
+        requestPending = false;
+        lastRequest = System.currentTimeMillis();
+        capture.expect();
         sendingOwnCommand = true;
         Minecraft.getInstance().getConnection().sendCommand("party list");
         sendingOwnCommand = false;
@@ -53,74 +67,40 @@ public class PartyListParser {
         if (!MANUAL_COMMAND.matcher(command.toLowerCase(Locale.ROOT).trim()).matches()) return;
 
         manualUntil = System.currentTimeMillis() + MANUAL_WINDOW_MS;
-        if (reading) abort();
-        expectingPartyList = false;
+        capture.cancel();
     }
 
     public static boolean handleMessage(Component message) {
-        if (!expectingPartyList || System.currentTimeMillis() < manualUntil) return true;
-        String text = message.getString().replaceAll("§.", "").trim();
-
-        if (text.contains("\n") && (text.contains("Party Members") || text.contains("not currently in a party") || text.contains("not in a party"))) {
-            reading = false;
-            rawBuffer.clear();
-            buffer.clear();
-            for (String line : text.split("\n")) buffer.add(line.trim());
-            parseBuffer();
-            getMemberUuids();
-            expectingPartyList = false;
-            return false;
-        }
-
-        if (ChatSeparator.is(message)) {
-            if (!reading) {
-                reading = true;
-                separator = message;
-                buffer.clear();
-                rawBuffer.clear();
-            } else {
-                reading = false;
-                parseBuffer();
-                getMemberUuids();
-                expectingPartyList = false;
-            }
-            return false;
-        }
-
-        if (!reading) return true;
-
-        if (buffer.isEmpty() && !text.isEmpty() && !isPartyListLine(text)) {
-            abort();
-            return true;
-        }
-
-        buffer.add(text);
-        rawBuffer.add(message);
-        return false;
+        if (System.currentTimeMillis() < manualUntil) return true;
+        return capture.handle(message);
     }
 
-    private static boolean isPartyListLine(String text) {
-        return text.startsWith("Party ") || text.startsWith("You are not currently in a party") || text.startsWith("You are not in a party");
+    private static boolean isNotInParty(String text) {
+        return text.startsWith("You are not currently in a party") || text.startsWith("You are not in a party");
     }
 
-    private static void abort() {
-        reading = false;
-        var chat = Minecraft.getInstance().gui.hud.getChat();
-        if (separator != null) chat.addClientSystemMessage(separator);
-        for (Component line : rawBuffer) chat.addClientSystemMessage(line);
-        buffer.clear();
-        rawBuffer.clear();
+    private static boolean isStartLine(String text) {
+        return PARTY_LINE.matcher(text).matches() || isNotInParty(text);
     }
 
-    private static void parseBuffer() {
+    private static boolean isListLine(String text) {
+        return text.isEmpty() || isStartLine(text);
+    }
+
+    private static void onListReceived(List<String> lines) {
+        parseLines(lines);
+        getMemberUuids();
+    }
+
+    private static void parseLines(List<String> lines) {
         PartyInfo.members.clear();
 
-        if (buffer.stream().noneMatch(line -> line.startsWith("Party "))) {
+        if (lines.stream().noneMatch(line -> PARTY_LINE.matcher(line).matches())) {
             resetPartyInfo();
             return;
         }
 
-        for (String line : buffer) {
+        for (String line : lines) {
             line = line.trim();
             if (line.isEmpty()) continue;
 

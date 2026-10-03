@@ -101,6 +101,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
             ScreenshotManager.tick();
             PowderChestNotifications.tick();
+            PartyListParser.tickCapture();
+            GuildListParser.tickCapture();
 
             if (client.level == null) return;
 
@@ -141,7 +143,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
             boolean partyListMessages = PartyListParser.handleMessage(message);
-            boolean guildListMessages = GuildListParser.handleMessage(message);
+            boolean guildListMessages = !partyListMessages || GuildListParser.handleMessage(message);
             boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(message);
 
             if (!isInSkyblock) return partyListMessages && guildListMessages && partyMsgFilter;
