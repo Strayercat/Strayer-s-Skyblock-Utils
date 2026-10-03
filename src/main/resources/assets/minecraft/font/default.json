@@ -5,70 +5,90 @@
       "file": "skyblockutils:gui/sprites/ssu_gem_big.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7A5"]
+      "chars": [
+        "\ue7a5"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_purple.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7A6"]
+      "chars": [
+        "\ue7a6"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_gold.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7A7"]
+      "chars": [
+        "\ue7a7"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_red.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7A8"]
+      "chars": [
+        "\ue7a8"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_green.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7A9"]
+      "chars": [
+        "\ue7a9"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_orange.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7AA"]
+      "chars": [
+        "\ue7aa"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_pink.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7AB"]
+      "chars": [
+        "\ue7ab"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_white.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7AC"]
+      "chars": [
+        "\ue7ac"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_black.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7AD"]
+      "chars": [
+        "\ue7ad"
+      ]
     },
     {
       "type": "bitmap",
       "file": "skyblockutils:font/ssu_gem_big_gray.png",
       "ascent": 7,
       "height": 8,
-      "chars": ["\uE7AE"]
+      "chars": [
+        "\ue7ae"
+      ]
     },
     {
       "type": "bitmap",
@@ -76,27 +96,31 @@
       "ascent": 7,
       "height": 8,
       "chars": [
-        "\uE7B0",
-        "\uE7B1",
-        "\uE7B2",
-        "\uE7B3",
-        "\uE7B4",
-        "\uE7B5",
-        "\uE7B6",
-        "\uE7B7",
-        "\uE7B8",
-        "\uE7B9",
-        "\uE7BA",
-        "\uE7BB",
-        "\uE7BC",
-        "\uE7BD",
-        "\uE7BE",
-        "\uE7BF",
-        "\uE7C0",
-        "\uE7C1",
-        "\uE7C2",
-        "\uE7C3"
+        "\ue7b0",
+        "\ue7b1",
+        "\ue7b2",
+        "\ue7b3",
+        "\ue7b4",
+        "\ue7b5",
+        "\ue7b6",
+        "\ue7b7",
+        "\ue7b8",
+        "\ue7b9",
+        "\ue7ba",
+        "\ue7bb",
+        "\ue7bc",
+        "\ue7bd",
+        "\ue7be",
+        "\ue7bf",
+        "\ue7c0",
+        "\ue7c1",
+        "\ue7c2",
+        "\ue7c3"
       ]
+    },
+    {
+      "type": "reference",
+      "id": "skyblockutils:emojis"
     }
   ]
 }

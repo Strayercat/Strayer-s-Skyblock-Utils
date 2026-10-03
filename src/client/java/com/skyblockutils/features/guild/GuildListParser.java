@@ -101,9 +101,13 @@ public class GuildListParser {
             return true;
         }
 
+        if (isSeparator) {
+            finish(parseLines());
+            return false;
+        }
+
         buffer.add(text);
         rawBuffer.add(message);
-        if (text.startsWith("Online Members:")) finish(parseLines());
         return false;
     }
 

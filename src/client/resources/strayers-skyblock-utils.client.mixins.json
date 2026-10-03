@@ -8,6 +8,7 @@
     "ChatComponentAccessor",
     "ChatGlyphAnimationMixin",
     "ChatHudMixin",
+    "ChatScreenMixin",
     "EntitiesDestroyMixin",
     "EntityTrackerUpdateMixin",
     "GameRendererMixin",

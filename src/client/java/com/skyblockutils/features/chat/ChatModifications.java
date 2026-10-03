@@ -1,5 +1,7 @@
 package com.skyblockutils.features.chat;
 
+import com.skyblockutils.ModFunctions;
+import com.skyblockutils.features.chat.emoji.EmojiRegistry;
 import com.skyblockutils.mixin.client.ChatComponentAccessor;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
@@ -17,12 +19,38 @@ public class ChatModifications {
     private static final Pattern CHAT_SENDER = Pattern.compile(
             "^(?:(Guild|Party|Officer|Co-op) > |(From) )?(?:\\[\\d+] )?(?:[^\\w\\s\\[]+ )?(?:\\[([^]]+)] )*(\\w{3,16})(?: \\[[^]]+])?: ");
 
+    public static final int MAX_MESSAGE_LENGTH = 256;
+
+    public static String prepareOutgoingChat(String message) {
+        String converted = EmojiRegistry.toShortcodes(fancyEmotes(message));
+        if (converted.length() <= MAX_MESSAGE_LENGTH) return converted;
+
+        converted = EmojiRegistry.toShortcodes(message);
+        if (converted.length() <= MAX_MESSAGE_LENGTH) return converted;
+
+        return trimmed(message);
+    }
+
+    public static String prepareOutgoingCommand(String command) {
+        String converted = EmojiRegistry.toShortcodes(command);
+        if (converted.length() < MAX_MESSAGE_LENGTH) return converted;
+        return trimmed(command, MAX_MESSAGE_LENGTH - 1);
+    }
+
+    private static String trimmed(String message) {
+        return trimmed(message, MAX_MESSAGE_LENGTH);
+    }
+
+    private static String trimmed(String message, int maxLength) {
+        ModFunctions.sendSystemMessage("Your message was too long after converting emojis, so the end was cut off.", false);
+        return EmojiRegistry.toShortcodes(message, maxLength);
+    }
+
     public static String fancyEmotes(String message) {
         return message.replace("<3", "❤")
                 .replace("\\o/", "¯\\_(ツ)_/¯")
                 .replace("o/", "( ﾟ◡ﾟ)/")
-                .replace("O/", "( ﾟ◡ﾟ)/")
-                .replace(":skull:", "☠");
+                .replace("O/", "( ﾟ◡ﾟ)/");
     }
 
     public static Component withChatBadge(Component message) {

@@ -1,3 +1,6 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 plugins {
     id 'net.fabricmc.fabric-loom' version "${loom_version}"
     id 'maven-publish'
@@ -54,8 +57,63 @@ dependencies {
     runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 }
 
+def emojiSourceDir = file("src/main/resources/assets/skyblockutils/textures/font/emojis")
+def emojiOutputDir = layout.buildDirectory.dir("generated/emojis")
+
+def generateEmojiFont = tasks.register("generateEmojiFont") {
+    inputs.files(fileTree(emojiSourceDir) { include "*.png", "emojis.json" })
+    outputs.dir(emojiOutputDir)
+
+    doLast {
+        def outDir = emojiOutputDir.get().asFile
+        outDir.deleteDir()
+
+        def atlas = new JsonSlurper().parse(new File(emojiSourceDir, "emojis.json"))
+        int base = Integer.parseInt(atlas.base as String, 16)
+        int columns = atlas.columns as int
+        List atlasEmojis = atlas.emojis
+
+        def providers = []
+        def custom = []
+        int nextId = 0xE800
+
+        emojiSourceDir.listFiles()
+                .findAll { it.name.endsWith(".png") && it.name != "emojis.png" }
+                .sort { it.name }
+                .each { f ->
+                    if (nextId > 0xE8FF) throw new GradleException("Too many custom emojis (max 256)")
+                    int cp = nextId++
+                    providers << [type: "bitmap", file: "skyblockutils:font/emojis/" + f.name, ascent: 7, height: 8, chars: [new String(Character.toChars(cp))]]
+                    custom << [name: f.name.substring(0, f.name.length() - 4), cp: cp]
+                }
+
+        int rowCount = (int) Math.ceil(atlasEmojis.size() / (double) columns)
+        def rows = (0..<rowCount).collect { r ->
+            (0..<columns).collect { c ->
+                int i = r * columns + c
+                i < atlasEmojis.size() ? new String(Character.toChars(base + i)) : "\u0000"
+            }.join()
+        }
+        providers << [type: "bitmap", file: "skyblockutils:font/emojis/emojis.png", ascent: 7, height: 8, chars: rows]
+
+        def normal = atlasEmojis.withIndex().collect { e, i -> [name: e.name, aliases: e.aliases ?: [], category: e.category, cp: base + i] }
+
+        def fontFile = new File(outDir, "assets/skyblockutils/font/emojis.json")
+        fontFile.parentFile.mkdirs()
+        fontFile.setText(JsonOutput.toJson([providers: providers]), "UTF-8")
+
+        def indexFile = new File(outDir, "assets/skyblockutils/emojis/index.json")
+        indexFile.parentFile.mkdirs()
+        indexFile.setText(JsonOutput.toJson([custom: custom, normal: normal]), "UTF-8")
+    }
+}
+
+sourceSets.main.resources.srcDir(generateEmojiFont)
+
 processResources {
     inputs.property "version", project.version
+
+    exclude "assets/skyblockutils/textures/font/emojis/*.json"
 
     filesMatching("fabric.mod.json") {
         expand "version": inputs.properties.version

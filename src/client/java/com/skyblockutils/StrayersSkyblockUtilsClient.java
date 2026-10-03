@@ -7,6 +7,7 @@ import com.skyblockutils.features.chat.ChatCommands;
 import com.skyblockutils.features.chat.ChatFilter;
 import com.skyblockutils.features.chat.ChatModifications;
 import com.skyblockutils.features.chat.SeparatedChat;
+import com.skyblockutils.features.chat.emoji.EmojiRegistry;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.foraging.TreeGiftNotifications;
 import com.skyblockutils.features.guild.GuildListParser;
@@ -159,12 +160,13 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             return SeparatedChat.handleMessage(message, overlay);
         });
 
-        ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::fancyEmotes);
+        ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::prepareOutgoingChat);
+        ClientSendMessageEvents.MODIFY_COMMAND.register(ChatModifications::prepareOutgoingCommand);
         ClientSendMessageEvents.COMMAND.register(command -> {
             PartyListParser.onCommandSent(command);
             GuildListParser.onCommandSent(command);
         });
-        ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : ChatModifications.fitToChat(message));
+        ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : ChatModifications.fitToChat(EmojiRegistry.withEmojis(message)));
 
         UseBlockCallback.EVENT.register((_, level, _, hitResult) -> {
             PowderChestNotifications.handleChestClick(hitResult);
