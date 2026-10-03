@@ -83,8 +83,10 @@ public class GlowingPlayers {
                     }
 
                     ModConfig.INSTANCE.addGlowingPlayer(new GlowingPlayer(profile.name(), profile.uuid(), color));
-                    if (!fromGui) ModFunctions.sendSystemMessage("§a" + profile.name() + " is now glowing!", false);
-                    ModConfig.save();
+                    if (!fromGui) {
+                        ModFunctions.sendSystemMessage("§a" + profile.name() + " is now glowing!", false);
+                        ModConfig.save();
+                    }
                     if (onSuccess != null) onSuccess.run();
                 })
         );
@@ -109,16 +111,14 @@ public class GlowingPlayers {
         }
 
         ModConfig.INSTANCE.removeGlowingPlayer(username);
-        if (!fromGui) ModFunctions.sendSystemMessage("§a" + username + " is no longer glowing", false);
-        ModConfig.save();
+        if (!fromGui) {
+            ModFunctions.sendSystemMessage("§a" + username + " is no longer glowing", false);
+            ModConfig.save();
+        }
     }
 
     public static void clearAll() {
         ModConfig.INSTANCE.getGlowingPlayers().clear();
-        ModConfig.save();
-    }
-
-    public static void save() {
         ModConfig.save();
     }
 

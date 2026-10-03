@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -129,7 +130,7 @@ public final class EmojiRegistry {
                     continue;
                 }
                 if (matcher.start() > last) out.append(Component.literal(text.substring(last, matcher.start())).setStyle(style));
-                out.append(Component.literal(emoji.text()).setStyle(emojiStyle(style)));
+                out.append(Component.literal(emoji.text()).setStyle(chatEmojiStyle(style, emoji)));
                 last = matcher.end();
                 searchFrom = last;
                 changed[0] = true;
@@ -155,6 +156,12 @@ public final class EmojiRegistry {
             }
             return true;
         };
+    }
+
+    private static Style chatEmojiStyle(Style style, Emoji emoji) {
+        Style styled = emojiStyle(style);
+        if (style.getHoverEvent() != null) return styled;
+        return styled.withHoverEvent(new HoverEvent.ShowText(Component.literal(emoji.shortcode())));
     }
 
     private static Style emojiStyle(Style style) {

@@ -182,7 +182,6 @@ public class GlowingPlayerCreationScreen extends Screen {
     private void confirm() {
         if (editingPlayer != null) {
             editingPlayer.color = selectedColor;
-            GlowingPlayers.save();
             Minecraft.getInstance().execute(() -> {
                 this.close();
                 GlowingPlayersGui.refreshScreen(Minecraft.getInstance());

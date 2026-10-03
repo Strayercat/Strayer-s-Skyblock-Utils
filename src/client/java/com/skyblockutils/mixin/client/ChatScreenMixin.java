@@ -6,11 +6,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -42,6 +40,7 @@ public abstract class ChatScreenMixin extends Screen {
         this.input.setX(this.input.getX() + EmojiPicker.INPUT_OFFSET);
         this.input.setWidth(this.input.getWidth() - EmojiPicker.INPUT_OFFSET);
         this.input.addFormatter((text, _) -> EmojiRegistry.formatInput(text));
+        EmojiPicker.bind(ssu$emojiPicker, this.input);
         ssu$limitLength();
     }
 
@@ -112,13 +111,5 @@ public abstract class ChatScreenMixin extends Screen {
         if (ssu$emojiPicker.keyPressed(event.key(), event.hasControlDownWithQuirk(), this::ssu$insertEmoji)) {
             cir.setReturnValue(true);
         }
-    }
-
-    @Override
-    public boolean charTyped(@NotNull CharacterEvent event) {
-        if (ssu$emojiPicker.isOpen() && event.isAllowedChatCharacter()) {
-            return ssu$emojiPicker.charTyped(event.codepointAsString());
-        }
-        return super.charTyped(event);
     }
 }

@@ -7,6 +7,7 @@ import com.skyblockutils.utils.ModStyle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
@@ -58,6 +59,18 @@ public class EmojiPicker {
     private boolean open = false;
     private int scroll = 0;
     private boolean pickedFromSearch = false;
+
+    private static EmojiPicker boundPicker;
+    private static EditBox boundInput;
+
+    public static void bind(EmojiPicker picker, EditBox input) {
+        boundPicker = picker;
+        boundInput = input;
+    }
+
+    public static EmojiPicker capturing(EditBox input) {
+        return input == boundInput && boundPicker != null && boundPicker.isOpen() ? boundPicker : null;
+    }
 
     public boolean isOpen() {
         return open;
@@ -227,6 +240,25 @@ public class EmojiPicker {
         String label = shown != null ? shown.shortcode() : "Emojis";
         label = font.plainSubstrByWidth(label, gridWidth);
         graphics.text(font, label, gridX, gridY + VISIBLE_HEIGHT + 3, shown != null ? ModStyle.COLOR_TITLE : ModStyle.COLOR_SUBTITLE, false);
+
+        if (hovered != null) renderHoverLabel(graphics, font, hovered.shortcode(), mouseX, mouseY, mainColor);
+    }
+
+    private static void renderHoverLabel(GuiGraphicsExtractor graphics, Font font, String text, int mouseX, int mouseY, int outline) {
+        int width = font.width(text) + 6;
+        int height = 12;
+        int x = mouseX + 6;
+        int y = mouseY - height - 2;
+        int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        if (x + width > screenWidth - 2) x = mouseX - width - 6;
+        if (y < 2) y = mouseY + 10;
+
+        graphics.fill(x, y, x + width, y + height, 0xEE101010);
+        graphics.fill(x, y, x + width, y + 1, outline);
+        graphics.fill(x, y + height - 1, x + width, y + height, outline);
+        graphics.fill(x, y, x + 1, y + height, outline);
+        graphics.fill(x + width - 1, y, x + width, y + height, outline);
+        graphics.text(font, text, x + 3, y + 2, ModStyle.COLOR_TITLE, false);
     }
 
     private void renderSearch(GuiGraphicsExtractor graphics, Font font, int x, int y, int width, int mainColor) {
