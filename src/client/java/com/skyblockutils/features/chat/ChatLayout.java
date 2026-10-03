@@ -18,6 +18,9 @@ public final class ChatLayout {
     private static final int MIN_SEPARATOR_LENGTH = 5;
     private static final int MIN_CENTER_PADDING = 2;
     private static final int CENTER_PADDING_TOLERANCE = 1;
+    private static final int SERVER_CENTER_MIN = 154;
+    private static final int SERVER_CENTER_MAX = 160;
+    private static final int SERVER_CENTER_TOLERANCE = 8;
 
     private ChatLayout() {}
 
@@ -130,11 +133,22 @@ public final class ChatLayout {
             return new ParsedLine(LineType.SEPARATOR, null, first.style(), activeCodes("", first.text()), c);
         }
 
-        if (isCentered(plain, trimmed)) {
-            return new ParsedLine(LineType.CENTERED, rebuild(segments, true), null, null, ' ');
+        if (isCentered(plain, trimmed) || isServerCentered(segments, plain, trimmed)) {
+            return new ParsedLine(LineType.CENTERED, rebuild(segments, true, true), null, null, ' ');
         }
 
-        return new ParsedLine(LineType.NORMAL, rebuild(segments, false), null, null, ' ');
+        return new ParsedLine(LineType.NORMAL, rebuild(segments, false, false), null, null, ' ');
+    }
+
+    private static boolean isServerCentered(List<Segment> segments, String plain, String trimmed) {
+        if (trimmed.isEmpty() || !plain.startsWith(" ".repeat(MIN_CENTER_PADDING))) return false;
+
+        Font font = Minecraft.getInstance().font;
+        int contentWidth = font.width(rebuild(segments, true, true));
+        int leadingWidth = font.width(rebuild(segments, false, true)) - contentWidth;
+        int middle = leadingWidth + contentWidth / 2;
+
+        return middle >= SERVER_CENTER_MIN - SERVER_CENTER_TOLERANCE && middle <= SERVER_CENTER_MAX + SERVER_CENTER_TOLERANCE;
     }
 
     private static boolean isCentered(String plain, String trimmed) {
@@ -179,17 +193,19 @@ public final class ChatLayout {
         return codes.toString();
     }
 
-    private static Component rebuild(List<Segment> segments, boolean trim) {
+    private static Component rebuild(List<Segment> segments, boolean trimLeading, boolean trimTrailing) {
         List<Segment> result = new ArrayList<>(segments);
 
-        if (trim) {
+        if (trimLeading) {
             for (int i = 0; i < result.size(); i++) {
                 Segment segment = result.get(i);
                 String stripped = stripLeadingSpaces(segment.text());
                 result.set(i, new Segment(segment.style(), stripped));
                 if (!stripped.replaceAll("§.", "").isEmpty()) break;
             }
+        }
 
+        if (trimTrailing) {
             for (int i = result.size() - 1; i >= 0; i--) {
                 Segment segment = result.get(i);
                 String stripped = stripTrailingSpaces(segment.text());
