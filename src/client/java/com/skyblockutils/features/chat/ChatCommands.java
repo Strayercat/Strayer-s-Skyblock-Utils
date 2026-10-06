@@ -26,11 +26,11 @@ public class ChatCommands {
 
         if (!ModConfig.INSTANCE.statCommands) return;
         if (messageContent.equalsIgnoreCase("!tps"))
-            sendMessageInChannel("TPS: " + String.format("%.1f", ModFunctions.tps), messageChannel);
+            sendMessageInChannel("Current TPS: " + String.format("%.1f", ModFunctions.tps), messageChannel);
         if (messageContent.equalsIgnoreCase("!ping"))
-            sendMessageInChannel("Ping: " + ModFunctions.ping, messageChannel);
+            sendMessageInChannel("Current Ping: " + ModFunctions.ping + "ms", messageChannel);
         if (messageContent.equalsIgnoreCase("!fps"))
-            sendMessageInChannel("FPS: ".concat(String.valueOf(Minecraft.getInstance().getFps())), messageChannel);
+            sendMessageInChannel("Current FPS: ".concat(String.valueOf(Minecraft.getInstance().getFps())), messageChannel);
         if (messageContent.equalsIgnoreCase("!ssu"))
             sendMessageInChannel("Goat!", messageChannel);
 
@@ -38,7 +38,7 @@ public class ChatCommands {
 
         // Silly messages
         if (!ModConfig.INSTANCE.chatCommands) return;
-        List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist", "sus", "furry", "goon");
+        List<String> allowedCommands = List.of("gay", "lesbian", "trans", "femboy", "racist", "sus", "furry");
         String command = messageContent.replaceFirst("!", "").split(" ")[0].trim().toLowerCase();
         if (allowedCommands.contains(command)) {
             int randomPercentage = (int) (Math.random() * 100) + 1;

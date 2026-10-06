@@ -34,6 +34,7 @@
     "HumanoidModelMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
+    "ModelPartMixin",
     "LivingEntityRenderStateMixin",
     "PingDebugMonitorAccessor",
     "PingDebugMonitorInvoker",
