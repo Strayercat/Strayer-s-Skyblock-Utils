@@ -12,6 +12,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -35,6 +36,7 @@ public class SSUIndicator {
     private static final int SPECIAL_GLYPH_BASE = 0xE7B0;
     private static final int SPECIAL_GLYPH_FRAMES = 20;
     private static final long SPECIAL_GLYPH_FRAME_MS = 200;
+    private static final long PRISMATIC_CYCLE_MS = 3_000;
 
     private static final Pattern SB_TAB_NAME = Pattern.compile("\\[\\d+] (?:[^\\w\\s\\[]+ )?(?:\\[[^]]+] )*(\\w{3,16})");
     private static final Pattern VALID_NAME = Pattern.compile("^\\w{3,16}$");
@@ -114,6 +116,19 @@ public class SSUIndicator {
 
     public static void setGuildMembers(Collection<String> names) {
         replaceWatch(guildWatch, names);
+    }
+
+    public static boolean isSpecialUser(String name) {
+        return isUser(name) && colorOf(name) == GemColor.SPECIAL;
+    }
+
+    public static boolean isVipUser(String name) {
+        return isUser(name) && colorOf(name) == GemColor.PURPLE;
+    }
+
+    public static int prismaticColor() {
+        float hue = (System.currentTimeMillis() % PRISMATIC_CYCLE_MS) / (float) PRISMATIC_CYCLE_MS;
+        return Color.HSBtoRGB(hue, 0.8F, 1.0F) & 0xFFFFFF;
     }
 
     public static GemColor colorOf(String name) {

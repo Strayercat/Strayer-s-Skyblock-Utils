@@ -31,6 +31,8 @@ import com.skyblockutils.render.EggDetector;
 import com.skyblockutils.render.EggClickFilter;
 import com.skyblockutils.render.SkullRefresher;
 import com.skyblockutils.utils.GuiBlocker;
+import com.skyblockutils.features.AboutScreen;
+import com.skyblockutils.render.GrouchoMaskLayer;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.SSUIndicator;
@@ -40,6 +42,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -60,6 +63,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ModKeyBindings.init();
         ModConfig.load();
         GuiBlocker.init();
+        AboutScreen.registerInfoButton();
+        GrouchoMaskLayer.register();
         DailyReminders.init();
         F7VoidLava.register();
 
@@ -129,16 +134,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             DailyReminders.tick(client);
         });
 
-        ClientReceiveMessageEvents.GAME.register((message, _) -> {
-            String cleanMessage = message.getString().replaceAll("§.", "").trim();
-            PartyCommands.handlePartyCommands(cleanMessage);
-            PartyInfo.handlePartyMessages(cleanMessage);
-            if (!isInSkyblock) return;
-            DowntimeTracker.trackDowntime(cleanMessage);
-            DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);
-            AutoRejoin.autoRejoin(cleanMessage);
-            ChatCommands.handleCommands(cleanMessage);
-        });
+        ClientReceiveMessageEvents.GAME.register((message, _) -> handleGameMessage(message));
+        ClientReceiveMessageEvents.GAME_CANCELED.register((message, _) -> handleGameMessage(message));
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             String cleanMessage = message.getString().replaceAll("§.", "").trim();
@@ -179,5 +176,16 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((be, _) -> SkullRefresher.handleBELoad(be));
         ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((be, _) -> SkullRefresher.handleBEUnload(be));
         ClientChunkEvents.CHUNK_LOAD.register(SkullRefresher::handleChunkLoad);
+    }
+
+    private static void handleGameMessage(Component message) {
+        String cleanMessage = message.getString().replaceAll("§.", "").trim();
+        PartyCommands.handlePartyCommands(cleanMessage);
+        PartyInfo.handlePartyMessages(cleanMessage);
+        if (!isInSkyblock) return;
+        DowntimeTracker.trackDowntime(cleanMessage);
+        DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);
+        AutoRejoin.autoRejoin(cleanMessage);
+        ChatCommands.handleCommands(cleanMessage);
     }
 }

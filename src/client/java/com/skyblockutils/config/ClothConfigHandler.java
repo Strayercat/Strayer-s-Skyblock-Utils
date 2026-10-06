@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public class ClothConfigHandler {
+    public static final String CONFIG_TITLE = "Strayer's Skyblock Utils (SSU) Config";
     public static boolean configScreenRequested = false;
 
     public static Screen createConfigScreen(Screen parent) {
@@ -21,7 +22,7 @@ public class ClothConfigHandler {
                 .setParentScreen(parent)
                 .setTransparentBackground(false)
                 .setDefaultBackgroundTexture(Identifier.fromNamespaceAndPath("skyblockutils", "textures/gui/background.png"))
-                .setTitle(Component.literal("Strayer's Skyblock Utils (SSU) Config"))
+                .setTitle(Component.literal(CONFIG_TITLE))
                 .setSavingRunnable(ModConfig::save);
 
         ConfigEntryBuilder eb = builder.entryBuilder();

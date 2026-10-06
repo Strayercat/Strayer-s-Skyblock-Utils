@@ -16,8 +16,9 @@
     "InGameHudMixin",
     "ModelManagerAccessor",
     "MouseMixin",
-    "WorldTimeMixin",
-    "SkullBlockEntityMixin"
+    "ScreenInvoker",
+    "SkullBlockEntityMixin",
+    "WorldTimeMixin"
   ],
   "injectors": {
     "defaultRequire": 0
@@ -29,7 +30,10 @@
     "EntityGlowingMixin",
     "EntityRendererMixin",
     "HudMixin",
+    "HumanoidModelMixin",
     "LivingEntityMixin",
+    "LivingEntityRendererMixin",
+    "LivingEntityRenderStateMixin",
     "PingDebugMonitorAccessor",
     "PingDebugMonitorInvoker",
     "PlayerTabOverlayMixin",

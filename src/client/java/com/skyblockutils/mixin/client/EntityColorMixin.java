@@ -2,6 +2,7 @@ package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.party.PartyInfo;
+import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +16,11 @@ public abstract class EntityColorMixin {
     private void onGetTeamColorValue(CallbackInfoReturnable<Integer> cir) {
         Entity entity = (Entity) (Object) this;
         if (!(entity instanceof Player player)) return;
+
+        if (SSUIndicator.isSpecialUser(player.getName().getString())) {
+            cir.setReturnValue(SSUIndicator.prismaticColor());
+            return;
+        }
 
         ModConfig.INSTANCE.getGlowingPlayers().stream()
                 .filter(gp -> gp.getUuid().equals(player.getUUID()))
