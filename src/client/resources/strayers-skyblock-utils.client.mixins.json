@@ -26,6 +26,7 @@
   "mixins": [
     "AbstractRecipeBookScreenMixin",
     "CameraMixin",
+    "CustomHeadLayerMixin",
     "EntityColorMixin",
     "EntityGlowingMixin",
     "EntityRendererMixin",
