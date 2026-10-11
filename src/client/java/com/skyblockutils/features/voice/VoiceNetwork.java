@@ -109,16 +109,16 @@ final class VoiceNetwork {
         }
     }
 
-    void send(VoicePeer peer) {
-        send(peer, VoiceNetwork.BYE, EMPTY, 0);
+    void send(VoicePeer peer, byte type) {
+        send(peer, type, EMPTY, 0);
     }
 
     void send(VoicePeer peer, byte type, byte[] payload, int length) {
         send(peer, peer.address, type, payload, length);
     }
 
-    void sendTo(VoicePeer peer, InetSocketAddress target) {
-        send(peer, target, VoiceNetwork.PING, EMPTY, 0);
+    void sendTo(VoicePeer peer, InetSocketAddress target, byte type) {
+        send(peer, target, type, EMPTY, 0);
     }
 
     private synchronized void send(VoicePeer peer, InetSocketAddress target, byte type, byte[] payload, int length) {
@@ -165,7 +165,7 @@ final class VoiceNetwork {
             VoicePeer peer = VoiceChat.peerById(getInt(buf, 1));
             if (peer == null) continue;
 
-            long counter = getLong(buf);
+            long counter = getLong(buf, 5);
             if (counter < 0 || counter <= peer.maxCounter - 512) continue;
 
             byte[] plain;
@@ -220,8 +220,8 @@ final class VoiceNetwork {
         b[off + 3] = (byte) v;
     }
 
-    private static long getLong(byte[] b) {
-        return ((long) getInt(b, 5) << 32) | (getInt(b, 5 + 4) & 0xFFFFFFFFL);
+    private static long getLong(byte[] b, int off) {
+        return ((long) getInt(b, off) << 32) | (getInt(b, off + 4) & 0xFFFFFFFFL);
     }
 
     private static void putLong(byte[] b, int off, long v) {
@@ -229,7 +229,7 @@ final class VoiceNetwork {
         putInt(b, off + 4, (int) v);
     }
 
-    static byte[] slice(byte[] b) {
-        return Arrays.copyOfRange(b, 4, b.length);
+    static byte[] slice(byte[] b, int from) {
+        return Arrays.copyOfRange(b, from, b.length);
     }
 }

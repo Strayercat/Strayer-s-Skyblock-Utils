@@ -247,7 +247,7 @@ public class ModConfig {
             INSTANCE.voiceMuted = loaded.voiceMuted;
             INSTANCE.voiceDeafened = loaded.voiceDeafened;
 
-            loaded.chatFilters.forEach(INSTANCE::setChatFilter);
+            if (loaded.chatFilters != null) loaded.chatFilters.forEach(INSTANCE::setChatFilter);
         } catch (IOException ignored) {
         }
 

@@ -71,7 +71,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(ModCommands::register);
 
         ClientPlayConnectionEvents.JOIN.register((handler, _, _) -> {
-            isOnHypixel = handler.getConnection().getRemoteAddress().toString().contains("hypixel.net");
+            isOnHypixel = handler.getConnection().getRemoteAddress().toString().toLowerCase(java.util.Locale.ROOT).contains("hypixel");
             if (!isOnHypixel) return;
             ModFunctions.connectionEventDataReset("Join");
         });
@@ -117,11 +117,10 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
                 ModFunctions.calculatePing(client, listener);
             }
 
-            if (isOnHypixel) SSUIndicator.tick(client);
-
             Boolean skyblockCheck = ModFunctions.isInSkyblock(client);
+            if (skyblockCheck != null) isInSkyblock = skyblockCheck;
+            if (isOnHypixel || isInSkyblock) SSUIndicator.tick(client);
             if (skyblockCheck == null) return;
-            isInSkyblock = skyblockCheck;
             if (!isInSkyblock) return;
 
             SkullRefresher.tick(client);

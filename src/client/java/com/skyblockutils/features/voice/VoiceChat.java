@@ -177,7 +177,7 @@ public final class VoiceChat {
                     peer.jitter.end(seq);
                     return;
                 }
-                peer.jitter.put(seq, VoiceNetwork.slice(payload));
+                peer.jitter.put(seq, VoiceNetwork.slice(payload, 4));
                 peer.lastAudio = System.currentTimeMillis();
             }
             case VoiceNetwork.BYE -> peer.byeAt = System.currentTimeMillis();
@@ -207,6 +207,7 @@ public final class VoiceChat {
         muted = ModConfig.INSTANCE.voiceMuted;
         deafened = ModConfig.INSTANCE.voiceDeafened;
         network.start();
+        SSUIndicator.connectNow();
         running = true;
         udpWarned = false;
         wantsDirty = true;
@@ -215,7 +216,7 @@ public final class VoiceChat {
 
     private static void shutdown(boolean disabled) {
         for (VoicePeer peer : peers.values()) {
-            if (peer.state == VoicePeer.State.CONNECTED) network.send(peer);
+            if (peer.state == VoicePeer.State.CONNECTED) network.send(peer, VoiceNetwork.BYE);
             peer.jitter.clear();
         }
         if (disabled && helloSent) sendJson("voice_bye", null);
@@ -292,7 +293,7 @@ public final class VoiceChat {
             for (String member : PartyInfo.members) addActive(member, self);
         }
 
-        boolean partyLike = PartyInfo.isInParty || ModFunctions.isInDungeons(client);
+        boolean partyLike = PartyInfo.isInParty || Boolean.TRUE.equals(ModFunctions.isInDungeons(client));
         if (ModConfig.INSTANCE.voiceInCoop && !(ModConfig.INSTANCE.voiceNoCoopInParty && partyLike)) {
             for (String member : CoopListParser.members) addActive(member, self);
         }
@@ -328,7 +329,7 @@ public final class VoiceChat {
         for (VoicePeer peer : peers.values()) {
             if (!peer.active) {
                 if (peer.state != VoicePeer.State.IDLE) {
-                    if (peer.state == VoicePeer.State.CONNECTED) network.send(peer);
+                    if (peer.state == VoicePeer.State.CONNECTED) network.send(peer, VoiceNetwork.BYE);
                     peer.setState(VoicePeer.State.IDLE, now);
                     peer.announced = false;
                     peer.away = false;
@@ -371,7 +372,7 @@ public final class VoiceChat {
                     } else if (now - peer.lastPing >= PUNCH_PING_MS) {
                         peer.lastPing = now;
                         sendWithState(peer, VoiceNetwork.PING);
-                        if (peer.lanAddress != null) network.sendTo(peer, peer.lanAddress);
+                        if (peer.lanAddress != null) network.sendTo(peer, peer.lanAddress, VoiceNetwork.PING);
                     }
                 }
                 case CONNECTED -> {

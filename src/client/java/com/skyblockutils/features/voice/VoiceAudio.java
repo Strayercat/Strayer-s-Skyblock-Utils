@@ -271,7 +271,7 @@ final class VoiceAudio {
 
     private static double peakDb(short[] pcm) {
         int peak = 0;
-        for (short sample : pcm) peak = Math.max(peak, Math.abs(sample));
+        for (short sample : pcm) peak = Math.max(peak, Math.abs((int) sample));
         return peak == 0 ? -127 : 20 * Math.log10(peak / 32768.0);
     }
 

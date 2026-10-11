@@ -58,7 +58,7 @@ public class CoopListParser {
         if (now - lastRequest < MIN_INTERVAL_MS) return;
         if (client.gui.screen() != null || client.getConnection() == null) return;
         if (ModFunctions.isWorldLoaded()) return;
-        if (ModFunctions.isInDungeons(client)) return;
+        if (Boolean.TRUE.equals(ModFunctions.isInDungeons(client))) return;
         if (PartyListParser.isExpecting() || GuildListParser.isExpecting()) return;
 
         request(client, now);
@@ -120,7 +120,6 @@ public class CoopListParser {
         lastRequest = now;
         expectOpenUntil = now + OPEN_WINDOW_MS;
         muteSoundsUntil = now + OPEN_WINDOW_MS + CONTENT_WINDOW_MS;
-        if (client.getConnection() == null) return;
         client.getConnection().sendCommand("coopmanage");
     }
 

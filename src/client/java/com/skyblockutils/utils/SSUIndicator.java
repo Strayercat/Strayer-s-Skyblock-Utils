@@ -13,6 +13,9 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
@@ -28,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SSUIndicator {
+    private static final Logger LOGGER = LoggerFactory.getLogger("SSU Server");
     private static final URI WS_URI = URI.create("wss://cawcah.duckdns.org/ssu/ws");
     private static final int PROTOCOL = 2;
     private static final HttpClient HTTP = HttpClient.newHttpClient();
@@ -124,12 +128,18 @@ public class SSUIndicator {
         replaceWatch(coopWatch, names);
     }
 
+    public static void connectNow() {
+        if (socket != null || connecting) return;
+        nextAttempt = 0;
+        backoff = MIN_BACKOFF;
+    }
+
     public static boolean isReady() {
-        return !ready || socket == null;
+        return ready && socket != null;
     }
 
     public static boolean sendText(String text) {
-        if (isReady()) return false;
+        if (!isReady()) return false;
         sendChain = sendChain.thenCompose(ws -> ws.sendText(text, true));
         return true;
     }
@@ -321,6 +331,7 @@ public class SSUIndicator {
         if (type.equals("challenge") && msg.has("serverId")) {
             authenticate(client, ws, msg.get("serverId").getAsString());
         } else if (type.equals("ready") && ws == socket) {
+            LOGGER.info("Connected and authenticated with the SSU server");
             onReady(System.currentTimeMillis());
         } else if (type.startsWith("voice_") && ws == socket) {
             VoiceChat.handleServerMessage(type, msg);
@@ -397,12 +408,14 @@ public class SSUIndicator {
 
     private static void connect(Minecraft client) {
         connecting = true;
+        LOGGER.info("Connecting to the SSU server");
         HTTP.newWebSocketBuilder()
                 .header("X-SSU-Client", "1")
                 .buildAsync(WS_URI, new Listener(client))
                 .whenComplete((ws, err) -> client.execute(() -> {
                     connecting = false;
                     if (err != null || ws.isInputClosed()) {
+                        LOGGER.warn("Couldn't connect to the SSU server: {}", err != null ? err.toString() : "closed");
                         retryLater();
                         return;
                     }
@@ -427,6 +440,7 @@ public class SSUIndicator {
                 auth.addProperty("protocol", PROTOCOL);
                 ws.sendText(auth.toString(), true);
             } catch (Exception e) {
+                LOGGER.warn("SSU server authentication failed", e);
                 ws.sendClose(WebSocket.NORMAL_CLOSURE, "");
             }
         });
@@ -512,12 +526,14 @@ public class SSUIndicator {
 
         @Override
         public CompletionStage<?> onClose(WebSocket ws, int statusCode, String reason) {
+            LOGGER.info("SSU server connection closed ({} {})", statusCode, reason);
             client.execute(() -> onDisconnected(ws));
             return null;
         }
 
         @Override
         public void onError(WebSocket ws, Throwable error) {
+            LOGGER.warn("SSU server connection error: {}", error.toString());
             client.execute(() -> onDisconnected(ws));
         }
     }

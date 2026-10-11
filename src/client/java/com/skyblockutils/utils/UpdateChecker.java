@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class UpdateChecker {
-    private static final String CURRENT_VERSION = "5.0.0";
+    private static final String CURRENT_VERSION = "5.0.1";
     private static final URI UPDATE_URI = URI.create("https://raw.githubusercontent.com/Strayercat/Strayer-s-Skyblock-Utils/main/update.json");
     private static final String MOD_URL = "https://modrinth.com/mod/strayers-skyblock-utils/versions";
     private static final HttpClient HTTP = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();

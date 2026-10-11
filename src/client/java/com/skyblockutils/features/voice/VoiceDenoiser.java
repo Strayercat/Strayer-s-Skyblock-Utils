@@ -3,6 +3,8 @@ package com.skyblockutils.features.voice;
 import de.maxhenkel.rnnoise4j.Denoiser;
 
 final class VoiceDenoiser implements AutoCloseable {
+    private static boolean unavailable = false;
+
     private final Denoiser rnnoise;
     private final short[] chunk;
 
@@ -37,10 +39,15 @@ final class VoiceDenoiser implements AutoCloseable {
     }
 
     private static Denoiser create() {
+        if (unavailable) return null;
         try {
-            return new Denoiser();
-        } catch (Throwable _) {
+            Denoiser denoiser = new Denoiser();
+            VoiceChat.LOGGER.info("Using RNNoise for noise suppression");
+            return denoiser;
+        } catch (Throwable t) {
+            unavailable = true;
+            VoiceChat.LOGGER.warn("RNNoise unavailable, noise suppression disabled", t);
+            return null;
         }
-        return null;
     }
 }

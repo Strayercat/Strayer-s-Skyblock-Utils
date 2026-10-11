@@ -65,8 +65,8 @@ public class VoiceHud {
         int accent = 0xFF000000 | ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
         int titleColor = 0xFF000000 | ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_END);
 
-        fillBottomRightRounded(context, width, height, accent, radius);
-        fillBottomRightRounded(context, width - 1, height - 1, BACKGROUND_COLOR, Math.max(0, radius - 1));
+        fillBottomRightRounded(context, 0, 0, width, height, accent, radius);
+        fillBottomRightRounded(context, 0, 0, width - 1, height - 1, BACKGROUND_COLOR, Math.max(0, radius - 1));
 
         int lineY = PADDING;
         drawScaledText(context, mc, TITLE, (width - scaledWidth(mc, TITLE)) / 2, lineY, titleColor);
@@ -104,18 +104,18 @@ public class VoiceHud {
         context.pose().popMatrix();
     }
 
-    private static void fillBottomRightRounded(GuiGraphicsExtractor context, int x2, int y2, int color, int radius) {
-        radius = Math.min(radius, Math.min(x2, y2) / 2);
+    private static void fillBottomRightRounded(GuiGraphicsExtractor context, int x1, int y1, int x2, int y2, int color, int radius) {
+        radius = Math.min(radius, Math.min(x2 - x1, y2 - y1) / 2);
         if (radius <= 0) {
-            context.fill(0, 0, x2, y2, color);
+            context.fill(x1, y1, x2, y2, color);
             return;
         }
 
-        context.fill(0, 0, x2, y2 - radius, color);
+        context.fill(x1, y1, x2, y2 - radius, color);
         for (int i = 0; i < radius; i++) {
             double dy = radius - i - 0.5;
             int inset = (int) Math.round(radius - Math.sqrt(Math.max(0, radius * radius - dy * dy)));
-            context.fill(0, y2 - i - 1, x2 - inset, y2 - i, color);
+            context.fill(x1, y2 - i - 1, x2 - inset, y2 - i, color);
         }
     }
 }
