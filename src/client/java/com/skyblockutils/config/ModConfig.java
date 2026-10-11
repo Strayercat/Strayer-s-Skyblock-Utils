@@ -80,6 +80,25 @@ public class ModConfig {
     public boolean spookyLootNotification = true;
     public boolean spookyTrickJumpscare = false;
 
+    // Voice Chat
+    public boolean voiceChatEnabled = false;
+    public boolean voiceInParty = true;
+    public boolean voiceInCoop = true;
+    public boolean voiceNoCoopInParty = false;
+    public String voiceInputDevice = "";
+    public String voiceOutputDevice = "";
+    public int voiceInputVolume = 250;
+    public int voiceOutputVolume = 100;
+    public VoiceActivation voiceActivation = VoiceActivation.VOICE_ACTIVATION;
+    public int voiceActivationLevel = -30;
+    public int voiceSmartSensitivity = 30;
+    public boolean voiceNoiseSuppression = true;
+    public boolean voiceKeyboardSuppression = true;
+    public transient boolean voiceMicTest = false;
+    public boolean voiceHud = true;
+    public boolean voiceMuted = false;
+    public boolean voiceDeafened = false;
+
     // Enums
     public enum GlaciteWaypoints {
         @SerializedName("UMBER") UMBER("Umber"),
@@ -89,6 +108,23 @@ public class ModConfig {
         private final String name;
 
         GlaciteWaypoints(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    public enum VoiceActivation {
+        @SerializedName("PUSH_TO_TALK") PUSH_TO_TALK("Push To Talk"),
+        @SerializedName("VOICE_ACTIVATION") VOICE_ACTIVATION("Voice Activation"),
+        @SerializedName("SMART") SMART("Smart Voice Detection");
+
+        private final String name;
+
+        VoiceActivation(String name) {
             this.name = name;
         }
 
@@ -145,6 +181,7 @@ public class ModConfig {
             if (loaded == null) return;
 
             INSTANCE.colorStyle = loaded.colorStyle != null ? loaded.colorStyle : ModStyle.ColorStyle.ORIGINAL;
+            INSTANCE.notificationStyle = loaded.notificationStyle != null ? loaded.notificationStyle : ModStyle.NotificationStyle.ROUNDED;
             INSTANCE.chatFiltersEnabled = loaded.chatFiltersEnabled;
             INSTANCE.partyInviteNotifications = loaded.partyInviteNotifications;
             INSTANCE.boopPartyInvites = loaded.boopPartyInvites;
@@ -189,6 +226,26 @@ public class ModConfig {
             INSTANCE.lastReset = loaded.lastReset != null ? loaded.lastReset : new Date(0);
             INSTANCE.disabledTypes = loaded.disabledTypes != null ? loaded.disabledTypes : new ArrayList<>();
             INSTANCE.completedTypes = loaded.completedTypes != null ? loaded.completedTypes : new ArrayList<>();
+
+            INSTANCE.spookyChestTitle = loaded.spookyChestTitle;
+            INSTANCE.spookyLootNotification = loaded.spookyLootNotification;
+            INSTANCE.spookyTrickJumpscare = loaded.spookyTrickJumpscare;
+            INSTANCE.voiceChatEnabled = loaded.voiceChatEnabled;
+            INSTANCE.voiceInParty = loaded.voiceInParty;
+            INSTANCE.voiceInCoop = loaded.voiceInCoop;
+            INSTANCE.voiceNoCoopInParty = loaded.voiceNoCoopInParty;
+            INSTANCE.voiceInputDevice = loaded.voiceInputDevice != null ? loaded.voiceInputDevice : "";
+            INSTANCE.voiceOutputDevice = loaded.voiceOutputDevice != null ? loaded.voiceOutputDevice : "";
+            INSTANCE.voiceInputVolume = Math.clamp(loaded.voiceInputVolume, 0, 500);
+            INSTANCE.voiceOutputVolume = Math.clamp(loaded.voiceOutputVolume, 0, 200);
+            INSTANCE.voiceActivation = loaded.voiceActivation != null ? loaded.voiceActivation : VoiceActivation.VOICE_ACTIVATION;
+            INSTANCE.voiceActivationLevel = Math.clamp(loaded.voiceActivationLevel, -90, 0);
+            INSTANCE.voiceSmartSensitivity = Math.clamp(loaded.voiceSmartSensitivity, 10, 95);
+            INSTANCE.voiceNoiseSuppression = loaded.voiceNoiseSuppression;
+            INSTANCE.voiceKeyboardSuppression = loaded.voiceKeyboardSuppression;
+            INSTANCE.voiceHud = loaded.voiceHud;
+            INSTANCE.voiceMuted = loaded.voiceMuted;
+            INSTANCE.voiceDeafened = loaded.voiceDeafened;
 
             loaded.chatFilters.forEach(INSTANCE::setChatFilter);
         } catch (IOException ignored) {

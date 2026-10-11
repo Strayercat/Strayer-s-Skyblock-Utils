@@ -1,6 +1,7 @@
 package com.skyblockutils.config;
 
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
+import com.skyblockutils.features.voice.VoiceChat;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.utils.CustomEntry;
 import com.skyblockutils.utils.ModStyle;
@@ -32,6 +33,7 @@ public class ClothConfigHandler {
         buildHudCategory(builder, eb);
         buildChatFiltersCategory(builder, eb);
         buildEventsCategory(builder, eb);
+        buildVoiceChatCategory(builder, eb);
 
         return builder.build();
     }
@@ -336,5 +338,84 @@ public class ClothConfigHandler {
                 .setSaveConsumer(v -> ModConfig.INSTANCE.spookyTrickJumpscare = v).build());
 
         return spookyFest;
+    }
+
+    private static void buildVoiceChatCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
+        ConfigCategory voice = builder.getOrCreateCategory(Component.literal("Voice Chat"));
+
+        voice.addEntry(eb.startBooleanToggle(Component.literal("Voice Chat Enabled"), ModConfig.INSTANCE.voiceChatEnabled)
+                .setDefaultValue(false).setTooltip(Component.literal("Talk directly with SSU users in your party or co-op. Your IP is only shared with players who also have you in their party/co-op with voice chat on"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceChatEnabled = v).build());
+
+        voice.addEntry(eb.startBooleanToggle(Component.literal("Party Voice"), ModConfig.INSTANCE.voiceInParty)
+                .setDefaultValue(true).setTooltip(Component.literal("Connect to SSU users in your party"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceInParty = v).build());
+
+        voice.addEntry(eb.startBooleanToggle(Component.literal("Co-op Voice"), ModConfig.INSTANCE.voiceInCoop)
+                .setDefaultValue(true).setTooltip(Component.literal("Connect to SSU users in your co-op"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceInCoop = v).build());
+
+        voice.addEntry(eb.startBooleanToggle(Component.literal("Disable Co-op Voice In Party"), ModConfig.INSTANCE.voiceNoCoopInParty)
+                .setDefaultValue(false).setTooltip(Component.literal("Only talk with your party while you're in a party or in dungeons, co-op members who aren't in it are disconnected"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceNoCoopInParty = v).build());
+
+        SubCategoryBuilder devices = eb.startSubCategory(Component.literal("Devices"))
+                .setTooltip(Component.literal("Microphone and speaker selection"));
+
+        devices.add(eb.startSelector(Component.literal("Input Device"), VoiceChat.inputDevices(), VoiceChat.deviceDisplay(ModConfig.INSTANCE.voiceInputDevice, VoiceChat.inputDevices()))
+                .setDefaultValue(VoiceChat.DEFAULT_DEVICE).setTooltip(Component.literal("Microphone used for voice chat"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceInputDevice = VoiceChat.deviceValue(v)).build());
+
+        devices.add(eb.startSelector(Component.literal("Output Device"), VoiceChat.outputDevices(), VoiceChat.deviceDisplay(ModConfig.INSTANCE.voiceOutputDevice, VoiceChat.outputDevices()))
+                .setDefaultValue(VoiceChat.DEFAULT_DEVICE).setTooltip(Component.literal("Speakers or headphones used for voice chat"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceOutputDevice = VoiceChat.deviceValue(v)).build());
+
+        devices.add(eb.startIntSlider(Component.literal("Input Volume (%)"), ModConfig.INSTANCE.voiceInputVolume, 0, 500)
+                .setDefaultValue(250).setTooltip(Component.literal("Microphone amplification, raise it if others hear you too quietly"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceInputVolume = v).build());
+
+        devices.add(eb.startIntSlider(Component.literal("Output Volume (%)"), ModConfig.INSTANCE.voiceOutputVolume, 0, 200)
+                .setDefaultValue(100).setTooltip(Component.literal("Volume of other players"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceOutputVolume = v).build());
+
+        voice.addEntry(devices.build());
+
+        SubCategoryBuilder activation = eb.startSubCategory(Component.literal("Activation"))
+                .setTooltip(Component.literal("When your microphone transmits"));
+
+        activation.add(eb.startEnumSelector(Component.literal("Activation Mode"), ModConfig.VoiceActivation.class, ModConfig.INSTANCE.voiceActivation)
+                .setDefaultValue(ModConfig.VoiceActivation.VOICE_ACTIVATION).setTooltip(Component.literal("Push To Talk uses the keybind in Controls, Voice Activation sends when you're louder than the activation level, Smart Voice Detection sends only when it hears a voice at any loudness, ignoring keyboards, mouse clicks and mouth noises"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceActivation = v).build());
+
+        activation.add(eb.startIntSlider(Component.literal("Activation Level (dB)"), ModConfig.INSTANCE.voiceActivationLevel, -90, 0)
+                .setDefaultValue(-30).setTooltip(Component.literal("How loud you need to be for voice activation to open your mic, lower picks up quieter speech"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceActivationLevel = v).build());
+
+        activation.add(eb.startIntSlider(Component.literal("Smart Detection Sensitivity (%)"), ModConfig.INSTANCE.voiceSmartSensitivity, 10, 95)
+                .setDefaultValue(30).setTooltip(Component.literal("Higher catches quieter or breathier speech, lower if keyboard or other sounds get through"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceSmartSensitivity = v).build());
+
+        voice.addEntry(activation.build());
+
+        SubCategoryBuilder processing = eb.startSubCategory(Component.literal("Processing"))
+                .setTooltip(Component.literal("Microphone cleanup before it's sent"));
+
+        processing.add(eb.startBooleanToggle(Component.literal("Noise Suppression"), ModConfig.INSTANCE.voiceNoiseSuppression)
+                .setDefaultValue(true).setTooltip(Component.literal("Removes background noise like fans, keyboards and hum using RNNoise"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceNoiseSuppression = v).build());
+
+        processing.add(eb.startBooleanToggle(Component.literal("Keyboard Suppression"), ModConfig.INSTANCE.voiceKeyboardSuppression)
+                .setDefaultValue(true).setTooltip(Component.literal("Turns down anything that isn't your voice while your mic is open, like keys, clicks and mouth noises between words"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceKeyboardSuppression = v).build());
+
+        processing.add(eb.startBooleanToggle(Component.literal("Mic Test"), ModConfig.INSTANCE.voiceMicTest)
+                .setDefaultValue(false).setTooltip(Component.literal("Play your own mic back to you so you hear what others hear, turns off on restart"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceMicTest = v).build());
+
+        voice.addEntry(processing.build());
+
+        voice.addEntry(eb.startBooleanToggle(Component.literal("Voice HUD"), ModConfig.INSTANCE.voiceHud)
+                .setDefaultValue(true).setTooltip(Component.literal("Show who is connected and talking in the top left corner"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceHud = v).build());
     }
 }

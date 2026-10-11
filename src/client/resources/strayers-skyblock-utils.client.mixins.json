@@ -9,6 +9,7 @@
     "ChatGlyphAnimationMixin",
     "ChatHudMixin",
     "ChatScreenMixin",
+    "ClientPacketListenerMixin",
     "EditBoxMixin",
     "EntitiesDestroyMixin",
     "EntityTrackerUpdateMixin",

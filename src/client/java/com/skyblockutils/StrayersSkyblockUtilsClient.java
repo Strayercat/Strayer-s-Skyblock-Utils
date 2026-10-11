@@ -8,6 +8,7 @@ import com.skyblockutils.features.chat.ChatFilter;
 import com.skyblockutils.features.chat.ChatModifications;
 import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.chat.emoji.EmojiRegistry;
+import com.skyblockutils.features.coop.CoopListParser;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.foraging.TreeGiftNotifications;
 import com.skyblockutils.features.guild.GuildListParser;
@@ -27,6 +28,8 @@ import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.features.textures.F7VoidLava;
+import com.skyblockutils.features.voice.VoiceChat;
+import com.skyblockutils.features.voice.VoiceHud;
 import com.skyblockutils.render.EggDetector;
 import com.skyblockutils.render.EggClickFilter;
 import com.skyblockutils.render.SkullRefresher;
@@ -76,12 +79,13 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
             isOnHypixel = false;
             EggDetector.clear();
+            CoopListParser.reset();
             ModFunctions.connectionEventDataReset("Leave");
         });
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, _) -> SsuHud.onHudRender(context, SideBarUtils.location));
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_screenshot_manager"), (context, _) -> ScreenshotManager.buildScreenshotHud(context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_system_messages"), (context, _) -> SeparatedChatHud.render(context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_voice_chat"), (context, _) -> VoiceHud.render(context));
         HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> {
             if (isInSkyblock && ModConfig.INSTANCE.customSidebar) CustomSidebar.displayCustomSidebar(context);
         });
@@ -105,12 +109,15 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             PowderChestNotifications.tick();
             PartyListParser.tickCapture();
             GuildListParser.tickCapture();
+            VoiceChat.tick(client);
 
             if (client.level == null) return;
 
             if (client.getConnection() instanceof ClientPacketListener listener) {
                 ModFunctions.calculatePing(client, listener);
             }
+
+            if (isOnHypixel) SSUIndicator.tick(client);
 
             Boolean skyblockCheck = ModFunctions.isInSkyblock(client);
             if (skyblockCheck == null) return;
@@ -119,12 +126,12 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
             SkullRefresher.tick(client);
             AutoFish.autoFish(client);
-            SSUIndicator.tick(client);
             CorlTimer.corlTimerTick(client);
             PuffTracker.tick(client);
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
             PartyListParser.handleOnJoinCommand();
             GuildListParser.tick();
+            CoopListParser.tick(client);
             SideBarUtils.updateLocation();
             SeparatedChat.tickAllMessages();
             SeparatedChatHud.tick();
@@ -179,6 +186,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         String cleanMessage = message.getString().replaceAll("§.", "").trim();
         PartyCommands.handlePartyCommands(cleanMessage);
         PartyInfo.handlePartyMessages(cleanMessage);
+        CoopListParser.handleMessage(cleanMessage);
         if (!isInSkyblock) return;
         DowntimeTracker.trackDowntime(cleanMessage);
         DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);

@@ -3,6 +3,7 @@ package com.skyblockutils.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.skyblockutils.features.chat.ChatModifications;
+import com.skyblockutils.features.voice.VoiceChat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -58,6 +59,7 @@ public class SSUIndicator {
     private static final Map<String, Long> chatSeen = new HashMap<>();
     private static final Set<String> partyWatch = new HashSet<>();
     private static final Set<String> guildWatch = new HashSet<>();
+    private static final Set<String> coopWatch = new HashSet<>();
     private static final Set<String> queued = new LinkedHashSet<>();
     private static final Set<String> inFlight = new HashSet<>();
     private static final Set<String> requeueOnReady = new HashSet<>();
@@ -116,6 +118,20 @@ public class SSUIndicator {
 
     public static void setGuildMembers(Collection<String> names) {
         replaceWatch(guildWatch, names);
+    }
+
+    public static void setCoopMembers(Collection<String> names) {
+        replaceWatch(coopWatch, names);
+    }
+
+    public static boolean isReady() {
+        return !ready || socket == null;
+    }
+
+    public static boolean sendText(String text) {
+        if (isReady()) return false;
+        sendChain = sendChain.thenCompose(ws -> ws.sendText(text, true));
+        return true;
     }
 
     public static boolean isSpecialUser(String name) {
@@ -190,6 +206,7 @@ public class SSUIndicator {
         pendingQueries.clear();
         tab = new HashSet<>();
 
+        VoiceChat.onSocketClosed();
         ws.sendClose(WebSocket.NORMAL_CLOSURE, "");
     }
 
@@ -212,7 +229,7 @@ public class SSUIndicator {
     }
 
     private static boolean isRelevant(String key, long now) {
-        if (tab.contains(key) || partyWatch.contains(key) || guildWatch.contains(key)) return true;
+        if (tab.contains(key) || partyWatch.contains(key) || guildWatch.contains(key) || coopWatch.contains(key)) return true;
         Long seen = chatSeen.get(key);
         return seen != null && now - seen <= CHAT_RELEVANCE_MS;
     }
@@ -305,6 +322,8 @@ public class SSUIndicator {
             authenticate(client, ws, msg.get("serverId").getAsString());
         } else if (type.equals("ready") && ws == socket) {
             onReady(System.currentTimeMillis());
+        } else if (type.startsWith("voice_") && ws == socket) {
+            VoiceChat.handleServerMessage(type, msg);
         }
     }
 
@@ -373,6 +392,7 @@ public class SSUIndicator {
 
         for (String key : partyWatch) if (needsQuery(key, now)) queued.add(key);
         for (String key : guildWatch) if (needsQuery(key, now)) queued.add(key);
+        for (String key : coopWatch) if (needsQuery(key, now)) queued.add(key);
     }
 
     private static void connect(Minecraft client) {
@@ -416,6 +436,7 @@ public class SSUIndicator {
         if (ws != socket) return;
         socket = null;
         ready = false;
+        VoiceChat.onSocketClosed();
 
         requeueOnReady.addAll(confirmed.keySet());
         requeueOnReady.addAll(inFlight);
