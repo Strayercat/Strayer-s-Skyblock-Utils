@@ -258,7 +258,7 @@ public final class VoiceChat {
     }
 
     private static void handleRegistration(long now) {
-        if (!SSUIndicator.isReady()) return;
+        if (SSUIndicator.isReady()) return;
 
         if (!helloSent) {
             helloSent = sendJson("voice_hello", null);
@@ -293,7 +293,7 @@ public final class VoiceChat {
             for (String member : PartyInfo.members) addActive(member, self);
         }
 
-        boolean partyLike = PartyInfo.isInParty || Boolean.TRUE.equals(ModFunctions.isInDungeons(client));
+        boolean partyLike = PartyInfo.isInParty || ModFunctions.isInDungeons(client);
         if (ModConfig.INSTANCE.voiceInCoop && !(ModConfig.INSTANCE.voiceNoCoopInParty && partyLike)) {
             for (String member : CoopListParser.members) addActive(member, self);
         }
@@ -309,7 +309,7 @@ public final class VoiceChat {
     }
 
     private static void sendWants() {
-        if (!wantsDirty || !SSUIndicator.isReady() || !network.registered) return;
+        if (!wantsDirty || SSUIndicator.isReady() || !network.registered) return;
         if (sentWants.equals(active.keySet())) {
             wantsDirty = false;
             return;
