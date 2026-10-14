@@ -135,13 +135,17 @@ public class SSUIndicator {
     }
 
     public static boolean isReady() {
-        return ready && socket != null;
+        return !ready || socket == null;
     }
 
     public static boolean sendText(String text) {
-        if (!isReady()) return false;
+        if (isReady()) return false;
         sendChain = sendChain.thenCompose(ws -> ws.sendText(text, true));
         return true;
+    }
+
+    public static boolean hasPlate(String name) {
+        return isUser(name);
     }
 
     public static boolean isSpecialUser(String name) {
@@ -153,7 +157,11 @@ public class SSUIndicator {
     }
 
     public static int prismaticColor() {
-        float hue = (System.currentTimeMillis() % PRISMATIC_CYCLE_MS) / (float) PRISMATIC_CYCLE_MS;
+        return prismaticColor(0.0F);
+    }
+
+    public static int prismaticColor(float hueOffset) {
+        float hue = (System.currentTimeMillis() % PRISMATIC_CYCLE_MS) / (float) PRISMATIC_CYCLE_MS + hueOffset;
         return Color.HSBtoRGB(hue, 0.8F, 1.0F) & 0xFFFFFF;
     }
 

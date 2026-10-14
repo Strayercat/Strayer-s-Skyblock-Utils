@@ -17,6 +17,8 @@
     "InGameHudMixin",
     "ModelManagerAccessor",
     "MouseMixin",
+    "NameTagFeatureRendererMixin",
+    "RenderTypeFeatureRendererInvoker",
     "ScreenInvoker",
     "SkullBlockEntityMixin",
     "WorldTimeMixin"
