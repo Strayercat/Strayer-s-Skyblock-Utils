@@ -2,7 +2,6 @@ package com.skyblockutils.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 import com.skyblockutils.render.NameplateRenderer;
 import net.minecraft.client.renderer.feature.FeatureFrameContext;
 import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
@@ -23,12 +22,9 @@ public class NameTagFeatureRendererMixin {
         return NameplateRenderer.isMarked(submit.text()) ? 0 : original.call(submit);
     }
 
-    @Inject(
-            method = "buildGroup",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font$PreparedText;visit(Lnet/minecraft/client/gui/Font$GlyphVisitor;)V")
-    )
-    private void ssu$submitPlate(FeatureFrameContext context, List<NameTagFeatureRenderer.Submit> submits, CallbackInfo ci,
-                                 @Local(name = "nameTag") NameTagFeatureRenderer.Submit nameTag) {
-        NameplateRenderer.submit((NameTagFeatureRenderer) (Object) this, nameTag);
+    @Inject(method = "buildGroup", at = @At("HEAD"))
+    private void ssu$submitPlates(FeatureFrameContext context, List<NameTagFeatureRenderer.Submit> submits, CallbackInfo ci) {
+        NameTagFeatureRenderer renderer = (NameTagFeatureRenderer) (Object) this;
+        for (NameTagFeatureRenderer.Submit submit : submits) NameplateRenderer.submit(renderer, submit);
     }
 }

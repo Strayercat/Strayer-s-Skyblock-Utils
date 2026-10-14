@@ -22,6 +22,7 @@ public final class NameplateRenderer {
     public static final int SCORE_OFFSET = 19;
     public static final float SCALE = 0.8F;
     public static final float NORMAL_LIFT = 0.15F;
+    public static final float TOWARD_CAMERA = 0.45F;
 
     private static final RenderType FRAME = type("nameplate");
     private static final RenderType FRAME_TRIM = type("nameplate_trim");

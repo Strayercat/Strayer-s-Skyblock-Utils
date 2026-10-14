@@ -25,7 +25,6 @@ public class LivingEntityRendererMixin {
         String name = entity instanceof Player player ? player.getName().getString() : null;
         boolean special = name != null && SSUIndicator.isSpecialUser(name);
         ((SSURenderState) state).ssu$setBigHead(special);
-        ((SSURenderState) state).ssu$setGroucho(name != null && SSUIndicator.isVipUser(name));
         if (!special) return;
         float scale = SSURenderState.SPECIAL_SCALE;
         state.scale *= scale;

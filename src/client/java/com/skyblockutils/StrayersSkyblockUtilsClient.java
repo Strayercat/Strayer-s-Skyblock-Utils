@@ -35,7 +35,7 @@ import com.skyblockutils.render.EggClickFilter;
 import com.skyblockutils.render.SkullRefresher;
 import com.skyblockutils.utils.*;
 import com.skyblockutils.features.AboutScreen;
-import com.skyblockutils.render.GrouchoMaskLayer;
+import com.skyblockutils.render.PawPrints;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents;
@@ -64,7 +64,6 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ModConfig.load();
         GuiBlocker.init();
         AboutScreen.registerInfoButton();
-        GrouchoMaskLayer.register();
         DailyReminders.init();
         F7VoidLava.register();
 
@@ -93,6 +92,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         LevelRenderEvents.END_MAIN.register(context -> {
             GlaciteTunnelsWaypoints.onWorldRender(context);
             NpcFinder.onWorldRender(context);
+            PawPrints.onWorldRender(context);
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -111,6 +111,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             GuildListParser.tickCapture();
             VoiceChat.tick(client);
 
+            PawPrints.tick(client);
             if (client.level == null) return;
 
             if (client.getConnection() instanceof ClientPacketListener listener) {

@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,9 +29,7 @@ public class EntityRendererMixin {
     private @Nullable Component ssu$addNametagBadge(@Nullable Component original, Entity entity) {
         if (original == null || !(entity instanceof Player player)) return original;
         String name = player.getName().getString();
-        if (SSUIndicator.hasPlate(name)) return NameplateRenderer.mark(original, name);
-        if (!SSUIndicator.isUser(name)) return original;
-        return SSUIndicator.withNametagBadge(original, name);
+        return SSUIndicator.isUser(name) ? NameplateRenderer.mark(original, name) : original;
     }
 
     @Inject(
@@ -74,7 +73,15 @@ public class EntityRendererMixin {
         float lift = special ? 0.0F : NameplateRenderer.NORMAL_LIFT;
         float scale = NameplateRenderer.SCALE;
 
+        Vector3f anchor = poseStack.last().pose().transformPosition(
+                (float) attachment.x, (float) attachment.y + lift, (float) attachment.z, new Vector3f());
+        float distance = anchor.length();
+        Vector3f toCamera = distance > 1.0E-4F
+                ? anchor.mul(-Math.min(NameplateRenderer.TOWARD_CAMERA, distance * 0.5F) / distance)
+                : new Vector3f();
+
         poseStack.pushPose();
+        poseStack.last().pose().translateLocal(toCamera);
         poseStack.translate((float) attachment.x, (float) attachment.y + lift, (float) attachment.z);
         poseStack.scale(scale, scale, scale);
         poseStack.translate((float) -attachment.x, (float) -attachment.y, (float) -attachment.z);

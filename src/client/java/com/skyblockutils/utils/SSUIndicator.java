@@ -9,7 +9,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -144,10 +143,6 @@ public class SSUIndicator {
         return true;
     }
 
-    public static boolean hasPlate(String name) {
-        return isUser(name);
-    }
-
     public static boolean isSpecialUser(String name) {
         return isUser(name) && colorOf(name) == GemColor.SPECIAL;
     }
@@ -173,14 +168,6 @@ public class SSUIndicator {
     public static void drawBadge(GuiGraphicsExtractor graphics, String name, int headX, int headY, int headSize) {
         int scale = Math.max(1, headSize / 8);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, colorOf(name).sprite, headX + headSize - 4 * scale, headY - scale, 5 * scale, 4 * scale);
-    }
-
-    public static Component withNametagBadge(Component name, String playerName) {
-        if (hasBadge(name.getString())) return name;
-        GemColor color = colorOf(playerName);
-        String glyph = color == GemColor.SPECIAL ? Character.toString(currentSpecialGlyph()) : color.glyphString();
-        MutableComponent out = Component.literal(glyph + " ").withColor(0xFFFFFF);
-        return out.append(name);
     }
 
     public static String glyphFor(String name) {

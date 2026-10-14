@@ -7,8 +7,4 @@ public interface SSURenderState {
     boolean ssu$isBigHead();
 
     void ssu$setBigHead(boolean bigHead);
-
-    boolean ssu$isGroucho();
-
-    void ssu$setGroucho(boolean groucho);
 }
