@@ -25,6 +25,7 @@ public class CustomSidebar {
     private static final int MIN_AUTO_WIDTH = 110;
     private static final int CORNER_RADIUS = 10;
     private static final int HEADER_HEIGHT = 15;
+    private static final int SIDEBAR_HEIGHT = 120;
     private static final int PADDING = 5;
     private static final float TEXT_SCALE = 0.8f;
     private static final float CAT_SCALE = 0.13f;
@@ -51,7 +52,7 @@ public class CustomSidebar {
 
         @Override
         public int height(int width, boolean preview) {
-            return HEADER_HEIGHT + 1 + PADDING * 2 + rows(width, preview).size() * lineStep();
+            return SIDEBAR_HEIGHT;
         }
 
         @Override
@@ -69,10 +70,6 @@ public class CustomSidebar {
             renderSidebar(ctx);
         }
     };
-
-    private static int lineStep() {
-        return Math.round(Minecraft.getInstance().font.lineHeight * TEXT_SCALE) + 3;
-    }
 
     private static List<Component> lines(boolean preview) {
         List<Component> lines = new ArrayList<>(SideBarUtils.getSidebarLines().stream()
@@ -97,11 +94,11 @@ public class CustomSidebar {
         return lines;
     }
 
-    private static List<FormattedCharSequence> rows(int width, boolean preview) {
+    private static List<FormattedCharSequence> rows(List<Component> lines, int width, float textScale) {
         Minecraft mc = Minecraft.getInstance();
-        int wrap = Math.max(1, Math.round((width - PADDING * 2) / TEXT_SCALE));
+        int wrap = Math.max(1, Math.round((width - PADDING * 2) / textScale));
         List<FormattedCharSequence> rows = new ArrayList<>();
-        for (Component line : lines(preview)) rows.addAll(mc.font.split(line, wrap));
+        for (Component line : lines) rows.addAll(mc.font.split(line, wrap));
         return rows;
     }
 
@@ -119,11 +116,23 @@ public class CustomSidebar {
         int[] inner = ctx.inner(0, 0, ctx.width, ctx.height);
         ctx.fill(inner[0], HEADER_HEIGHT, inner[2], HEADER_HEIGHT + 1, accent);
 
-        int step = lineStep();
-        float y = HEADER_HEIGHT + 1 + PADDING + 1;
-        for (FormattedCharSequence row : rows(ctx.width, ctx.preview)) {
-            ctx.scaledText(row, PADDING, y, TEXT_SCALE, 0xFFFFFFFF, true);
-            y += step;
+        int bodyTop = HEADER_HEIGHT + 1;
+        int bodyHeight = ctx.height - bodyTop - PADDING * 2;
+        List<Component> lines = lines(ctx.preview);
+        if (!lines.isEmpty() && bodyHeight > 0) {
+            float textScale = TEXT_SCALE;
+            List<FormattedCharSequence> rows = rows(lines, ctx.width, textScale);
+            int minStep = ctx.font.lineHeight + 1;
+            if (rows.size() * minStep * textScale > bodyHeight) {
+                textScale = Math.max(0.3f, bodyHeight / (float) (rows.size() * minStep));
+                rows = rows(lines, ctx.width, textScale);
+            }
+
+            float space = bodyHeight / (float) rows.size();
+            float offset = space / 2f - ctx.font.lineHeight * textScale / 2f;
+            for (int i = 0; i < rows.size(); i++) {
+                ctx.scaledText(rows.get(i), PADDING, bodyTop + PADDING + offset + i * space, textScale, 0xFFFFFFFF, true);
+            }
         }
 
         if (!ModConfig.INSTANCE.cat) return;
