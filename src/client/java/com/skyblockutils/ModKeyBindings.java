@@ -74,6 +74,12 @@ public class ModKeyBindings {
             GLFW.GLFW_KEY_UNKNOWN,
             SSU_CATEGORY);
 
+    public static final KeyMapping COPY_SYSTEM_MESSAGE_KEY = new KeyMapping(
+            "key.ssu.copySystemMessage",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_UNKNOWN,
+            SSU_CATEGORY);
+
     public static void init() {
         KeyMappingHelper.registerKeyMapping(CORLEONE_TIMER_KEY);
         KeyMappingHelper.registerKeyMapping(AUTOFISH_KEY);
@@ -86,5 +92,6 @@ public class ModKeyBindings {
         KeyMappingHelper.registerKeyMapping(VOICE_PTT_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_MUTE_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_DEAFEN_KEY);
+        KeyMappingHelper.registerKeyMapping(COPY_SYSTEM_MESSAGE_KEY);
     }
 }

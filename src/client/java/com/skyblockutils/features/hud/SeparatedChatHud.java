@@ -10,6 +10,7 @@ import com.skyblockutils.features.hud.layout.HudContext;
 import com.skyblockutils.features.hud.layout.HudElement;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.features.hud.layout.HudManager;
+import com.skyblockutils.utils.ModStyle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
@@ -26,7 +27,7 @@ import java.util.Locale;
 
 public class SeparatedChatHud {
     private static final int TOP_MARGIN = 0;
-    private static final int PADDING = 1;
+    private static final int PADDING = 4;
     private static final int LINE_HEIGHT = 9;
     private static final int HISTORY_VISIBLE_LINES = 10;
     private static final int SCROLL_STEP = 3;
@@ -41,7 +42,7 @@ public class SeparatedChatHud {
     private static String searchQuery = "";
     private static String searchLower = "";
 
-    private record RenderLine(FormattedCharSequence text, boolean centered) {}
+    private record RenderLine(FormattedCharSequence text, boolean centered, ChatLayout.ParsedMessage message) {}
 
     private record HistoryView(List<RenderLine> lines, int start, int end, int left, int top, int right, int bottom, int wrap, int maxOffset) {}
 
@@ -58,18 +59,18 @@ public class SeparatedChatHud {
         List<RenderLine> lines = new ArrayList<>();
         for (ChatLayout.ParsedLine line : message.lines()) {
             if (line.type() == ChatLayout.LineType.SEPARATOR) {
-                lines.add(new RenderLine(ChatLayout.separator(line, width, font).getVisualOrderText(), false));
+                lines.add(new RenderLine(ChatLayout.separator(line, width, font).getVisualOrderText(), false, message));
                 continue;
             }
 
             List<FormattedCharSequence> wrapped = font.split(line.component(), wrap);
             if (wrapped.isEmpty()) {
-                lines.add(new RenderLine(FormattedCharSequence.EMPTY, false));
+                lines.add(new RenderLine(FormattedCharSequence.EMPTY, false, message));
                 continue;
             }
 
             boolean centered = line.type() == ChatLayout.LineType.CENTERED;
-            for (FormattedCharSequence seq : wrapped) lines.add(new RenderLine(seq, centered));
+            for (FormattedCharSequence seq : wrapped) lines.add(new RenderLine(seq, centered, message));
         }
         return lines;
     }
@@ -261,7 +262,7 @@ public class SeparatedChatHud {
         List<RenderLine> lines = liveLines(textWidth);
         if (lines.isEmpty()) return;
 
-        ctx.panel(0, 0, ctx.width, ctx.height, CORNER_RADIUS, backgroundColor(mc), 0);
+        ctx.panel(0, 0, ctx.width, ctx.height, CORNER_RADIUS, backgroundColor(mc), borderColor());
 
         int textColor = textColor(mc);
         int lineY = PADDING;
@@ -307,7 +308,7 @@ public class SeparatedChatHud {
         GuiGraphicsExtractor graphics = ctx.graphics;
         HistoryView view = historyView(ctx.width, ctx.height);
 
-        ctx.panel(view.left(), view.top(), view.right(), view.bottom(), CORNER_RADIUS, Math.max(backgroundColor(mc) >>> 24, 0x80) << 24, 0);
+        ctx.panel(view.left(), view.top(), view.right(), view.bottom(), CORNER_RADIUS, Math.max(backgroundColor(mc) >>> 24, 0x80) << 24, borderColor());
 
         if (view.lines().isEmpty()) {
             String empty = searchLower.isEmpty() ? "No system messages yet" : "No matching messages";
@@ -345,6 +346,27 @@ public class SeparatedChatHud {
         }
     }
 
+    public static String messageTextAt(double mouseX, double mouseY) {
+        HudManager.Bounds bounds = HudManager.bounds(ELEMENT, false);
+        if (!bounds.contains(mouseX, mouseY)) return null;
+
+        HistoryView view = historyView(bounds.width(), bounds.height());
+        if (view.lines().isEmpty()) return null;
+
+        double localY = (mouseY - bounds.y()) / bounds.scale();
+        int index = view.start() + (int) Math.floor((localY - firstLineY(view)) / LINE_HEIGHT);
+        if (index < view.start() || index >= view.end()) return null;
+
+        ChatLayout.ParsedMessage message = view.lines().get(index).message();
+        List<String> parts = new ArrayList<>();
+        for (ChatLayout.ParsedLine line : message.lines()) {
+            if (line.type() == ChatLayout.LineType.SEPARATOR) continue;
+            String text = line.component().getString().replaceAll("§.", "").strip();
+            if (!text.isEmpty()) parts.add(text);
+        }
+        return parts.isEmpty() ? null : String.join("\n", parts);
+    }
+
     public static Style findStyleAt(double mouseX, double mouseY, boolean includeInsertions) {
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
@@ -368,6 +390,10 @@ public class SeparatedChatHud {
         }
 
         return finder.result();
+    }
+
+    private static int borderColor() {
+        return 0xFF000000 | ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
     }
 
     private static float textOpacity(Minecraft mc) {

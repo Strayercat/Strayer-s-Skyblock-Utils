@@ -1,6 +1,9 @@
 package com.skyblockutils.features.chat;
 
+import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.features.hud.SeparatedChatHud;
+import com.skyblockutils.utils.ClipboardUtils;
+import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -64,11 +67,32 @@ public class SystemChatScreen extends Screen {
             this.onClose();
             return true;
         }
+        if (ModKeyBindings.COPY_SYSTEM_MESSAGE_KEY.matches(event) && this.copyHovered()) return true;
         return super.keyPressed(event);
+    }
+
+    private boolean copyHovered() {
+        double mouseX = this.minecraft.mouseHandler.xpos() * this.width / this.minecraft.getWindow().getWidth();
+        double mouseY = this.minecraft.mouseHandler.ypos() * this.height / this.minecraft.getWindow().getHeight();
+        return this.copyAt(mouseX, mouseY);
+    }
+
+    private boolean copyAt(final double mouseX, final double mouseY) {
+        String text = SeparatedChatHud.messageTextAt(mouseX, mouseY);
+        if (text == null) return false;
+        ClipboardUtils.copyTextToClipboard(text);
+        OnScreenNotification.builder()
+                .title("Copied")
+                .subtitle("System message copied to clipboard")
+                .tickTime(40)
+                .withSound(false)
+                .send();
+        return true;
     }
 
     @Override
     public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
+        if (event.button() == 2 && this.copyAt(event.x(), event.y())) return true;
         if (event.button() == 0 && !this.searchBox.isMouseOver(event.x(), event.y())) {
             boolean insert = this.minecraft.hasShiftDown();
             Style clicked = SeparatedChatHud.findStyleAt(event.x(), event.y(), insert);

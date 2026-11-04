@@ -10,5 +10,6 @@
   "key.ssu.systemChatHistory": "Server Chat History",
   "key.ssu.voicePushToTalk": "Voice Chat Push To Talk",
   "key.ssu.voiceMute": "Voice Chat Mute",
-  "key.ssu.voiceDeafen": "Voice Chat Deafen"
+  "key.ssu.voiceDeafen": "Voice Chat Deafen",
+  "key.ssu.copySystemMessage": "Copy Hovered System Message"
 }
