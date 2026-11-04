@@ -5,6 +5,9 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.DailyReminders;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
+import com.skyblockutils.features.hud.layout.HudContext;
+import com.skyblockutils.features.hud.layout.HudElement;
+import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.utils.FunFacts;
 import com.skyblockutils.utils.SSU;
@@ -12,10 +15,10 @@ import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalTime;
@@ -33,17 +36,61 @@ public class SsuHud {
     public static String funFact = null;
     public static boolean funFactHandled = false;
 
-    public static float scale;
-
     private static final int BASE_HUD_WIDTH = 200;
     private static final int BASE_LINE_HEIGHT = 12;
     private static final int BASE_DIVIDER_HEIGHT = 6;
     private static final int BASE_PADDING = 10;
+    private static final int TEXT_INSET = 5;
+    private static final int CORNER_RADIUS = 5;
     private static final int GEM_SIZE = 8;
     private static final int GEM_VISIBLE_WIDTH = 7;
+    private static final float CAT_SCALE = 1.0f / 6.0f;
+    private static final int CAT_TEXTURE_SIZE = 418;
 
     private static final int COLOR_TEXT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT);
-    private static final int COLOR_MAIN = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
+
+    public static final HudElement ELEMENT = new HudElement("ssu_hud", "SSU HUD") {
+        @Override
+        public HudLayoutEntry defaultLayout() {
+            return new HudLayoutEntry(HudLayoutEntry.Anchor.CENTER, HudLayoutEntry.Anchor.START, 0, 0, ModConfig.INSTANCE.hudScale / 100f);
+        }
+
+        @Override
+        public int minWidth() {
+            return 100;
+        }
+
+        @Override
+        public int maxWidth() {
+            return 400;
+        }
+
+        @Override
+        public int autoWidth(boolean preview) {
+            return BASE_HUD_WIDTH;
+        }
+
+        @Override
+        public int height(int width, boolean preview) {
+            return measure(rows(width, preview));
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return ModConfig.INSTANCE.hudEnabled;
+        }
+
+        @Override
+        public boolean isActive() {
+            Minecraft client = Minecraft.getInstance();
+            return !isVisible || client.player == null || getHudLines(client, SideBarUtils.location).size() <= 2;
+        }
+
+        @Override
+        public void render(HudContext ctx) {
+            renderHud(ctx);
+        }
+    };
 
     public static void setVisible(boolean visible) {
         if (!ModConfig.INSTANCE.hudEnabled) return;
@@ -51,85 +98,93 @@ public class SsuHud {
         showBossBar = !visible;
     }
 
-    private record HudLine(String text, int color, boolean isDivider, Component richText) {
+    private record HudLine(Component text, boolean isDivider) {
         static HudLine of(String text, int color) {
-            return new HudLine(text, color, false, null);
+            return new HudLine(Component.literal(text).withColor(color), false);
         }
 
         static HudLine rich(Component text) {
-            return new HudLine("", 0, false, text);
+            return new HudLine(text, false);
         }
 
         static HudLine divider() {
-            return new HudLine("", COLOR_MAIN, true, null);
+            return new HudLine(Component.empty(), true);
         }
     }
 
-    public static void onHudRender(GuiGraphicsExtractor context, String location) {
-        if (!isVisible) return;
+    private record Row(FormattedCharSequence text, boolean divider) {
+    }
 
-        scale = ModConfig.INSTANCE.hudScale / 100.0f;
-
+    private static List<Row> rows(int width, boolean preview) {
         Minecraft client = Minecraft.getInstance();
-        if (client.player == null) return;
+        List<HudLine> lines = client.player == null && preview ? sampleLines() : getHudLines(client, SideBarUtils.location);
 
-        List<HudLine> lines = getHudLines(client, location);
-        if (lines.size() <= 2) return;
-
-        int screenWidth = client.getWindow().getGuiScaledWidth();
-        int dividerCount = (int) lines.stream().filter(HudLine::isDivider).count();
-        int scaledHudWidth = (int) (BASE_HUD_WIDTH * scale);
-        int renderX = screenWidth / 2 - scaledHudWidth / 2;
-        int unscaledRenderX = (int) (renderX / scale);
-        int unscaledRenderY = BASE_PADDING / 2;
-        int unscaledHudWidth = BASE_HUD_WIDTH;
-        int unscaledHudHeight = (lines.size() - dividerCount) * BASE_LINE_HEIGHT + dividerCount * BASE_DIVIDER_HEIGHT + BASE_PADDING;
-        int scaledHudHeight = (int) (unscaledHudHeight * scale);
-
-        context.fill(renderX, 0, renderX + scaledHudWidth, scaledHudHeight, COLOR_BACKGROUND);
-        context.pose().pushMatrix();
-        context.pose().scale(scale, scale);
-        context.fill(unscaledRenderX, 0, unscaledRenderX + 1, unscaledHudHeight, COLOR_MAIN);
-        context.fill(unscaledRenderX + unscaledHudWidth - 1, 0, unscaledRenderX + unscaledHudWidth, unscaledHudHeight, COLOR_MAIN);
-        context.fill(unscaledRenderX, 0, unscaledRenderX + unscaledHudWidth, 1, COLOR_MAIN);
-        context.fill(unscaledRenderX, unscaledHudHeight - 1, unscaledRenderX + unscaledHudWidth, unscaledHudHeight, COLOR_MAIN);
-
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, SSUIndicator.BADGE_BIG,
-                unscaledRenderX + unscaledHudWidth - 5 - GEM_VISIBLE_WIDTH, unscaledRenderY, GEM_SIZE, GEM_SIZE);
-
+        List<Row> rows = new ArrayList<>();
+        int wrapWidth = width - TEXT_INSET * 2;
+        boolean first = true;
         for (HudLine line : lines) {
             if (line.isDivider()) {
-                int lineY = unscaledRenderY + 1;
-                context.fill(unscaledRenderX + 4, lineY, unscaledRenderX + BASE_HUD_WIDTH - 4, lineY + 1, COLOR_MAIN);
-                unscaledRenderY += BASE_DIVIDER_HEIGHT;
+                rows.add(new Row(FormattedCharSequence.EMPTY, true));
+                continue;
+            }
+            int lineWidth = first ? wrapWidth - GEM_VISIBLE_WIDTH - 2 : wrapWidth;
+            first = false;
+            List<FormattedCharSequence> wrapped = client.font.split(line.text(), Math.max(1, lineWidth));
+            if (wrapped.isEmpty()) rows.add(new Row(FormattedCharSequence.EMPTY, false));
+            for (FormattedCharSequence seq : wrapped) rows.add(new Row(seq, false));
+        }
+        return rows;
+    }
+
+    private static int measure(List<Row> rows) {
+        int height = BASE_PADDING;
+        for (Row row : rows) height += row.divider() ? BASE_DIVIDER_HEIGHT : BASE_LINE_HEIGHT;
+        return height;
+    }
+
+    private static void renderHud(HudContext ctx) {
+        List<Row> rows = rows(ctx.width, ctx.preview);
+        int accent = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
+
+        ctx.panel(0, 0, ctx.width, ctx.height, CORNER_RADIUS, COLOR_BACKGROUND, accent);
+        ctx.graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SSUIndicator.BADGE_BIG,
+                ctx.width - TEXT_INSET - GEM_VISIBLE_WIDTH, BASE_PADDING / 2, GEM_SIZE, GEM_SIZE);
+
+        int y = BASE_PADDING / 2;
+        for (Row row : rows) {
+            if (row.divider()) {
+                ctx.fill(4, y + 1, ctx.width - 4, y + 2, accent);
+                y += BASE_DIVIDER_HEIGHT;
             } else {
-                if (line.richText() != null) {
-                    context.text(client.font, line.richText(), unscaledRenderX + 5, unscaledRenderY, 0xFFFFFFFF);
-                } else {
-                    context.text(client.font, line.text(), unscaledRenderX + 5, unscaledRenderY, line.color());
-                }
-                unscaledRenderY += BASE_LINE_HEIGHT;
+                ctx.text(row.text(), TEXT_INSET, y, 0xFFFFFFFF, true);
+                y += BASE_LINE_HEIGHT;
             }
         }
 
-        context.pose().popMatrix();
-
         if (ModConfig.INSTANCE.customSidebar || !ModConfig.INSTANCE.cat) return;
 
-        context.pose().pushMatrix();
-        float imageScale = (1.0f / 6.0f) * scale;
-        context.pose().scale(imageScale, imageScale);
-        context.blit(RenderPipelines.GUI_TEXTURED, CAT_IMAGE,
-                (int) ((renderX + scaledHudWidth) / imageScale) - 31,
-                (int) ((scaledHudHeight / 2.0f) / imageScale) - 175,
-                0, 0, 418, 418, 418, 418);
-        context.pose().popMatrix();
+        float catSize = CAT_TEXTURE_SIZE * CAT_SCALE;
+        ctx.overlay(CAT_IMAGE, ctx.width - 31 * CAT_SCALE, ctx.height / 2f - 175 * CAT_SCALE, catSize, CAT_TEXTURE_SIZE);
+    }
+
+    private static List<HudLine> sampleLines() {
+        List<HudLine> lines = new ArrayList<>();
+        lines.add(HudLine.rich(SSU.getHudTitle()));
+        lines.add(HudLine.divider());
+        lines.add(HudLine.of("Current time: 12:00", COLOR_TEXT));
+        lines.add(HudLine.of("Ping: 42", COLOR_TEXT));
+        lines.add(HudLine.of("Server tps: 20.0", COLOR_TEXT));
+        lines.add(HudLine.of("Fps: 144", COLOR_TEXT));
+        lines.add(HudLine.divider());
+        lines.add(HudLine.of("Party Info", COLOR_TITLE));
+        lines.add(HudLine.of("Not currently in a party", COLOR_TEXT));
+        return lines;
     }
 
     private static @NotNull List<HudLine> getHudLines(Minecraft client, String location) {
         List<HudLine> lines = new ArrayList<>();
         lines.add(HudLine.rich(SSU.getHudTitle()));
-        addDivider(lines);
+        lines.add(HudLine.divider());
 
         boolean anyGeneralInfo = false;
 
@@ -193,7 +248,7 @@ public class SsuHud {
         if (location.equals("Your Island") && ModConfig.INSTANCE.hudIslandFunFact) {
             if (!funFactHandled) funFact = FunFacts.funFacts.get((int) (Math.random() * FunFacts.funFacts.size()));
             if (anyGeneralInfo) addDivider(lines);
-            lines.addAll(wrapText("Fun fact: " + funFact));
+            lines.add(HudLine.of("Fun fact: " + funFact, COLOR_TEXT));
             funFactHandled = true;
         }
 
@@ -207,12 +262,12 @@ public class SsuHud {
     private static void addSidebarSection(List<HudLine> lines, boolean preceded) {
         if (preceded) addDivider(lines);
 
-        List<String> scoreboardLines = new java.util.ArrayList<>(SideBarUtils.getSidebarLines().stream()
+        List<String> scoreboardLines = SideBarUtils.getSidebarLines().stream()
                 .filter(line -> !line.replaceAll("(?i)§.", "").trim().isEmpty()
                         && !line.replaceAll("§.", "").trim().matches("\\d{2}/\\d{2}/\\d{2} .*")
                         && !line.replaceAll("§.", "").trim().matches("www.hypixel.net"))
-                .map(line -> line.trim())
-                .toList());
+                .map(String::trim)
+                .toList();
 
         for (String line : scoreboardLines) {
             lines.add(HudLine.of(line, 0xFFFFFFFF));
@@ -233,7 +288,7 @@ public class SsuHud {
         lines.add(HudLine.of("Members:", COLOR_SUBTITLE));
 
         String memberList = PartyInfo.members.toString().replace("[", "").replace("]", "");
-        lines.addAll(wrapText(memberList));
+        lines.add(HudLine.of(memberList, COLOR_TEXT));
     }
 
     private static void addDungeonSection(List<HudLine> lines, boolean preceded) {
@@ -247,28 +302,5 @@ public class SsuHud {
         lines.add(HudLine.of("Floor Auto-Rejoin: " + (AutoRejoin.autoRejoinEnabled ? "On" : "Off"), COLOR_TEXT));
         if (AutoRejoin.autoRejoinEnabled)
             lines.add(HudLine.of("Current floor: " + AutoRejoin.currentFloor, COLOR_TEXT));
-    }
-
-    private static List<HudLine> wrapText(String text) {
-        Minecraft client = Minecraft.getInstance();
-        List<HudLine> wrappedLines = new ArrayList<>();
-        String[] words = text.split(" ");
-        StringBuilder currentLine = new StringBuilder();
-
-        for (String word : words) {
-            String testLine = currentLine.isEmpty() ? word : currentLine + " " + word;
-            if (client.font.width(testLine) > 190 && !currentLine.isEmpty()) {
-                wrappedLines.add(HudLine.of(currentLine.toString(), SsuHud.COLOR_TEXT));
-                currentLine = new StringBuilder(word);
-            } else {
-                currentLine = new StringBuilder(testLine);
-            }
-        }
-
-        if (!currentLine.isEmpty()) {
-            wrappedLines.add(HudLine.of(currentLine.toString(), SsuHud.COLOR_TEXT));
-        }
-
-        return wrappedLines;
     }
 }

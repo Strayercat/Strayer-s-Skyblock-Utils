@@ -6,11 +6,16 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.ChatLayout;
 import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.chat.SystemChatScreen;
+import com.skyblockutils.features.hud.layout.HudContext;
+import com.skyblockutils.features.hud.layout.HudElement;
+import com.skyblockutils.features.hud.layout.HudLayoutEntry;
+import com.skyblockutils.features.hud.layout.HudManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.TextAlignment;
+import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -28,6 +33,7 @@ public class SeparatedChatHud {
     private static final int SCROLLBAR_WIDTH = 2;
     private static final int TAP_TICKS = 4;
     private static final int SEARCH_BAR_HEIGHT = 12;
+    private static final int CORNER_RADIUS = 4;
 
     private static int scrollOffset = 0;
     private static int heldTicks = 0;
@@ -43,7 +49,7 @@ public class SeparatedChatHud {
         if (!matches(entry)) return;
 
         if ((isPeeking() || isPinned()) && scrollOffset > 0) {
-            int wrap = ChatLayout.wrapWidth();
+            int wrap = wrap();
             scrollOffset += buildLines(entry.message(), wrap, wrap, Minecraft.getInstance().font).size();
         }
     }
@@ -98,11 +104,6 @@ public class SeparatedChatHud {
                 && Minecraft.getInstance().gui.screen() == null;
     }
 
-    public static void ignoreKeyUntilRelease() {
-        ignoreUntilRelease = true;
-        heldTicks = 0;
-    }
-
     private static boolean isPinned() {
         return Minecraft.getInstance().gui.screen() instanceof SystemChatScreen;
     }
@@ -155,89 +156,126 @@ public class SeparatedChatHud {
         return true;
     }
 
-    public static int[] searchBarBounds(int screenWidth) {
-        float scale = ChatLayout.chatScale();
-        if (scale <= 0) scale = 1;
-
-        int panelWidth = ChatLayout.wrapWidth() + PADDING * 3 + SCROLLBAR_WIDTH;
-        int panelHeight = HISTORY_VISIBLE_LINES * LINE_HEIGHT + PADDING * 2;
-        int panelBottom = Mth.floor(TOP_MARGIN / scale) + panelHeight;
-
-        int width = Mth.ceil(panelWidth * scale);
-        int x = screenWidth - width;
-        int y = Mth.ceil(panelBottom * scale);
-        return new int[]{x, y, width, SEARCH_BAR_HEIGHT};
+    public static int[] searchBarBounds() {
+        HudManager.Bounds b = HudManager.bounds(ELEMENT, false);
+        int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
+        int x = Mth.floor(b.x());
+        int width = Mth.ceil(b.right()) - x;
+        int y = b.bottom() + SEARCH_BAR_HEIGHT <= screenHeight ? Mth.ceil(b.bottom()) : Mth.floor(b.y()) - SEARCH_BAR_HEIGHT;
+        return new int[]{x, Math.max(0, y), width, SEARCH_BAR_HEIGHT};
     }
 
-    public static void render(GuiGraphicsExtractor graphics) {
-        if (!ModConfig.INSTANCE.separateMessage) return;
+    private static int wrap() {
+        return Math.max(20, HudManager.layoutWidth(ELEMENT, false) - PADDING * 3 - SCROLLBAR_WIDTH);
+    }
 
-        float scale = ChatLayout.chatScale();
-        if (scale <= 0) return;
+    private static boolean historyMode(boolean preview) {
+        return preview || isPeeking() || isPinned();
+    }
 
-        if (isPinned()) return;
-
-        if (isPeeking()) {
-            graphics.pose().pushMatrix();
-            graphics.pose().scale(scale, scale);
-            renderHistory(graphics, scale, false);
-            graphics.pose().popMatrix();
-            return;
-        }
-
-        scrollOffset = 0;
-
-        List<ChatLayout.ParsedMessage> messages = SeparatedChat.activeMessages();
-        if (messages.isEmpty()) return;
-
-        Minecraft mc = Minecraft.getInstance();
-        Font font = mc.font;
-        int wrap = ChatLayout.wrapWidth();
-
-        int textWidth = 0;
-        for (ChatLayout.ParsedMessage message : messages) textWidth = Math.max(textWidth, ChatLayout.contentWidth(message, wrap, font));
-        if (textWidth == 0) textWidth = wrap;
-
+    private static List<RenderLine> liveLines(int textWidth) {
+        Font font = Minecraft.getInstance().font;
+        int wrap = wrap();
         List<RenderLine> lines = new ArrayList<>();
-        for (ChatLayout.ParsedMessage message : messages) lines.addAll(buildLines(message, textWidth, wrap, font));
-        if (lines.isEmpty()) return;
+        for (ChatLayout.ParsedMessage message : SeparatedChat.activeMessages()) lines.addAll(buildLines(message, textWidth, wrap, font));
+        return lines;
+    }
 
-        graphics.pose().pushMatrix();
-        graphics.pose().scale(scale, scale);
+    private static int liveTextWidth() {
+        Font font = Minecraft.getInstance().font;
+        int wrap = wrap();
+        int textWidth = 0;
+        for (ChatLayout.ParsedMessage message : SeparatedChat.activeMessages()) textWidth = Math.max(textWidth, ChatLayout.contentWidth(message, wrap, font));
+        return textWidth == 0 ? wrap : textWidth;
+    }
 
-        int right = Mth.ceil(graphics.guiWidth() / scale);
-        int left = right - textWidth - PADDING * 2;
-        int top = Mth.floor(TOP_MARGIN / scale);
-        int bottom = top + lines.size() * LINE_HEIGHT + PADDING * 2;
-
-        int backgroundColor = backgroundColor(mc);
-        if ((backgroundColor >>> 24) > 0) graphics.fill(left, top, right, bottom, backgroundColor);
-
-        int textColor = textColor(mc);
-        int lineY = top + PADDING;
-        for (RenderLine line : lines) {
-            int x = left + PADDING;
-            if (line.centered()) x += (textWidth - font.width(line.text())) / 2;
-            graphics.text(font, line.text(), x, lineY, textColor, true);
-            lineY += LINE_HEIGHT;
+    public static final HudElement ELEMENT = new HudElement("system_chat", "System Messages") {
+        @Override
+        public HudLayoutEntry defaultLayout() {
+            float scale = ChatLayout.chatScale();
+            return new HudLayoutEntry(HudLayoutEntry.Anchor.END, HudLayoutEntry.Anchor.START, 0, TOP_MARGIN, scale > 0 ? scale : 1f);
         }
 
-        graphics.pose().popMatrix();
+        @Override
+        public int minWidth() {
+            return 80;
+        }
+
+        @Override
+        public int maxWidth() {
+            return 600;
+        }
+
+        @Override
+        public int autoWidth(boolean preview) {
+            return ChatComponent.getWidth(Minecraft.getInstance().options.chatWidth().get()) + PADDING * 3 + SCROLLBAR_WIDTH;
+        }
+
+        @Override
+        public int contentWidth(int layoutWidth, boolean preview) {
+            if (historyMode(preview)) return layoutWidth;
+            return Math.min(layoutWidth, liveTextWidth() + PADDING * 2);
+        }
+
+        @Override
+        public int height(int width, boolean preview) {
+            if (historyMode(preview)) return HISTORY_VISIBLE_LINES * LINE_HEIGHT + PADDING * 2;
+            return Math.max(1, liveLines(liveTextWidth()).size()) * LINE_HEIGHT + PADDING * 2;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return ModConfig.INSTANCE.separateMessage;
+        }
+
+        @Override
+        public boolean isActive() {
+            if (isPinned()) return true;
+            if (isPeeking()) return false;
+            scrollOffset = 0;
+            return SeparatedChat.activeMessages().isEmpty();
+        }
+
+        @Override
+        public void render(HudContext ctx) {
+            if (historyMode(ctx.preview)) {
+                renderHistory(ctx, isPinned() && !ctx.preview);
+            } else {
+                renderLive(ctx);
+            }
+        }
+    };
+
+    public static void render(GuiGraphicsExtractor graphics) {
+        HudManager.render(ELEMENT, graphics);
     }
 
     public static void renderPinned(GuiGraphicsExtractor graphics) {
-        float scale = ChatLayout.chatScale();
-        if (scale <= 0) return;
-
-        graphics.pose().pushMatrix();
-        graphics.pose().scale(scale, scale);
-        renderHistory(graphics, scale, true);
-        graphics.pose().popMatrix();
+        HudManager.draw(ELEMENT, graphics, false);
     }
 
-    private static HistoryView historyView(int guiWidth, float scale) {
+    private static void renderLive(HudContext ctx) {
+        Minecraft mc = ctx.mc;
+        Font font = ctx.font;
+        int textWidth = liveTextWidth();
+        List<RenderLine> lines = liveLines(textWidth);
+        if (lines.isEmpty()) return;
+
+        ctx.panel(0, 0, ctx.width, ctx.height, CORNER_RADIUS, backgroundColor(mc), 0);
+
+        int textColor = textColor(mc);
+        int lineY = PADDING;
+        for (RenderLine line : lines) {
+            int x = PADDING;
+            if (line.centered()) x += (textWidth - font.width(line.text())) / 2;
+            ctx.text(line.text(), x, lineY, textColor, true);
+            lineY += LINE_HEIGHT;
+        }
+    }
+
+    private static HistoryView historyView(int width, int height) {
         Font font = Minecraft.getInstance().font;
-        int wrap = ChatLayout.wrapWidth();
+        int wrap = wrap();
 
         List<RenderLine> lines = new ArrayList<>();
         for (SeparatedChat.HistoryEntry entry : SeparatedChat.history()) {
@@ -247,17 +285,10 @@ public class SeparatedChatHud {
         int maxOffset = Math.max(0, lines.size() - HISTORY_VISIBLE_LINES);
         if (scrollOffset > maxOffset) scrollOffset = maxOffset;
 
-        int panelWidth = wrap + PADDING * 3 + SCROLLBAR_WIDTH;
-        int panelHeight = HISTORY_VISIBLE_LINES * LINE_HEIGHT + PADDING * 2;
-        int right = Mth.ceil(guiWidth / scale);
-        int left = right - panelWidth;
-        int top = Mth.floor(TOP_MARGIN / scale);
-        int bottom = top + panelHeight;
-
         int end = lines.size() - scrollOffset;
         int start = Math.max(0, end - HISTORY_VISIBLE_LINES);
 
-        return new HistoryView(lines, start, end, left, top, right, bottom, wrap, maxOffset);
+        return new HistoryView(lines, start, end, 0, 0, width, height, wrap, maxOffset);
     }
 
     private static int lineX(HistoryView view, RenderLine line, Font font) {
@@ -270,16 +301,17 @@ public class SeparatedChatHud {
         return view.bottom() - PADDING - (view.end() - view.start()) * LINE_HEIGHT;
     }
 
-    private static void renderHistory(GuiGraphicsExtractor graphics, float scale, boolean interactive) {
-        Minecraft mc = Minecraft.getInstance();
-        Font font = mc.font;
-        HistoryView view = historyView(graphics.guiWidth(), scale);
+    private static void renderHistory(HudContext ctx, boolean interactive) {
+        Minecraft mc = ctx.mc;
+        Font font = ctx.font;
+        GuiGraphicsExtractor graphics = ctx.graphics;
+        HistoryView view = historyView(ctx.width, ctx.height);
 
-        graphics.fill(view.left(), view.top(), view.right(), view.bottom(), Math.max(backgroundColor(mc) >>> 24, 0x80) << 24);
+        ctx.panel(view.left(), view.top(), view.right(), view.bottom(), CORNER_RADIUS, Math.max(backgroundColor(mc) >>> 24, 0x80) << 24, 0);
 
         if (view.lines().isEmpty()) {
             String empty = searchLower.isEmpty() ? "No system messages yet" : "No matching messages";
-            graphics.text(font, empty, view.left() + PADDING, view.top() + PADDING, 0xFFAAAAAA, true);
+            ctx.text(empty, view.left() + PADDING, view.top() + PADDING, 0xFFAAAAAA, true);
             return;
         }
 
@@ -294,7 +326,7 @@ public class SeparatedChatHud {
             if (collector != null) {
                 collector.accept(TextAlignment.LEFT, x, lineY, parameters, line.text());
             } else {
-                graphics.text(font, line.text(), x, lineY, textColor, true);
+                ctx.text(line.text(), x, lineY, textColor, true);
             }
             lineY += LINE_HEIGHT;
         }
@@ -308,21 +340,24 @@ public class SeparatedChatHud {
             int barRight = view.right() - PADDING;
             int barLeft = barRight - SCROLLBAR_WIDTH;
 
-            graphics.fill(barLeft, trackTop, barRight, trackTop + trackHeight, 0x40FFFFFF);
-            graphics.fill(barLeft, thumbTop, barRight, thumbTop + thumbHeight, 0xC0FFFFFF);
+            ctx.fill(barLeft, trackTop, barRight, trackTop + trackHeight, 0x40FFFFFF);
+            ctx.fill(barLeft, thumbTop, barRight, thumbTop + thumbHeight, 0xC0FFFFFF);
         }
     }
 
     public static Style findStyleAt(double mouseX, double mouseY, boolean includeInsertions) {
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
-        float scale = ChatLayout.chatScale();
-        if (scale <= 0) return null;
 
-        HistoryView view = historyView(mc.getWindow().getGuiScaledWidth(), scale);
+        HudManager.Bounds bounds = HudManager.bounds(ELEMENT, false);
+        if (!bounds.contains(mouseX, mouseY)) return null;
+
+        HistoryView view = historyView(bounds.width(), bounds.height());
         if (view.lines().isEmpty()) return null;
 
-        ActiveTextCollector.ClickableStyleFinder finder = new ActiveTextCollector.ClickableStyleFinder(font, (int) (mouseX / scale), (int) (mouseY / scale))
+        int localX = (int) ((mouseX - bounds.x()) / bounds.scale());
+        int localY = (int) ((mouseY - bounds.y()) / bounds.scale());
+        ActiveTextCollector.ClickableStyleFinder finder = new ActiveTextCollector.ClickableStyleFinder(font, localX, localY)
                 .includeInsertions(includeInsertions);
 
         int lineY = firstLineY(view);

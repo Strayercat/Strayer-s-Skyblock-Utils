@@ -21,12 +21,15 @@ import com.skyblockutils.features.hud.ScreenshotManager;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.hud.SsuHud;
+import com.skyblockutils.features.hud.layout.HudEditScreen;
+import com.skyblockutils.features.hud.layout.HudManager;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
 import com.skyblockutils.features.mining.GlaciteTunnelsWaypoints;
 import com.skyblockutils.features.party.PartyCommands;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.party.PartyListParser;
+import com.skyblockutils.features.slayer.CarryTracker;
 import com.skyblockutils.features.textures.F7VoidLava;
 import com.skyblockutils.features.voice.VoiceChat;
 import com.skyblockutils.features.voice.VoiceHud;
@@ -82,12 +85,11 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ModFunctions.connectionEventDataReset("Leave");
         });
 
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, _) -> SsuHud.onHudRender(context, SideBarUtils.location));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, _) -> HudManager.render(SsuHud.ELEMENT, context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_carry_hud"), (context, _) -> HudManager.render(CarryTracker.ELEMENT, context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_system_messages"), (context, _) -> SeparatedChatHud.render(context));
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_voice_chat"), (context, _) -> VoiceHud.render(context));
-        HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> {
-            if (isInSkyblock && ModConfig.INSTANCE.customSidebar) CustomSidebar.displayCustomSidebar(context);
-        });
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_voice_chat"), (context, _) -> HudManager.render(VoiceHud.ELEMENT, context));
+        HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> HudManager.render(CustomSidebar.ELEMENT, context));
 
         LevelRenderEvents.END_MAIN.register(context -> {
             GlaciteTunnelsWaypoints.onWorldRender(context);
@@ -104,6 +106,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             OnScreenNotification.tick();
             ClothConfigHandler.handleConfigScreen(client);
             GlowingPlayersGui.handleConfigScreen(client);
+            HudEditScreen.handleRequest(client);
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
             ScreenshotManager.tick();
             PowderChestNotifications.tick();
@@ -128,6 +131,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             AutoFish.autoFish(client);
             CorlTimer.corlTimerTick(client);
             PuffTracker.tick(client);
+            CarryTracker.tick(client);
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
             PartyListParser.handleOnJoinCommand();
             GuildListParser.tick();

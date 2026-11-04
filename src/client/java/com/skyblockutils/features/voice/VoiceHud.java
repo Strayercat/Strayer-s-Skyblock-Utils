@@ -1,9 +1,11 @@
 package com.skyblockutils.features.voice;
 
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.hud.layout.HudContext;
+import com.skyblockutils.features.hud.layout.HudElement;
+import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.utils.ModStyle;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
@@ -32,57 +34,122 @@ public class VoiceHud {
 
     private record Row(Identifier icon, String name, int color) {}
 
-    public static void render(GuiGraphicsExtractor context) {
-        if (!ModConfig.INSTANCE.voiceChatEnabled || !ModConfig.INSTANCE.voiceHud || !VoiceChat.isRunning()) return;
+    public static final HudElement ELEMENT = new HudElement("voice_chat", "Voice Chat") {
+        @Override
+        public HudLayoutEntry defaultLayout() {
+            return new HudLayoutEntry(HudLayoutEntry.Anchor.START, HudLayoutEntry.Anchor.START, 0, 0, 1f);
+        }
 
-        List<VoicePeer> peers = VoiceChat.hudPeers();
-        if (peers.isEmpty()) return;
+        @Override
+        public int minWidth() {
+            return 50;
+        }
+
+        @Override
+        public int maxWidth() {
+            return 250;
+        }
+
+        @Override
+        public int autoWidth(boolean preview) {
+            Minecraft mc = Minecraft.getInstance();
+            int width = PADDING * 2 + scaledWidth(mc, TITLE);
+            for (Row row : rows(preview)) width = Math.max(width, nameX() + scaledWidth(mc, row.name()) + PADDING);
+            return Math.max(MIN_WIDTH, width);
+        }
+
+        @Override
+        public int height(int width, boolean preview) {
+            Minecraft mc = Minecraft.getInstance();
+            return PADDING + titleStep(mc) + DIVIDER_MARGIN * 2 + DIVIDER_HEIGHT + rows(preview).size() * lineStep(mc) + PADDING - 2;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return ModConfig.INSTANCE.voiceChatEnabled && ModConfig.INSTANCE.voiceHud;
+        }
+
+        @Override
+        public boolean isActive() {
+            return !VoiceChat.isRunning() || VoiceChat.hudPeers().isEmpty();
+        }
+
+        @Override
+        public void render(HudContext ctx) {
+            renderHud(ctx);
+        }
+    };
+
+    private static List<Row> rows(boolean preview) {
+        List<Row> rows = new ArrayList<>();
+        if (preview && ELEMENT.isActive()) {
+            rows.add(new Row(ICON_SPEAKING, "You", COLOR_NAME));
+            rows.add(new Row(null, "Teammate", COLOR_NAME));
+            rows.add(new Row(ICON_MUTED, "Friend", COLOR_NAME));
+            rows.add(new Row(null, "Connecting", COLOR_PENDING));
+            return rows;
+        }
 
         long now = System.currentTimeMillis();
-        List<Row> rows = new ArrayList<>();
         rows.add(new Row(icon(VoiceChat.deafened, VoiceChat.muted, VoiceChat.isTransmitting()), "You", COLOR_NAME));
-        for (VoicePeer peer : peers) {
+        for (VoicePeer peer : VoiceChat.hudPeers()) {
             rows.add(switch (peer.state) {
                 case CONNECTED -> new Row(icon(peer.remoteDeafened, peer.remoteMuted, peer.isSpeaking(now)), peer.name, COLOR_NAME);
                 case FAILED -> new Row(null, peer.name, COLOR_FAILED);
                 default -> new Row(null, peer.name, COLOR_PENDING);
             });
         }
+        return rows;
+    }
 
-        Minecraft mc = Minecraft.getInstance();
-        int lineStep = Math.max(ICON_SIZE, Math.round(mc.font.lineHeight * TEXT_SCALE)) + 2;
-        int nameX = PADDING + ICON_SIZE + ICON_GAP;
+    private static int nameX() {
+        return PADDING + ICON_SIZE + ICON_GAP;
+    }
 
-        int width = PADDING * 2 + scaledWidth(mc, TITLE);
-        for (Row row : rows) width = Math.max(width, nameX + scaledWidth(mc, row.name()) + PADDING);
-        width = Math.max(MIN_WIDTH, width);
+    private static int lineStep(Minecraft mc) {
+        return Math.max(ICON_SIZE, Math.round(mc.font.lineHeight * TEXT_SCALE)) + 2;
+    }
 
-        int titleStep = Math.round(mc.font.lineHeight * TEXT_SCALE) + 2;
-        int height = PADDING + titleStep + DIVIDER_MARGIN * 2 + DIVIDER_HEIGHT + rows.size() * lineStep + PADDING - 2;
+    private static int titleStep(Minecraft mc) {
+        return Math.round(mc.font.lineHeight * TEXT_SCALE) + 2;
+    }
 
-        boolean rounded = ModConfig.INSTANCE.notificationStyle == ModStyle.NotificationStyle.ROUNDED;
-        int radius = rounded ? CORNER_RADIUS : 0;
+    private static void renderHud(HudContext ctx) {
+        Minecraft mc = ctx.mc;
         int accent = 0xFF000000 | ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
         int titleColor = 0xFF000000 | ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_END);
+        int lineStep = lineStep(mc);
 
-        fillBottomRightRounded(context, 0, 0, width, height, accent, radius);
-        fillBottomRightRounded(context, 0, 0, width - 1, height - 1, BACKGROUND_COLOR, Math.max(0, radius - 1));
+        ctx.panel(0, 0, ctx.width, ctx.height, CORNER_RADIUS, BACKGROUND_COLOR, accent);
+        int[] inner = ctx.inner(0, 0, ctx.width, ctx.height);
 
         int lineY = PADDING;
-        drawScaledText(context, mc, TITLE, (width - scaledWidth(mc, TITLE)) / 2, lineY, titleColor);
-        lineY += titleStep + DIVIDER_MARGIN;
+        String title = fit(mc, TITLE, ctx.width - PADDING * 2);
+        ctx.scaledText(title, (ctx.width - scaledWidth(mc, title)) / 2f, lineY, TEXT_SCALE, titleColor, false);
+        lineY += titleStep(mc) + DIVIDER_MARGIN;
 
-        context.fill(0, lineY, width - 1, lineY + DIVIDER_HEIGHT, accent);
+        ctx.fill(inner[0], lineY, inner[2], lineY + DIVIDER_HEIGHT, accent);
         lineY += DIVIDER_HEIGHT + DIVIDER_MARGIN;
 
         int textOffset = (lineStep - 2 - Math.round(mc.font.lineHeight * TEXT_SCALE)) / 2 + 1;
-        for (Row row : rows) {
+        int nameWidth = ctx.width - nameX() - PADDING;
+        for (Row row : rows(ctx.preview)) {
             if (row.icon() != null) {
-                context.blitSprite(RenderPipelines.GUI_TEXTURED, row.icon(), PADDING, lineY, ICON_SIZE, ICON_SIZE);
+                ctx.graphics.blitSprite(RenderPipelines.GUI_TEXTURED, row.icon(), PADDING, lineY, ICON_SIZE, ICON_SIZE);
             }
-            drawScaledText(context, mc, row.name(), nameX, lineY + textOffset, row.color());
+            ctx.scaledText(fit(mc, row.name(), nameWidth), nameX(), lineY + textOffset, TEXT_SCALE, row.color(), false);
             lineY += lineStep;
         }
+    }
+
+    private static String fit(Minecraft mc, String text, int maxScaledWidth) {
+        if (scaledWidth(mc, text) <= maxScaledWidth) return text;
+        String ellipsis = "…";
+        for (int end = text.length() - 1; end > 0; end--) {
+            String candidate = text.substring(0, end) + ellipsis;
+            if (scaledWidth(mc, candidate) <= maxScaledWidth) return candidate;
+        }
+        return ellipsis;
     }
 
     private static Identifier icon(boolean deafened, boolean muted, boolean speaking) {
@@ -94,28 +161,5 @@ public class VoiceHud {
 
     private static int scaledWidth(Minecraft mc, String text) {
         return Math.round(mc.font.width(text) * TEXT_SCALE);
-    }
-
-    private static void drawScaledText(GuiGraphicsExtractor context, Minecraft mc, String text, int x, int y, int color) {
-        context.pose().pushMatrix();
-        context.pose().translate(x, y);
-        context.pose().scale(TEXT_SCALE, TEXT_SCALE);
-        context.text(mc.font, text, 0, 0, color, false);
-        context.pose().popMatrix();
-    }
-
-    private static void fillBottomRightRounded(GuiGraphicsExtractor context, int x1, int y1, int x2, int y2, int color, int radius) {
-        radius = Math.min(radius, Math.min(x2 - x1, y2 - y1) / 2);
-        if (radius <= 0) {
-            context.fill(x1, y1, x2, y2, color);
-            return;
-        }
-
-        context.fill(x1, y1, x2, y2 - radius, color);
-        for (int i = 0; i < radius; i++) {
-            double dy = radius - i - 0.5;
-            int inset = (int) Math.round(radius - Math.sqrt(Math.max(0, radius * radius - dy * dy)));
-            context.fill(x1, y2 - i - 1, x2 - inset, y2 - i, color);
-        }
     }
 }

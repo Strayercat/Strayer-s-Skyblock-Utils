@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import com.skyblockutils.features.DailyReminders;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayers.GlowingPlayer;
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
+import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.utils.ModStyle;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -58,6 +59,7 @@ public class ModConfig {
     public boolean hudPartyInfo = true;
     public boolean hudPartyInfoInDungeons = false;
     public boolean hudIslandFunFact = true;
+    public Map<String, HudLayoutEntry> hudLayouts = new HashMap<>();
 
     // Mining
     public boolean displayGlaciteWaypoints = true;
@@ -212,6 +214,12 @@ public class ModConfig {
             INSTANCE.hudPartyInfo = loaded.hudPartyInfo;
             INSTANCE.hudPartyInfoInDungeons = loaded.hudPartyInfoInDungeons;
             INSTANCE.hudIslandFunFact = loaded.hudIslandFunFact;
+            INSTANCE.hudLayouts = new HashMap<>();
+            if (loaded.hudLayouts != null) {
+                loaded.hudLayouts.forEach((id, layout) -> {
+                    if (id != null && layout != null) INSTANCE.hudLayouts.put(id, layout.sanitize());
+                });
+            }
             INSTANCE.displayGlaciteWaypoints = loaded.displayGlaciteWaypoints;
             INSTANCE.glaciteWaypoints = loaded.glaciteWaypoints != null ? loaded.glaciteWaypoints : GlaciteWaypoints.BOTH;
             INSTANCE.powderChestNotification = loaded.powderChestNotification;
@@ -247,7 +255,7 @@ public class ModConfig {
             INSTANCE.voiceMuted = loaded.voiceMuted;
             INSTANCE.voiceDeafened = loaded.voiceDeafened;
 
-            if (loaded.chatFilters != null) loaded.chatFilters.forEach(INSTANCE::setChatFilter);
+            loaded.chatFilters.forEach(INSTANCE::setChatFilter);
         } catch (IOException ignored) {
         }
 

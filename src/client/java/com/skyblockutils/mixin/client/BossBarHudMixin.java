@@ -1,6 +1,7 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.features.hud.SsuHud;
+import com.skyblockutils.features.slayer.CarryTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +17,7 @@ public class BossBarHudMixin {
             cancellable = true
     )
     private void onExtractRenderState(GuiGraphicsExtractor graphics, CallbackInfo ci) {
-        if (!SsuHud.showBossBar) {
+        if (!SsuHud.showBossBar || CarryTracker.isHudShowing()) {
             ci.cancel();
         }
     }

@@ -1,167 +1,134 @@
 package com.skyblockutils.features.hud;
 
 import com.skyblockutils.ModFunctions;
+import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.hud.layout.HudContext;
+import com.skyblockutils.features.hud.layout.HudElement;
+import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.ModStyle;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.skyblockutils.utils.ModStyle.COLOR_BACKGROUND;
 
 public class CustomSidebar {
     private static final Identifier CAT_IMAGE = Identifier.fromNamespaceAndPath("skyblockutils", "textures/hud/cat_sidebar.png");
-    private static final int COLOR_MAIN = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
-    private static final int COLOR_TITLE_START = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_START);
-    private static final int COLOR_TITLE_END = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TITLE_END);
-    private static int sideBarWidth;
+    private static final String TITLE = "Skyblock";
+    private static final int MIN_AUTO_WIDTH = 110;
+    private static final int CORNER_RADIUS = 10;
+    private static final int HEADER_HEIGHT = 15;
+    private static final int PADDING = 5;
+    private static final float TEXT_SCALE = 0.8f;
+    private static final float CAT_SCALE = 0.13f;
+    private static final int CAT_TEXTURE_SIZE = 418;
 
-    public static void displayCustomSidebar(GuiGraphicsExtractor context) {
-        if (ModConfig.INSTANCE.sideBarInHud) return;
-
-        Minecraft client = Minecraft.getInstance();
-        int screenWidth = client.getWindow().getGuiScaledWidth();
-        int screenHeight = client.getWindow().getGuiScaledHeight();
-
-        int sideBarHeight = 120;
-
-        drawRoundedRect(context, client, screenWidth - sideBarWidth, (screenHeight / 2) - (sideBarHeight / 2), screenWidth, (screenHeight / 2) + (sideBarHeight / 2), 12);
-    }
-
-    public static void drawRoundedRect(GuiGraphicsExtractor context, Minecraft client, int x1, int y1, int x2, int y2, int radius) {
-        // Background
-        context.fill(x1 + radius, y1, x2, y2, COLOR_BACKGROUND);
-        context.fill(x1, y1 + radius, x1 + radius, y2 - radius, COLOR_BACKGROUND);
-
-        // Outline
-        context.fill(x1 + radius, y1, x2, y1 + 1, COLOR_MAIN);
-        context.fill(x1 + radius, y2 - 1, x2, y2, COLOR_MAIN);
-        context.fill(x1, y1 + radius, x1 + 1, y2 - radius, COLOR_MAIN);
-
-        // Corners and their outline
-        drawCorner(context, x1 + radius - 1, y1 + radius - 1, radius, 2);
-        drawCorner(context, x1 + radius - 1, y2 - radius, radius, 1);
-        drawCornerOutline(context, x1 + radius - 1, y1 + radius - 1, radius, 2);
-        drawCornerOutline(context, x1 + radius - 1, y2 - radius, radius, 1);
-
-        // Title + separation bar
-        int barPosition = y1 + radius + 3;
-        context.text(client.font, SSU.gradientText("Skyblock", COLOR_TITLE_START, COLOR_TITLE_END), x1 + ((x2 - x1) / 2) - client.font.width("Skyblock") / 2, y1 + ((barPosition - y1) / 2) - client.font.lineHeight / 2 + 1, 0xFFFFFFFF, true);
-        context.fill(x1, barPosition, x2, barPosition + 1, COLOR_MAIN);
-
-        drawSidebarText(context, client, x1, barPosition + 1, y2 - barPosition + 1, 10);
-
-        if (!ModConfig.INSTANCE.cat) return;
-
-        context.pose().pushMatrix();
-        try {
-            float imageScale = 0.13f;
-            int imageSize = (int) (418 * imageScale);
-            context.pose().translate(x1 + (float) (x2 - x1) / 2 - (float) imageSize / 2 - 10, y1 - imageSize + 31 * imageScale);
-            context.pose().scale(imageScale, imageScale);
-            context.blit(RenderPipelines.GUI_TEXTURED, CAT_IMAGE, 0, 0, 0, 0, 418, 418, 418, 418);
-        } finally {
-            context.pose().popMatrix();
+    public static final HudElement ELEMENT = new HudElement("custom_sidebar", "Custom Sidebar") {
+        @Override
+        public HudLayoutEntry defaultLayout() {
+            return new HudLayoutEntry(HudLayoutEntry.Anchor.END, HudLayoutEntry.Anchor.CENTER, 0, 0, 1f);
         }
-    }
 
-    private static void drawCorner(GuiGraphicsExtractor context, int cx, int cy, int r, int quadrant) {
-        for (int x = -r; x <= r; x++) {
-            for (int y = -r; y <= r; y++) {
-                if (x * x + y * y <= (r - 1) * (r - 1)) {
-                    int drawX = cx + x;
-                    int drawY = cy + y;
-
-                    switch (quadrant) {
-                        case 1:
-                            if (x <= 0 && y >= 0)
-                                context.fill(drawX, drawY, drawX + 1, drawY + 1, COLOR_BACKGROUND);
-                            break;
-                        case 2:
-                            if (x <= 0 && y <= 0)
-                                context.fill(drawX, drawY, drawX + 1, drawY + 1, COLOR_BACKGROUND);
-                            break;
-                    }
-                }
-            }
+        @Override
+        public int maxWidth() {
+            return 300;
         }
-    }
 
-    private static void drawCornerOutline(GuiGraphicsExtractor context, int cx, int cy, int r, int quadrant) {
-        int outer = r * r;
-        int inner = (r - 1) * (r - 1);
-
-        for (int x = -r; x <= r; x++) {
-            for (int y = -r; y <= r; y++) {
-                int distSq = x * x + y * y;
-
-                if (distSq <= outer && distSq > inner) {
-                    int drawX = cx + x;
-                    int drawY = cy + y;
-
-                    if (Math.abs(x) == r) drawX += (x > 0 ? -1 : 1);
-                    if (Math.abs(y) == r) drawY += (y > 0 ? -1 : 1);
-
-                    switch (quadrant) {
-                        case 1:
-                            if (x <= 0 && y >= 0)
-                                context.fill(drawX, drawY, drawX + 1, drawY + 1, CustomSidebar.COLOR_MAIN);
-                            break;
-                        case 2:
-                            if (x <= 0 && y <= 0)
-                                context.fill(drawX, drawY, drawX + 1, drawY + 1, CustomSidebar.COLOR_MAIN);
-                            break;
-                    }
-                }
-            }
+        @Override
+        public int autoWidth(boolean preview) {
+            Minecraft mc = Minecraft.getInstance();
+            int max = 0;
+            for (Component line : lines(preview)) max = Math.max(max, Math.round(mc.font.width(line) * TEXT_SCALE));
+            return Math.max(MIN_AUTO_WIDTH, max + PADDING * 2);
         }
+
+        @Override
+        public int height(int width, boolean preview) {
+            return HEADER_HEIGHT + 1 + PADDING * 2 + rows(width, preview).size() * lineStep();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return ModConfig.INSTANCE.customSidebar && !ModConfig.INSTANCE.sideBarInHud;
+        }
+
+        @Override
+        public boolean isActive() {
+            return !StrayersSkyblockUtilsClient.isInSkyblock;
+        }
+
+        @Override
+        public void render(HudContext ctx) {
+            renderSidebar(ctx);
+        }
+    };
+
+    private static int lineStep() {
+        return Math.round(Minecraft.getInstance().font.lineHeight * TEXT_SCALE) + 3;
     }
 
-    public static void drawSidebarText(GuiGraphicsExtractor context, Minecraft client, int x1, int topPosition, int maxHeight, int padding) {
-        float textScale = 0.8f;
-
-        List<Component> lines = new java.util.ArrayList<>(SideBarUtils.getSidebarLines().stream()
+    private static List<Component> lines(boolean preview) {
+        List<Component> lines = new ArrayList<>(SideBarUtils.getSidebarLines().stream()
                 .filter(line -> !line.replaceAll("(?i)§.", "").trim().isEmpty()
                         && !line.replaceAll("§.", "").trim().matches("\\d{2}/\\d{2}/\\d{2} .*")
                         && !line.replaceAll("§.", "").trim().matches("www.hypixel.net"))
                 .map(line -> (Component) Component.literal(line))
                 .toList());
 
-        if (ModConfig.INSTANCE.sidebarCoords) {
+        if (lines.isEmpty() && preview) {
+            lines.add(Component.literal("§fLate Winter 19th"));
+            lines.add(Component.literal("§78:10am §b☽"));
+            lines.add(Component.literal("§7⏣ §5Void Sepulture"));
+            lines.add(Component.literal("§fPurse: §614,767"));
+            lines.add(Component.literal("§fBits: §b10"));
+        }
+
+        if (ModConfig.INSTANCE.sidebarCoords && Minecraft.getInstance().player != null) {
             lines.add(ModFunctions.getFormattedCoordinates());
         }
 
-        int maxTextWidth = lines.stream()
-                .mapToInt(line -> (int) (client.font.width(line) * textScale))
-                .max()
-                .orElse(0);
+        return lines;
+    }
 
-        sideBarWidth = Math.max(110, maxTextWidth + 7);
+    private static List<FormattedCharSequence> rows(int width, boolean preview) {
+        Minecraft mc = Minecraft.getInstance();
+        int wrap = Math.max(1, Math.round((width - PADDING * 2) / TEXT_SCALE));
+        List<FormattedCharSequence> rows = new ArrayList<>();
+        for (Component line : lines(preview)) rows.addAll(mc.font.split(line, wrap));
+        return rows;
+    }
 
-        if (lines.isEmpty()) return;
+    private static void renderSidebar(HudContext ctx) {
+        ModStyle.ColorStyle style = ModConfig.INSTANCE.colorStyle;
+        int accent = ModStyle.getColor(style, ModStyle.ColorType.MAIN);
+        int titleStart = ModStyle.getColor(style, ModStyle.ColorType.TITLE_START);
+        int titleEnd = ModStyle.getColor(style, ModStyle.ColorType.TITLE_END);
 
-        int scaledFontHeight = (int) (client.font.lineHeight * textScale);
-        int maxSpacePerLine = (maxHeight - padding) / lines.size();
-        int verticalOffset = maxSpacePerLine / 2 - scaledFontHeight / 2 + padding / 2;
+        ctx.panel(0, 0, ctx.width, ctx.height, CORNER_RADIUS, COLOR_BACKGROUND, accent);
 
-        for (int i = 0; i < lines.size(); i++) {
-            int x = x1 + padding / 2;
-            int y = topPosition + verticalOffset + (i * maxSpacePerLine);
+        ctx.text(SSU.gradientText(TITLE, titleStart, titleEnd), ctx.width / 2 - ctx.font.width(TITLE) / 2,
+                HEADER_HEIGHT / 2 - ctx.font.lineHeight / 2 + 1, 0xFFFFFFFF, true);
 
-            context.pose().pushMatrix();
-            try {
-                context.pose().translate(x, y);
-                context.pose().scale(textScale, textScale);
-                context.text(client.font, lines.get(i), 0, 0, 0xFFFFFFFF, true);
-            } finally {
-                context.pose().popMatrix();
-            }
+        int[] inner = ctx.inner(0, 0, ctx.width, ctx.height);
+        ctx.fill(inner[0], HEADER_HEIGHT, inner[2], HEADER_HEIGHT + 1, accent);
+
+        int step = lineStep();
+        float y = HEADER_HEIGHT + 1 + PADDING + 1;
+        for (FormattedCharSequence row : rows(ctx.width, ctx.preview)) {
+            ctx.scaledText(row, PADDING, y, TEXT_SCALE, 0xFFFFFFFF, true);
+            y += step;
         }
+
+        if (!ModConfig.INSTANCE.cat) return;
+
+        float catSize = CAT_TEXTURE_SIZE * CAT_SCALE;
+        ctx.overlay(CAT_IMAGE, ctx.width / 2f - catSize / 2f - 10, -catSize + 31 * CAT_SCALE, catSize, CAT_TEXTURE_SIZE);
     }
 }

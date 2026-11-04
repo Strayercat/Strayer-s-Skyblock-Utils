@@ -1,6 +1,7 @@
 package com.skyblockutils;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
@@ -10,6 +11,8 @@ import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.NpcFinder;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.party.PartyInviteNotifications;
+import com.skyblockutils.features.slayer.CarryTracker;
+import com.skyblockutils.features.hud.layout.HudEditScreen;
 import com.skyblockutils.utils.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -87,6 +90,44 @@ public class ModCommands {
                                 })
                         )
                 )
+                .then(ClientCommands.literal("carry")
+                        .then(ClientCommands.literal("stop")
+                                .executes(context -> {
+                                    CarryTracker.stop();
+                                    return 1;
+                                })
+                        )
+                        .then(ClientCommands.argument("username", StringArgumentType.word())
+                                .suggests((ctx, builder) -> {
+                                    var connection = client.getConnection();
+                                    if (connection != null) {
+                                        fuzzyMatch(
+                                                connection.getOnlinePlayers().stream()
+                                                        .map(entry -> entry.getProfile().name())
+                                                        .filter(name -> name.matches("^[A-Za-z0-9_]{1,16}$")),
+                                                builder.getRemaining()
+                                        ).forEach(builder::suggest);
+                                    }
+                                    return builder.buildFuture();
+                                })
+                                .then(ClientCommands.argument("amount", IntegerArgumentType.integer(1))
+                                        .then(ClientCommands.argument("price", StringArgumentType.greedyString())
+                                                .executes(context -> {
+                                                    CarryTracker.start(
+                                                            StringArgumentType.getString(context, "username"),
+                                                            IntegerArgumentType.getInteger(context, "amount"),
+                                                            StringArgumentType.getString(context, "price")
+                                                    );
+                                                    return 1;
+                                                })
+                                        )
+                                )
+                        )
+                )
+                .then(ClientCommands.literal("hud").executes(context -> {
+                    HudEditScreen.requested = true;
+                    return 1;
+                }))
                 .then(ClientCommands.literal("config").executes(context -> {
                     ClothConfigHandler.configScreenRequested = true;
                     return 1;

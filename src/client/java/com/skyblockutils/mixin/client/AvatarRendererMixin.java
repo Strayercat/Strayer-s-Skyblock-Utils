@@ -16,6 +16,6 @@ public class AvatarRendererMixin {
             at = @At("TAIL")
     )
     private void ssu$applyCustomCape(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
-        state.skin = CustomCapes.apply(entity.getUUID(), state.skin);
+        state.skin = CustomCapes.apply(entity.getUUID(), entity.getName().getString(), state.skin);
     }
 }

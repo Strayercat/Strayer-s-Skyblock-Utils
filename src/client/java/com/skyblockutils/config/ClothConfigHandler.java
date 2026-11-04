@@ -1,6 +1,7 @@
 package com.skyblockutils.config;
 
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
+import com.skyblockutils.features.hud.layout.HudEditScreen;
 import com.skyblockutils.features.voice.VoiceChat;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.utils.CustomEntry;
@@ -221,9 +222,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Master toggle for the SSU HUD"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudEnabled = v).build());
 
-        hud.addEntry(eb.startIntSlider(Component.literal("HUD Scale (%)"), ModConfig.INSTANCE.hudScale, 50, 100)
-                .setDefaultValue(100).setTooltip(Component.literal("Scale of the HUD elements"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.hudScale = v).build());
+        hud.addEntry(new CustomEntry()
+                .addButton(Component.literal("Edit HUD Layout"), 120, CustomEntry.Alignment.LEFT, () ->
+                                HudEditScreen.requested = true
+                        , Component.literal("Move, scale and resize every SSU HUD")));
 
         SubCategoryBuilder stats = eb.startSubCategory(Component.literal("Stats"))
                 .setTooltip(Component.literal("Server and client stat display"));
