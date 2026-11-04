@@ -179,15 +179,8 @@ public class SeparatedChatHud {
         int wrap = wrap();
         List<RenderLine> lines = new ArrayList<>();
         for (ChatLayout.ParsedMessage message : SeparatedChat.activeMessages()) lines.addAll(buildLines(message, textWidth, wrap, font));
+        if (lines.size() > HISTORY_VISIBLE_LINES) return lines.subList(lines.size() - HISTORY_VISIBLE_LINES, lines.size());
         return lines;
-    }
-
-    private static int liveTextWidth() {
-        Font font = Minecraft.getInstance().font;
-        int wrap = wrap();
-        int textWidth = 0;
-        for (ChatLayout.ParsedMessage message : SeparatedChat.activeMessages()) textWidth = Math.max(textWidth, ChatLayout.contentWidth(message, wrap, font));
-        return textWidth == 0 ? wrap : textWidth;
     }
 
     public static final HudElement ELEMENT = new HudElement("system_chat", "System Messages") {
@@ -213,15 +206,9 @@ public class SeparatedChatHud {
         }
 
         @Override
-        public int contentWidth(int layoutWidth, boolean preview) {
-            if (historyMode(preview)) return layoutWidth;
-            return Math.min(layoutWidth, liveTextWidth() + PADDING * 2);
-        }
-
-        @Override
         public int height(int width, boolean preview) {
             if (historyMode(preview)) return HISTORY_VISIBLE_LINES * LINE_HEIGHT + PADDING * 2;
-            return Math.max(1, liveLines(liveTextWidth()).size()) * LINE_HEIGHT + PADDING * 2;
+            return Math.max(1, liveLines(wrap()).size()) * LINE_HEIGHT + PADDING * 2;
         }
 
         @Override
@@ -258,7 +245,7 @@ public class SeparatedChatHud {
     private static void renderLive(HudContext ctx) {
         Minecraft mc = ctx.mc;
         Font font = ctx.font;
-        int textWidth = liveTextWidth();
+        int textWidth = wrap();
         List<RenderLine> lines = liveLines(textWidth);
         if (lines.isEmpty()) return;
 
