@@ -93,9 +93,19 @@ public class ModCommands {
                 .then(ClientCommands.literal("carry")
                         .then(ClientCommands.literal("stop")
                                 .executes(context -> {
-                                    CarryTracker.stop();
+                                    CarryTracker.stop(null);
                                     return 1;
                                 })
+                                .then(ClientCommands.argument("username", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> {
+                                            fuzzyMatch(CarryTracker.activeTargets().stream(), builder.getRemaining()).forEach(builder::suggest);
+                                            return builder.buildFuture();
+                                        })
+                                        .executes(context -> {
+                                            CarryTracker.stop(StringArgumentType.getString(context, "username"));
+                                            return 1;
+                                        })
+                                )
                         )
                         .then(ClientCommands.argument("username", StringArgumentType.word())
                                 .suggests((ctx, builder) -> {

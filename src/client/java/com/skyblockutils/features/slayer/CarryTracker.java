@@ -19,6 +19,11 @@ import net.minecraft.world.phys.Vec3;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,24 +38,63 @@ public class CarryTracker {
     private static final int HUD_PADDING = 6;
     private static final int HUD_CORNER_RADIUS = 5;
     private static final int BAR_HEIGHT = 5;
+    private static final int BAR_GAP = 2;
+    private static final int CARRY_GAP = 5;
     private static final int BAR_TRACK_COLOR = 0xFF1A1A1A;
 
-    private static boolean active = false;
-    private static String target = "";
-    private static Pattern bossPattern = null;
-    private static int amount = 0;
-    private static int completed = 0;
-    private static BigDecimal price = BigDecimal.ZERO;
+    private static final class Carry {
+        final String target;
+        final Pattern bossPattern;
+        final int amount;
+        final BigDecimal price;
+        int completed = 0;
+        boolean bossSeen = false;
+        int missingTicks = 0;
+        Vec3 lastBossPos = null;
+        float displayedProgress = 0f;
 
-    private static boolean bossSeen = false;
-    private static int missingTicks = 0;
-    private static Vec3 lastBossPos = null;
+        Carry(String target, int amount, BigDecimal price) {
+            this.target = target;
+            this.bossPattern = Pattern.compile("(?:^|[^A-Za-z0-9_])" + Pattern.quote(target) + "'s SLAYER BOSS", Pattern.CASE_INSENSITIVE);
+            this.amount = amount;
+            this.price = price;
+        }
+
+        Carry(String target, int amount, int completed) {
+            this(target, amount, BigDecimal.ZERO);
+            this.completed = completed;
+            this.displayedProgress = completed / (float) amount;
+        }
+
+        void resetBossState() {
+            bossSeen = false;
+            missingTicks = 0;
+            lastBossPos = null;
+        }
+
+        BigDecimal total() {
+            return price.multiply(BigDecimal.valueOf(amount));
+        }
+
+        BigDecimal owed() {
+            return price.multiply(BigDecimal.valueOf(completed));
+        }
+    }
+
+    private static final Map<String, Carry> carries = new LinkedHashMap<>();
+    private static final List<Carry> SAMPLE = List.of(new Carry("Player", 5, 2), new Carry("Teammate", 3, 1));
     private static ClientLevel lastLevel = null;
 
-    private static float displayedProgress = 0f;
+    private static String key(String username) {
+        return username.toLowerCase(Locale.ROOT);
+    }
 
     public static boolean isHudShowing() {
-        return active && StrayersSkyblockUtilsClient.isInSkyblock;
+        return !carries.isEmpty() && StrayersSkyblockUtilsClient.isInSkyblock;
+    }
+
+    public static List<String> activeTargets() {
+        return carries.values().stream().map(c -> c.target).toList();
     }
 
     public static void start(String username, int carryAmount, String priceInput) {
@@ -60,83 +104,87 @@ public class CarryTracker {
             return;
         }
 
-        if (active) {
-            ModFunctions.sendSystemMessage("§eReplaced carry for " + target + " (" + completed + "/" + amount + ")", false);
+        Carry previous = carries.get(key(username));
+        if (previous != null) {
+            ModFunctions.sendSystemMessage("§eReplaced carry for " + previous.target + " (" + previous.completed + "/" + previous.amount + ")", false);
         }
 
-        active = true;
-        target = username;
-        bossPattern = Pattern.compile("(?:^|[^A-Za-z0-9_])" + Pattern.quote(username) + "'s SLAYER BOSS", Pattern.CASE_INSENSITIVE);
-        amount = carryAmount;
-        completed = 0;
-        price = parsed;
-        displayedProgress = 0f;
-        resetBossState();
-        lastLevel = Minecraft.getInstance().level;
+        Carry carry = new Carry(username, carryAmount, parsed);
+        carries.put(key(username), carry);
+        if (carries.size() == 1) lastLevel = Minecraft.getInstance().level;
 
         ModFunctions.sendSystemMessage("§aStarted carrying " + username + ": " + carryAmount + "x at "
-                + formatCoins(parsed) + " each (" + formatCoins(total()) + " total)", false);
+                + formatCoins(parsed) + " each (" + formatCoins(carry.total()) + " total)", false);
     }
 
-    public static void stop() {
-        if (!active) {
+    public static void stop(String username) {
+        if (carries.isEmpty()) {
             ModFunctions.sendSystemMessage("§cYou aren't carrying anyone.", false);
             return;
         }
-        ModFunctions.sendSystemMessage("§cStopped carrying " + target + " (" + completed + "/" + amount + ", "
-                + formatCoins(price.multiply(BigDecimal.valueOf(completed))) + " owed)", false);
-        reset();
+
+        Carry carry;
+        if (username == null) {
+            if (carries.size() > 1) {
+                ModFunctions.sendSystemMessage("§cYou're carrying multiple players, use /ssu carry stop <username> ("
+                        + String.join(", ", activeTargets()) + ")", false);
+                return;
+            }
+            carry = carries.values().iterator().next();
+        } else {
+            carry = carries.get(key(username));
+            if (carry == null) {
+                ModFunctions.sendSystemMessage("§cYou aren't carrying " + username + ".", false);
+                return;
+            }
+        }
+
+        carries.remove(key(carry.target));
+        ModFunctions.sendSystemMessage("§cStopped carrying " + carry.target + " (" + carry.completed + "/" + carry.amount + ", "
+                + formatCoins(carry.owed()) + " owed)", false);
     }
 
     public static void reset() {
-        active = false;
-        target = "";
-        bossPattern = null;
-        amount = 0;
-        completed = 0;
-        price = BigDecimal.ZERO;
-        displayedProgress = 0f;
-        resetBossState();
+        carries.clear();
         lastLevel = null;
     }
 
-    private static void resetBossState() {
-        bossSeen = false;
-        missingTicks = 0;
-        lastBossPos = null;
-    }
-
     public static void tick(Minecraft client) {
-        if (!active || client.level == null || client.player == null) return;
+        if (carries.isEmpty() || client.level == null || client.player == null) return;
 
         if (client.level != lastLevel) {
             lastLevel = client.level;
-            resetBossState();
+            carries.values().forEach(Carry::resetBossState);
             return;
         }
 
-        Entity boss = findBossTag(client.level);
-        if (boss != null) {
-            bossSeen = true;
-            missingTicks = 0;
-            lastBossPos = boss.position();
-            return;
+        List<Carry> finished = new ArrayList<>();
+        for (Carry carry : carries.values()) {
+            Entity boss = findBossTag(client.level, carry.bossPattern);
+            if (boss != null) {
+                carry.bossSeen = true;
+                carry.missingTicks = 0;
+                carry.lastBossPos = boss.position();
+                continue;
+            }
+
+            if (!carry.bossSeen) continue;
+
+            if (carry.lastBossPos != null && client.player.position().distanceToSqr(carry.lastBossPos) > MAX_TRACK_DISTANCE_SQ) {
+                carry.resetBossState();
+                continue;
+            }
+
+            if (++carry.missingTicks >= MISSING_TICKS_TO_COMPLETE) {
+                carry.resetBossState();
+                if (completeCarry(client, carry)) finished.add(carry);
+            }
         }
 
-        if (!bossSeen) return;
-
-        if (lastBossPos != null && client.player.position().distanceToSqr(lastBossPos) > MAX_TRACK_DISTANCE_SQ) {
-            resetBossState();
-            return;
-        }
-
-        if (++missingTicks >= MISSING_TICKS_TO_COMPLETE) {
-            resetBossState();
-            completeCarry(client);
-        }
+        for (Carry carry : finished) carries.remove(key(carry.target));
     }
 
-    private static Entity findBossTag(ClientLevel level) {
+    private static Entity findBossTag(ClientLevel level, Pattern bossPattern) {
         for (Entity entity : level.entitiesForRendering()) {
             Component name = entity.getCustomName();
             if (name == null) continue;
@@ -146,29 +194,25 @@ public class CarryTracker {
         return null;
     }
 
-    private static void completeCarry(Minecraft client) {
-        completed++;
+    private static boolean completeCarry(Minecraft client, Carry carry) {
+        carry.completed++;
 
-        if (completed < amount) {
-            ModFunctions.sendSystemMessage("§aCarry completed for " + target + " (" + completed + "/" + amount + ")", false);
-            return;
+        if (carry.completed < carry.amount) {
+            ModFunctions.sendSystemMessage("§aCarry completed for " + carry.target + " (" + carry.completed + "/" + carry.amount + ")", false);
+            return false;
         }
 
-        String owed = formatCoins(total());
+        String owed = formatCoins(carry.total());
         ModFunctions.showTitle(client, Component.literal("COLLECT PAYMENT")
                 .withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 60, true);
         OnScreenNotification.builder()
                 .title("Carries Completed")
-                .subtitle("Finished " + amount + "/" + amount + " carries for " + target + "\nCollect " + owed + " coins")
+                .subtitle("Finished " + carry.amount + "/" + carry.amount + " carries for " + carry.target + "\nCollect " + owed + " coins")
                 .tickTime(200)
                 .withSound(false)
                 .send();
-        ModFunctions.sendSystemMessage("§aAll " + amount + " carries done for " + target + "! Collect §6" + owed + " coins", false);
-        reset();
-    }
-
-    private static BigDecimal total() {
-        return price.multiply(BigDecimal.valueOf(amount));
+        ModFunctions.sendSystemMessage("§aAll " + carry.amount + " carries done for " + carry.target + "! Collect §6" + owed + " coins", false);
+        return true;
     }
 
     public static BigDecimal parsePrice(String input) {
@@ -239,14 +283,19 @@ public class CarryTracker {
 
         @Override
         public int autoWidth(boolean preview) {
-            return Math.max(HUD_MIN_WIDTH, Minecraft.getInstance().font.width(header(preview)) + HUD_PADDING * 2);
+            Minecraft mc = Minecraft.getInstance();
+            int width = HUD_MIN_WIDTH;
+            for (Carry carry : shown(preview)) width = Math.max(width, mc.font.width(header(carry)) + HUD_PADDING * 2);
+            return width;
         }
 
         @Override
         public int height(int width, boolean preview) {
             Minecraft mc = Minecraft.getInstance();
-            int lines = Math.max(1, mc.font.split(header(preview), Math.max(1, width - HUD_PADDING * 2)).size());
-            return HUD_PADDING + lines * (mc.font.lineHeight + 1) + 2 + BAR_HEIGHT + HUD_PADDING;
+            List<Carry> list = shown(preview);
+            int height = HUD_PADDING * 2 + CARRY_GAP * Math.max(0, list.size() - 1);
+            for (Carry carry : list) height += carryHeight(mc, carry, width);
+            return height;
         }
 
         @Override
@@ -262,21 +311,26 @@ public class CarryTracker {
         }
     };
 
-    private static Component header(boolean preview) {
-        boolean sample = preview && !active;
-        String name = sample ? "Player" : target;
-        int done = sample ? 2 : completed;
-        int total = sample ? 5 : amount;
+    private static List<Carry> shown(boolean preview) {
+        if (preview && carries.isEmpty()) return SAMPLE;
+        return new ArrayList<>(carries.values());
+    }
+
+    private static int carryHeight(Minecraft mc, Carry carry, int width) {
+        int lines = Math.max(1, mc.font.split(header(carry), Math.max(1, width - HUD_PADDING * 2)).size());
+        return lines * (mc.font.lineHeight + 1) + BAR_GAP + BAR_HEIGHT;
+    }
+
+    private static Component header(Carry carry) {
         int text = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT);
         return Component.empty()
                 .append(Component.literal("Carrying ").withColor(ModStyle.COLOR_TITLE))
-                .append(Component.literal(name).withColor(text))
+                .append(Component.literal(carry.target).withColor(text))
                 .append(Component.literal(" - ").withColor(ModStyle.COLOR_SUBTITLE))
-                .append(Component.literal(done + "/" + total).withColor(ModStyle.COLOR_TITLE));
+                .append(Component.literal(carry.completed + "/" + carry.amount).withColor(ModStyle.COLOR_TITLE));
     }
 
     private static void renderHud(HudContext ctx) {
-        boolean sample = ctx.preview && !active;
         ModStyle.ColorStyle style = ModConfig.INSTANCE.colorStyle;
         int accent = ModStyle.getColor(style, ModStyle.ColorType.MAIN);
         int gradStart = 0xFF000000 | ModStyle.getColor(style, ModStyle.ColorType.TITLE_START);
@@ -285,34 +339,29 @@ public class CarryTracker {
         ctx.panel(0, 0, ctx.width, ctx.height, HUD_CORNER_RADIUS, ModStyle.COLOR_BACKGROUND, accent);
 
         int lineStep = ctx.font.lineHeight + 1;
-        int y = HUD_PADDING;
-        for (FormattedCharSequence line : ctx.wrap(header(ctx.preview), ctx.width - HUD_PADDING * 2)) {
-            ctx.text(line, ctx.width / 2 - ctx.font.width(line) / 2, y, 0xFFFFFFFF, true);
-            y += lineStep;
-        }
-
         int barX1 = HUD_PADDING;
         int barX2 = ctx.width - HUD_PADDING;
-        int barY1 = ctx.height - HUD_PADDING - BAR_HEIGHT;
-        int barY2 = barY1 + BAR_HEIGHT;
         int barWidth = barX2 - barX1;
+        int y = HUD_PADDING;
 
-        float progress;
-        if (sample) {
-            progress = 0.4f;
-        } else {
-            float targetProgress = amount <= 0 ? 0f : Math.min(1f, completed / (float) amount);
-            displayedProgress += (targetProgress - displayedProgress) * 0.15f;
-            if (Math.abs(targetProgress - displayedProgress) < 0.001f) displayedProgress = targetProgress;
-            progress = displayedProgress;
-        }
+        for (Carry carry : shown(ctx.preview)) {
+            for (FormattedCharSequence line : ctx.wrap(header(carry), ctx.width - HUD_PADDING * 2)) {
+                ctx.text(line, ctx.width / 2 - ctx.font.width(line) / 2, y, 0xFFFFFFFF, true);
+                y += lineStep;
+            }
 
-        ctx.fill(barX1, barY1, barX2, barY2, BAR_TRACK_COLOR);
+            y += BAR_GAP;
+            float target = carry.amount <= 0 ? 0f : Math.min(1f, carry.completed / (float) carry.amount);
+            carry.displayedProgress += (target - carry.displayedProgress) * 0.15f;
+            if (Math.abs(target - carry.displayedProgress) < 0.001f) carry.displayedProgress = target;
 
-        int filled = Math.round(barWidth * progress);
-        for (int i = 0; i < filled; i++) {
-            float t = barWidth <= 1 ? 0f : i / (float) (barWidth - 1);
-            ctx.fill(barX1 + i, barY1, barX1 + i + 1, barY2, lerpColor(gradStart, gradEnd, t));
+            ctx.fill(barX1, y, barX2, y + BAR_HEIGHT, BAR_TRACK_COLOR);
+            int filled = Math.round(barWidth * carry.displayedProgress);
+            for (int i = 0; i < filled; i++) {
+                float t = barWidth <= 1 ? 0f : i / (float) (barWidth - 1);
+                ctx.fill(barX1 + i, y, barX1 + i + 1, y + BAR_HEIGHT, lerpColor(gradStart, gradEnd, t));
+            }
+            y += BAR_HEIGHT + CARRY_GAP;
         }
     }
 

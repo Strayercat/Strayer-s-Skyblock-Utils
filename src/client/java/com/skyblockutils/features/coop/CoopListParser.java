@@ -1,8 +1,6 @@
 package com.skyblockutils.features.coop;
 
 import com.skyblockutils.ModFunctions;
-import com.skyblockutils.features.guild.GuildListParser;
-import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -22,10 +20,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CoopListParser {
-    private static final long JOIN_DELAY_MS = 1_500;
     private static final long CHANGE_DELAY_MS = 1_000;
     private static final long MIN_INTERVAL_MS = 5_000;
-    private static final long OPEN_WINDOW_MS = 2_500;
+    private static final long OPEN_WINDOW_MS = 1_500;
+    private static final long RETRY_DELAY_MS = 500;
+    private static final int MAX_ATTEMPTS = 3;
     private static final long CONTENT_WINDOW_MS = 3_000;
     private static final long SOUND_GRACE_MS = 300;
     private static final Pattern MEMBER = Pattern.compile("^(?:\\[[^]]+] )*(\\w{3,16})$");
@@ -34,6 +33,8 @@ public class CoopListParser {
 
     private static ClientLevel lastLevel;
     private static long pendingAt = -1;
+    private static boolean urgent = false;
+    private static int attempts = 0;
     private static long lastRequest = 0;
     private static long expectOpenUntil = 0;
     private static long expectContentUntil = 0;
@@ -45,21 +46,30 @@ public class CoopListParser {
 
         if (client.level != lastLevel) {
             lastLevel = client.level;
-            if (client.level != null) schedule(now + JOIN_DELAY_MS);
+            if (client.level != null) {
+                pendingAt = now;
+                urgent = true;
+                attempts = 0;
+            }
         }
 
         if (containerId != -1 && now > expectContentUntil) closeHidden(client);
         if (containerId == -1 && expectOpenUntil != 0 && now > expectOpenUntil) {
             expectOpenUntil = 0;
             muteSoundsUntil = 0;
+            if (attempts < MAX_ATTEMPTS) {
+                pendingAt = now + RETRY_DELAY_MS;
+                urgent = true;
+            }
         }
 
         if (pendingAt < 0 || now < pendingAt) return;
-        if (now - lastRequest < MIN_INTERVAL_MS) return;
+        if (!urgent && now - lastRequest < MIN_INTERVAL_MS) return;
+        if (expectOpenUntil != 0 || containerId != -1) return;
         if (client.gui.screen() != null || client.getConnection() == null) return;
         if (ModFunctions.isWorldLoaded()) return;
-        if (Boolean.TRUE.equals(ModFunctions.isInDungeons(client))) return;
-        if (PartyListParser.isExpecting() || GuildListParser.isExpecting()) return;
+        if (!Boolean.TRUE.equals(ModFunctions.isInSkyblock(client))) return;
+        if (ModFunctions.isInDungeons(client)) return;
 
         request(client, now);
     }
@@ -69,6 +79,7 @@ public class CoopListParser {
         String lower = message.toLowerCase(Locale.ROOT);
         if (!lower.contains("co-op") && !lower.contains("coop")) return;
         if (lower.contains("joined") || lower.contains("left") || lower.contains("kicked") || lower.contains("removed")) {
+            attempts = 0;
             schedule(System.currentTimeMillis() + CHANGE_DELAY_MS);
         }
     }
@@ -81,6 +92,7 @@ public class CoopListParser {
             return false;
         }
         expectOpenUntil = 0;
+        attempts = MAX_ATTEMPTS;
         containerId = id;
         expectContentUntil = System.currentTimeMillis() + CONTENT_WINDOW_MS;
         return true;
@@ -105,6 +117,8 @@ public class CoopListParser {
         members.clear();
         lastLevel = null;
         pendingAt = -1;
+        urgent = false;
+        attempts = 0;
         expectOpenUntil = 0;
         containerId = -1;
         muteSoundsUntil = 0;
@@ -117,9 +131,12 @@ public class CoopListParser {
 
     private static void request(Minecraft client, long now) {
         pendingAt = -1;
+        urgent = false;
+        attempts++;
         lastRequest = now;
         expectOpenUntil = now + OPEN_WINDOW_MS;
         muteSoundsUntil = now + OPEN_WINDOW_MS + CONTENT_WINDOW_MS;
+        if (client.getConnection() == null) return;
         client.getConnection().sendCommand("coopmanage");
     }
 
