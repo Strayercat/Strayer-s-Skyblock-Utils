@@ -70,6 +70,7 @@ public class SeparatedChat {
     }
 
     private static boolean isUserMessage(String clean) {
+        if (clean.startsWith("From stash: ")) return false;
         if (USER_SENT_MESSAGE_PATTERN.matcher(clean).matches()) return true;
         if (LEVEL_PREFIX_PATTERN.matcher(clean).matches() && USER_SHOW_PATTERN.matcher(clean).matches()) return true;
 

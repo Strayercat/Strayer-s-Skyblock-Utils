@@ -80,6 +80,7 @@ public class ChatFilterDefinitions {
         general.addEntry(new FilterEntry("playingOnProfile", "Playing on Profile", "Filter 'You are playing on profile:' messages", "^You are playing on profile: .+$"));
         general.addEntry(new FilterEntry("profileId", "Profile ID", "Filter 'Profile ID:' messages", "^Profile ID: .+$"));
         general.addEntry(new FilterEntry("unclaimedEventRewards", "Unclaimed Event Rewards", "Filter unclaimed event rewards messages", "^(You have \\d+ unclaimed event rewards?!|>>> CLICK HERE to claim! <<<|Event rewards are deleted after \\d+ SkyBlock years!)$"));
+        general.addEntry(new FilterEntry("stashPickup", "Stash Pickup", "Filter 'From stash: [item]' messages", "^From stash: .+$"));
         general.addEntry(new FilterEntry("stashMessages", "Stash Messages", "Filter every line of the 'You have X items/materials stashed away!' reminders", "^\\s*(?:You have [\\d,]+ (?:items?|materials?) stashed away!|\\(This totals [\\d,]+ types? of (?:items?|materials?) stashed!\\)|>>> CLICK HERE to pick (?:them|it) up! <<<)(?:\\s*\\n\\s*(?:You have [\\d,]+ (?:items?|materials?) stashed away!|\\(This totals [\\d,]+ types? of (?:items?|materials?) stashed!\\)|>>> CLICK HERE to pick (?:them|it) up! <<<))*\\s*$"));
         general.addEntry(new FilterEntry("deathMessages", "Death Messages", "Filter death messages", "^☠ .+$"));
         general.addEntry(new FilterEntry("coinsLostOnDeath", "Coins Lost on Death", "Filter 'You died and lost X coins!' messages", "^You died and lost [\\d.,]+ coins!$"));
