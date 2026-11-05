@@ -20,6 +20,10 @@ public class ChatModifications {
     private static final Pattern CHAT_SENDER = Pattern.compile(
             "^(?:(Guild|Party|Officer|Co-op) > |(From) )?(?:\\[\\d+] )?(?:[^\\w\\s\\[]+ )?(?:\\[([^]]+)] )*(\\w{3,16})(?: \\[[^]]+])?: ");
 
+    private static final Pattern HEART = Pattern.compile("<3(?!\\d)");
+    private static final Pattern SHRUG = Pattern.compile("(?<!\\S)\\\\o/(?!\\S)");
+    private static final Pattern WAVE = Pattern.compile("(?<!\\S)[oO]/(?!\\S)");
+
     public static final int MAX_MESSAGE_LENGTH = 256;
 
     public static String prepareOutgoingChat(String message) {
@@ -48,10 +52,10 @@ public class ChatModifications {
     }
 
     public static String fancyEmotes(String message) {
-        return ModConfig.INSTANCE.fancyEmotes ? message.replace("<3", "❤")
-                .replace("\\o/", "¯\\_(ツ)_/¯")
-                .replace("o/", "( ﾟ◡ﾟ)/")
-                .replace("O/", "( ﾟ◡ﾟ)/") : message;
+        if (!ModConfig.INSTANCE.fancyEmotes) return message;
+        String result = HEART.matcher(message).replaceAll("❤");
+        result = SHRUG.matcher(result).replaceAll(Matcher.quoteReplacement("¯\\_(ツ)_/¯"));
+        return WAVE.matcher(result).replaceAll(Matcher.quoteReplacement("( ﾟ◡ﾟ)/"));
     }
 
     public static Component withChatBadge(Component message) {
