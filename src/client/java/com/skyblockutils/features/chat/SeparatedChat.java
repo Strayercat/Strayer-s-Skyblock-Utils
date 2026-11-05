@@ -2,7 +2,10 @@ package com.skyblockutils.features.chat;
 
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.hud.SeparatedChatHud;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,9 +26,14 @@ public class SeparatedChat {
 
     public record HistoryEntry(ChatLayout.ParsedMessage message, String searchText) {}
 
+    private static String lastClean = null;
+    private static ChatLayout.ParsedMessage lastBase = null;
+    private static int duplicateCount = 1;
+
     private static class SystemChat {
-        private final ChatLayout.ParsedMessage message;
+        private ChatLayout.ParsedMessage message;
         private int tickTime = 0;
+        private ChatLayout.ParsedMessage base;
 
         SystemChat(ChatLayout.ParsedMessage message) {
             this.message = message;
@@ -56,13 +64,86 @@ public class SeparatedChat {
     }
 
     private static void add(Component message, String cleanMessage) {
+        if (ModConfig.INSTANCE.systemDuplicateCounter && cleanMessage.equals(lastClean) && lastBase != null && !history.isEmpty()) {
+            addDuplicate(cleanMessage);
+            return;
+        }
+
         ChatLayout.ParsedMessage parsed = ChatLayout.parse(message);
+        lastClean = cleanMessage;
+        lastBase = parsed;
+        duplicateCount = 1;
         HistoryEntry entry = new HistoryEntry(parsed, cleanMessage.toLowerCase(Locale.ROOT));
-        systemChats.add(new SystemChat(parsed));
+        SystemChat chat = new SystemChat(parsed);
+        chat.base = parsed;
+        systemChats.add(chat);
         history.add(entry);
         if (history.size() > MAX_HISTORY) history.removeFirst();
 
         SeparatedChatHud.onMessageAdded(entry);
+    }
+
+    private static void addDuplicate(String cleanMessage) {
+        duplicateCount++;
+        ChatLayout.ParsedMessage counted = withCounter(lastBase, duplicateCount);
+        history.set(history.size() - 1, new HistoryEntry(counted, cleanMessage.toLowerCase(Locale.ROOT)));
+
+        SystemChat latest = systemChats.isEmpty() ? null : systemChats.getLast();
+        if (latest != null && latest.base == lastBase) {
+            latest.message = counted;
+            latest.tickTime = 0;
+        } else {
+            SystemChat chat = new SystemChat(counted);
+            chat.base = lastBase;
+            systemChats.add(chat);
+        }
+    }
+
+    private static ChatLayout.ParsedMessage withCounter(ChatLayout.ParsedMessage base, int count) {
+        List<ChatLayout.ParsedLine> lines = new ArrayList<>(base.lines());
+        for (int i = lines.size() - 1; i >= 0; i--) {
+            ChatLayout.ParsedLine line = lines.get(i);
+            if (line.type() == ChatLayout.LineType.SEPARATOR) continue;
+            lines.set(i, new ChatLayout.ParsedLine(line.type(), line.component().copy().append(counterComponent(count)),
+                    line.style(), line.codes(), line.separatorChar()));
+            break;
+        }
+        return new ChatLayout.ParsedMessage(lines);
+    }
+
+    private static Component counterComponent(int count) {
+        String text = " " + ModConfig.INSTANCE.systemDuplicateCounterText.replace("$", String.valueOf(count));
+        Style base = Style.EMPTY.withColor(ModConfig.INSTANCE.systemDuplicateCounterColor & 0xFFFFFF);
+        MutableComponent result = Component.empty();
+        Style style = base;
+        StringBuilder segment = new StringBuilder();
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if ((c == '&' || c == '§') && i + 1 < text.length()) {
+                ChatFormatting format = ChatFormatting.getByCode(Character.toLowerCase(text.charAt(i + 1)));
+                if (format != null) {
+                    if (!segment.isEmpty()) {
+                        result.append(Component.literal(segment.toString()).setStyle(style));
+                        segment.setLength(0);
+                    }
+                    style = switch (format) {
+                        case RESET -> base;
+                        case OBFUSCATED -> style.withObfuscated(true);
+                        case BOLD -> style.withBold(true);
+                        case STRIKETHROUGH -> style.withStrikethrough(true);
+                        case UNDERLINE -> style.withUnderlined(true);
+                        case ITALIC -> style.withItalic(true);
+                        default -> Style.EMPTY.withColor(format);
+                    };
+                    i++;
+                    continue;
+                }
+            }
+            segment.append(c);
+        }
+        if (!segment.isEmpty()) result.append(Component.literal(segment.toString()).setStyle(style));
+        return result;
     }
 
     private static String clean(Component message) {

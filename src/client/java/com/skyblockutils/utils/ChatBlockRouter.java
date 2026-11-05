@@ -206,7 +206,7 @@ public final class ChatBlockRouter {
                     lines.add(join(parts));
                     parts.clear();
                 }
-                if (!split[i].isEmpty()) parts.add(Component.literal(split[i]).withStyle(style));
+                if (!split[i].isEmpty()) parts.add(Component.literal(split[i]).setStyle(style));
             }
             return Optional.empty();
         }, Style.EMPTY);

@@ -30,9 +30,9 @@ public class ClothConfigHandler {
         ConfigEntryBuilder eb = builder.entryBuilder();
 
         buildGeneralCategory(builder, eb);
-        buildPerSkillCategory(builder, eb);
         buildHudCategory(builder, eb);
-        buildChatFiltersCategory(builder, eb);
+        buildChatCategory(builder, eb);
+        buildPerSkillCategory(builder, eb);
         buildEventsCategory(builder, eb);
         buildVoiceChatCategory(builder, eb);
 
@@ -58,18 +58,13 @@ public class ClothConfigHandler {
                 })
                 .setSaveConsumer(v -> ModConfig.INSTANCE.colorStyle = v).requireRestart().build());
 
-        general.addEntry(eb.startEnumSelector(Component.literal("Notification Style"), ModStyle.NotificationStyle.class, ModConfig.INSTANCE.notificationStyle)
-                .setDefaultValue(ModStyle.NotificationStyle.ROUNDED)
-                .setEnumNameProvider(value -> {
-                    ModStyle.NotificationStyle style = (ModStyle.NotificationStyle) value;
-                    int rgb = ModConfig.INSTANCE.colorStyle.getColor(ModStyle.ColorType.MAIN);
-                    String hudStyle = switch (style) {
-                        case ModStyle.NotificationStyle.ROUNDED -> "Modern";
-                        case ModStyle.NotificationStyle.LEGACY -> "Legacy";
-                    };
-                    return Component.literal(hudStyle).withColor(rgb);
-                })
-                .setSaveConsumer(v -> ModConfig.INSTANCE.notificationStyle = v).build());
+        general.addEntry(eb.startBooleanToggle(Component.literal("Party Glow"), ModConfig.INSTANCE.partyGlow)
+                .setDefaultValue(true).setTooltip(Component.literal("Whether or not party members should automatically glow"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.partyGlow = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Component.literal("Daily Reminders"), ModConfig.INSTANCE.dailyReminders)
+                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to be reminded about an island's dailies upon entering"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.dailyReminders = v).build());
 
         general.addEntry(eb.startBooleanToggle(Component.literal("Party Invite Notifications"), ModConfig.INSTANCE.partyInviteNotifications)
                 .setDefaultValue(true).setTooltip(Component.literal("Sends party invites as a notification instead of a chat message"))
@@ -79,17 +74,9 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Sends a clickable notification to invite whoever boops you"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.boopPartyInvites = v).build());
 
-        general.addEntry(eb.startBooleanToggle(Component.literal("Separate Messages"), ModConfig.INSTANCE.separateMessage)
-                .setDefaultValue(false).setTooltip(Component.literal("Separates server sent messages and user sent messages in 2 different HUDs"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.separateMessage = v).build());
-
         general.addEntry(eb.startBooleanToggle(Component.literal("Cancel Arm Swing"), ModConfig.INSTANCE.cancelSwings)
                 .setDefaultValue(false).setTooltip(Component.literal("Removes the first person arm swing animation"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.cancelSwings = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Fancy Emotes"), ModConfig.INSTANCE.fancyEmotes)
-                .setDefaultValue(true).setTooltip(Component.literal("Transforms <3 into ♥ and such"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.fancyEmotes = v).build());
 
         general.addEntry(eb.startBooleanToggle(Component.literal("Auto Hoppity Eggs"), ModConfig.INSTANCE.autoHoppityEggs)
                 .setDefaultValue(false).setTooltip(Component.literal("Whether to instantly collect hoppity eggs or not"))
@@ -99,46 +86,14 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Whether printing your coordinates (via the keybind) should also send the Skyblock location"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.coordinatesSendLocation = v).build());
 
-        general.addEntry(eb.startBooleanToggle(Component.literal("Stat Commands"), ModConfig.INSTANCE.statCommands)
-                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to enable !tps !fps and !ping"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.statCommands = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Chat Commands"), ModConfig.INSTANCE.chatCommands)
-                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to enable !gay !furry !sus and such commands"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.chatCommands = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Custom Sidebar"), ModConfig.INSTANCE.customSidebar)
-                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to replace the vanilla scoreboard (sidebar) with a custom one"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.customSidebar = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Sidebar Coordinates"), ModConfig.INSTANCE.sidebarCoords)
-                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to show coordinates in the custom sidebar"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.sidebarCoords = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Daily Reminders"), ModConfig.INSTANCE.dailyReminders)
-                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to be reminded about an island's dailies upon entering"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.dailyReminders = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Cat"), ModConfig.INSTANCE.cat)
-                .setDefaultValue(false).setTooltip(Component.literal("Cat or no cat?"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.cat = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Party Glow"), ModConfig.INSTANCE.partyGlow)
-                .setDefaultValue(true).setTooltip(Component.literal("Whether or not party members should automatically glow"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.partyGlow = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Screenshot HUD"), ModConfig.INSTANCE.screenshotHud)
-                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to use SSU's custom screenshot hud"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.screenshotHud = v).build());
-
-        general.addEntry(eb.startBooleanToggle(Component.literal("Ragebait button"), true)
-                .setDefaultValue(true).setTooltip(Component.literal("No matter how much you toggle it, whenever you come back it'll always be true"))
-                .build());
-
         general.addEntry(new CustomEntry()
                 .addButton(Component.literal("Glowing Players GUI"), 120, CustomEntry.Alignment.LEFT, () ->
                                 GlowingPlayersGui.configScreenRequested = true
                         , Component.literal("Open the glowing players config GUI")));
+
+        general.addEntry(eb.startBooleanToggle(Component.literal("Ragebait button"), true)
+                .setDefaultValue(true).setTooltip(Component.literal("No matter how much you toggle it, whenever you come back it'll always be true"))
+                .build());
     }
 
     // Per skill
@@ -218,14 +173,21 @@ public class ClothConfigHandler {
     public static void buildHudCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory hud = builder.getOrCreateCategory(Component.literal("HUD Settings"));
 
-        hud.addEntry(eb.startBooleanToggle(Component.literal("HUD Enabled"), ModConfig.INSTANCE.hudEnabled)
-                .setDefaultValue(true).setTooltip(Component.literal("Master toggle for the SSU HUD"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.hudEnabled = v).build());
-
         hud.addEntry(new CustomEntry()
                 .addButton(Component.literal("Edit HUD Layout"), 120, CustomEntry.Alignment.LEFT, () ->
                                 HudEditScreen.requested = true
                         , Component.literal("Move, scale and resize every SSU HUD")));
+
+        hud.addEntry(eb.startBooleanToggle(Component.literal("Cat"), ModConfig.INSTANCE.cat)
+                .setDefaultValue(false).setTooltip(Component.literal("Cat or no cat?"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.cat = v).build());
+
+        SubCategoryBuilder ssuHud = eb.startSubCategory(Component.literal("SSU HUD"))
+                .setTooltip(Component.literal("The main SSU HUD shown while holding the HUD key"));
+
+        ssuHud.add(eb.startBooleanToggle(Component.literal("HUD Enabled"), ModConfig.INSTANCE.hudEnabled)
+                .setDefaultValue(true).setTooltip(Component.literal("Master toggle for the SSU HUD"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.hudEnabled = v).build());
 
         SubCategoryBuilder stats = eb.startSubCategory(Component.literal("Stats"))
                 .setTooltip(Component.literal("Server and client stat display"));
@@ -246,7 +208,7 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Show your current coordinates"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudCoords = v).build());
 
-        hud.addEntry(stats.build());
+        ssuHud.add(stats.build());
 
         SubCategoryBuilder time = eb.startSubCategory(Component.literal("Time"))
                 .setTooltip(Component.literal("Real-time clock display"));
@@ -259,7 +221,7 @@ public class ClothConfigHandler {
                 .setDefaultValue("24H").setTooltip(Component.literal("Whether to display time in 12-hour or 24-hour format"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudTime12hFormat = v.equals("12H")).build());
 
-        hud.addEntry(time.build());
+        ssuHud.add(time.build());
 
         SubCategoryBuilder info = eb.startSubCategory(Component.literal("Info"))
                 .setTooltip(Component.literal("Contextual info overlays"));
@@ -276,28 +238,112 @@ public class ClothConfigHandler {
                 .setDefaultValue(false).setTooltip(Component.literal("Also show party info while inside a dungeon"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudPartyInfoInDungeons = v).build());
 
-        info.add(eb.startBooleanToggle(Component.literal("Scoreboard In HUD"), ModConfig.INSTANCE.sideBarInHud)
-                .setDefaultValue(false).setTooltip(Component.literal("Show scoreboard content in the HUD instead of the sidebar"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.sideBarInHud = v).build());
-
         info.add(eb.startBooleanToggle(Component.literal("Island Fun Facts"), ModConfig.INSTANCE.hudIslandFunFact)
                 .setDefaultValue(true).setTooltip(Component.literal("Display a fun fact when you're on your island"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.hudIslandFunFact = v).build());
 
-        hud.addEntry(info.build());
+        ssuHud.add(info.build());
+
+        hud.addEntry(ssuHud.build());
+
+        SubCategoryBuilder sidebar = eb.startSubCategory(Component.literal("Sidebar"))
+                .setTooltip(Component.literal("Scoreboard replacement settings"));
+
+        sidebar.add(eb.startBooleanToggle(Component.literal("Custom Sidebar"), ModConfig.INSTANCE.customSidebar)
+                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to replace the vanilla scoreboard (sidebar) with a custom one"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.customSidebar = v).build());
+
+        sidebar.add(eb.startBooleanToggle(Component.literal("Sidebar Coordinates"), ModConfig.INSTANCE.sidebarCoords)
+                .setDefaultValue(false).setTooltip(Component.literal("Whether or not to show coordinates in the custom sidebar"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.sidebarCoords = v).build());
+
+        sidebar.add(eb.startBooleanToggle(Component.literal("Scoreboard In HUD"), ModConfig.INSTANCE.sideBarInHud)
+                .setDefaultValue(false).setTooltip(Component.literal("Show scoreboard content in the HUD instead of the sidebar"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.sideBarInHud = v).build());
+
+        hud.addEntry(sidebar.build());
+
+        SubCategoryBuilder overlays = eb.startSubCategory(Component.literal("Notifications & Overlays"))
+                .setTooltip(Component.literal("Notifications, screenshot previews and the voice chat HUD"));
+
+        overlays.add(eb.startEnumSelector(Component.literal("Notification Style"), ModStyle.NotificationStyle.class, ModConfig.INSTANCE.notificationStyle)
+                .setDefaultValue(ModStyle.NotificationStyle.ROUNDED)
+                .setEnumNameProvider(value -> {
+                    ModStyle.NotificationStyle style = (ModStyle.NotificationStyle) value;
+                    int rgb = ModConfig.INSTANCE.colorStyle.getColor(ModStyle.ColorType.MAIN);
+                    String hudStyle = switch (style) {
+                        case ModStyle.NotificationStyle.ROUNDED -> "Modern";
+                        case ModStyle.NotificationStyle.LEGACY -> "Legacy";
+                    };
+                    return Component.literal(hudStyle).withColor(rgb);
+                })
+                .setSaveConsumer(v -> ModConfig.INSTANCE.notificationStyle = v).build());
+
+        overlays.add(eb.startBooleanToggle(Component.literal("Screenshot HUD"), ModConfig.INSTANCE.screenshotHud)
+                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to use SSU's custom screenshot hud"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.screenshotHud = v).build());
+
+        overlays.add(eb.startBooleanToggle(Component.literal("Voice HUD"), ModConfig.INSTANCE.voiceHud)
+                .setDefaultValue(true).setTooltip(Component.literal("Show who is connected and talking in the top left corner"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceHud = v).build());
+
+        hud.addEntry(overlays.build());
     }
 
-    // Chat Filters
-    public static void buildChatFiltersCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
-        ConfigCategory category = builder.getOrCreateCategory(Component.literal("Chat Filters"));
+    // Chat
+    public static void buildChatCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
+        ConfigCategory chat = builder.getOrCreateCategory(Component.literal("Chat"));
 
-        category.addEntry(eb.startBooleanToggle(Component.literal("Chat Filters Enabled"), ModConfig.INSTANCE.chatFiltersEnabled)
+        chat.addEntry(eb.startBooleanToggle(Component.literal("Fancy Emotes"), ModConfig.INSTANCE.fancyEmotes)
+                .setDefaultValue(true).setTooltip(Component.literal("Transforms <3 into ♥ and such"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.fancyEmotes = v).build());
+
+        SubCategoryBuilder systemMessages = eb.startSubCategory(Component.literal("System Messages"))
+                .setTooltip(Component.literal("Separate HUD for server sent messages"));
+
+        systemMessages.add(eb.startBooleanToggle(Component.literal("Separate Messages"), ModConfig.INSTANCE.separateMessage)
+                .setDefaultValue(false).setTooltip(Component.literal("Separates server sent messages and user sent messages in 2 different HUDs"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.separateMessage = v).build());
+
+        systemMessages.add(eb.startBooleanToggle(Component.literal("System Message Duplicate Counter"), ModConfig.INSTANCE.systemDuplicateCounter)
+                .setDefaultValue(true).setTooltip(Component.literal("Merges identical system messages sent back to back and shows how many times it was sent"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.systemDuplicateCounter = v).build());
+
+        systemMessages.add(eb.startStrField(Component.literal("Duplicate Counter Text"), ModConfig.INSTANCE.systemDuplicateCounterText)
+                .setDefaultValue("&8(&7x&r$&8)").setTooltip(Component.literal("Text added after duplicated system messages. $ is the count, & codes are formatting, &r resets to the counter color"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.systemDuplicateCounterText = v).build());
+
+        systemMessages.add(eb.startColorField(Component.literal("Duplicate Counter Color"), ModConfig.INSTANCE.systemDuplicateCounterColor)
+                .setDefaultValue(0xFFFF55).setTooltip(Component.literal("Base color of the duplicate counter"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.systemDuplicateCounterColor = v).build());
+
+        chat.addEntry(systemMessages.build());
+
+        SubCategoryBuilder commands = eb.startSubCategory(Component.literal("Chat Commands"))
+                .setTooltip(Component.literal("Commands other players can trigger by typing in chat"));
+
+        commands.add(eb.startBooleanToggle(Component.literal("Stat Commands"), ModConfig.INSTANCE.statCommands)
+                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to enable !tps !fps and !ping"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.statCommands = v).build());
+
+        commands.add(eb.startBooleanToggle(Component.literal("Chat Commands"), ModConfig.INSTANCE.chatCommands)
+                .setDefaultValue(true).setTooltip(Component.literal("Whether or not to enable !gay !furry !sus and such commands"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.chatCommands = v).build());
+
+        chat.addEntry(commands.build());
+
+        SubCategoryBuilder filters = eb.startSubCategory(Component.literal("Chat Filters"))
+                .setTooltip(Component.literal("Hide specific server messages"));
+
+        filters.add(eb.startBooleanToggle(Component.literal("Chat Filters Enabled"), ModConfig.INSTANCE.chatFiltersEnabled)
                 .setDefaultValue(true).setTooltip(Component.literal("Master toggle for all chat filters"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.chatFiltersEnabled = v).build());
 
         for (ChatFilterDefinitions.FilterCategory filterCategory : ChatFilterDefinitions.getRootCategories()) {
-            category.addEntry(buildFilterCategory(filterCategory, eb).build());
+            filters.add(buildFilterCategory(filterCategory, eb).build());
         }
+
+        chat.addEntry(filters.build());
     }
 
     private static SubCategoryBuilder buildFilterCategory(ChatFilterDefinitions.FilterCategory category, ConfigEntryBuilder eb) {
@@ -415,9 +461,5 @@ public class ClothConfigHandler {
                 .setSaveConsumer(v -> ModConfig.INSTANCE.voiceMicTest = v).build());
 
         voice.addEntry(processing.build());
-
-        voice.addEntry(eb.startBooleanToggle(Component.literal("Voice HUD"), ModConfig.INSTANCE.voiceHud)
-                .setDefaultValue(true).setTooltip(Component.literal("Show who is connected and talking in the top left corner"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.voiceHud = v).build());
     }
 }

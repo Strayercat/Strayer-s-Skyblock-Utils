@@ -106,8 +106,9 @@ public class ModFunctions {
                 + " z:" + (int) client.player.getZ();
 
         String coordinatesMessage = (arguments.contains("withLocation")
-                ? SideBarUtils.location.isEmpty() ? "" : "⏣ " + SideBarUtils.location + " | "
-                : "") + coordinates;
+                ? coordinates + (SideBarUtils.location.isEmpty() ? "" : " | ⏣ " + SideBarUtils.location)
+                : coordinates
+        );
 
         client.getConnection().sendChat(coordinatesMessage);
     }

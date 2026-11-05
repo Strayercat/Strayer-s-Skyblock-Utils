@@ -74,6 +74,9 @@ public class ModConfig {
 
     // Chat filters & glowing players
     public boolean separateMessage = false;
+    public boolean systemDuplicateCounter = true;
+    public String systemDuplicateCounterText = "&8(&7x&r$&8)";
+    public int systemDuplicateCounterColor = 0xFFFF55;
     private final Map<String, Boolean> chatFilters = new HashMap<>();
     private List<GlowingPlayer> glowingPlayers = new ArrayList<>();
 
@@ -230,6 +233,9 @@ public class ModConfig {
             INSTANCE.glowingPlayers = loaded.glowingPlayers != null ? new ArrayList<>(loaded.glowingPlayers) : new ArrayList<>();
             INSTANCE.dailyReminders = loaded.dailyReminders;
             INSTANCE.separateMessage = loaded.separateMessage;
+            INSTANCE.systemDuplicateCounter = loaded.systemDuplicateCounter;
+            INSTANCE.systemDuplicateCounterText = loaded.systemDuplicateCounterText != null ? loaded.systemDuplicateCounterText : "&8(&7x&r$&8)";
+            INSTANCE.systemDuplicateCounterColor = loaded.systemDuplicateCounterColor;
             INSTANCE.cancelSwings = loaded.cancelSwings;
             INSTANCE.lastReset = loaded.lastReset != null ? loaded.lastReset : new Date(0);
             INSTANCE.disabledTypes = loaded.disabledTypes != null ? loaded.disabledTypes : new ArrayList<>();
