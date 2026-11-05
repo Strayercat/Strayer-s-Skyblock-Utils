@@ -332,7 +332,7 @@ public class ModFunctions {
             case "Torrhus Canyon", "Spring Path", "Safari Zone Entrance", "Torrhus Springs", "Torrhus Heights",
                  "Miria's Hut", "Spring Shallows" -> "Torrhus Canyon";
 
-            default -> location;
+            default -> "";
         };
     }
 
@@ -348,10 +348,6 @@ public class ModFunctions {
         if (index >= 0) return 6_000 + (isWordStart(t, index) ? 1_000 : 0) - Math.min(index * 10 + t.length(), 999);
 
         return Math.max(subsequenceScore(q, t), typoScore(q, t));
-    }
-
-    public static <T> List<T> fuzzySearch(String query, Collection<T> items, Function<T, String> key) {
-        return fuzzySearchAny(query, items, item -> List.of(key.apply(item)));
     }
 
     public static <T> List<T> fuzzySearchAny(String query, Collection<T> items, Function<T, Collection<String>> keys) {

@@ -26,6 +26,7 @@ public class PartyListParser {
     private static boolean requestPending = false;
     private static ClientLevel lastLevel;
     private static boolean awaitingResponse = false;
+    private static boolean reportNext = false;
 
     private static final ChatListCapture capture = new ChatListCapture(
             PartyListParser::isStartLine,
@@ -49,6 +50,10 @@ public class PartyListParser {
         if (awaitingResponse && !capture.isExpecting()) {
             awaitingResponse = false;
             onJoinCommandHandled = false;
+            if (reportNext) {
+                reportNext = false;
+                ModFunctions.sendSystemMessage("§c[Dev] Party scan got no response", false);
+            }
         }
         if (requestPending && !GuildListParser.isExpecting()) requestList();
     }
@@ -74,8 +79,22 @@ public class PartyListParser {
         awaitingResponse = true;
         capture.expect();
         sendingOwnCommand = true;
-        Minecraft.getInstance().getConnection().sendCommand("party list");
-        sendingOwnCommand = false;
+        try {
+            Minecraft.getInstance().getConnection().sendCommand("party list");
+        } finally {
+            sendingOwnCommand = false;
+        }
+    }
+
+    public static void devScan() {
+        if (Minecraft.getInstance().getConnection() == null) return;
+        if (capture.isExpecting()) {
+            ModFunctions.sendSystemMessage("§e[Dev] Party scan already in progress", false);
+            return;
+        }
+        reportNext = true;
+        ModFunctions.sendSystemMessage("§7[Dev] Scanning party...", false);
+        requestList();
     }
 
     public static void onCommandSent(String command) {
@@ -108,6 +127,15 @@ public class PartyListParser {
         awaitingResponse = false;
         parseLines(lines);
         getMemberUuids();
+        if (reportNext) {
+            reportNext = false;
+            if (!PartyInfo.isInParty) {
+                ModFunctions.sendSystemMessage("§a[Dev] Party scan: not in a party", false);
+            } else {
+                ModFunctions.sendSystemMessage("§a[Dev] Party scan: leader " + PartyInfo.leader + ", "
+                        + PartyInfo.members.size() + " member(s): " + String.join(", ", PartyInfo.members), false);
+            }
+        }
     }
 
     private static void parseLines(List<String> lines) {

@@ -1,6 +1,8 @@
 package com.skyblockutils.render;
 
+import com.skyblockutils.ModFunctions;
 import com.skyblockutils.StrayersSkyblockUtilsClient;
+import com.skyblockutils.utils.SideBarUtils;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -13,15 +15,23 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 
+import java.util.List;
+
 public final class SkullRefresher {
     private static final int DELAY_TICKS = 5;
     private static final Long2IntOpenHashMap PENDING = new Long2IntOpenHashMap();
+    private static boolean wasScanning = false;
 
     private SkullRefresher() {
     }
 
     public static void tick(Minecraft client) {
         EggDetector.tick(client);
+
+        boolean scanning = client.level != null && StrayersSkyblockUtilsClient.isOnHypixel && !isPublicIsland();
+        if (scanning && !wasScanning) rescanLoadedChunks(client);
+        wasScanning = scanning;
+
         if (PENDING.isEmpty()) return;
         if (client.level == null) {
             PENDING.clear();
@@ -41,8 +51,26 @@ public final class SkullRefresher {
         }
     }
 
+    private static void rescanLoadedChunks(Minecraft client) {
+        ClientLevel level = client.level;
+        if (level == null || client.player == null) return;
+
+        int radius = client.options.getEffectiveRenderDistance();
+        int centerX = SectionPos.blockToSectionCoord(client.player.getBlockX());
+        int centerZ = SectionPos.blockToSectionCoord(client.player.getBlockZ());
+
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                LevelChunk chunk = level.getChunkSource().getChunk(centerX + dx, centerZ + dz, false);
+                if (chunk == null) continue;
+                for (BlockEntity be : List.copyOf(chunk.getBlockEntities().values())) handleBELoad(be);
+                handleChunkLoad(level, chunk);
+            }
+        }
+    }
+
     public static void handleChunkLoad(ClientLevel level, LevelChunk chunk) {
-        if (!StrayersSkyblockUtilsClient.isOnHypixel) return;
+        if (!StrayersSkyblockUtilsClient.isOnHypixel || isPublicIsland()) return;
         LevelChunkSection[] sections = chunk.getSections();
         int baseX = chunk.getPos().getMinBlockX();
         int baseZ = chunk.getPos().getMinBlockZ();
@@ -68,10 +96,14 @@ public final class SkullRefresher {
     }
 
     public static void handleBELoad(BlockEntity be) {
-        if (!StrayersSkyblockUtilsClient.isOnHypixel) return;
+        if (!StrayersSkyblockUtilsClient.isOnHypixel || isPublicIsland()) return;
         if (!(be instanceof SkullBlockEntity skull)) return;
         EggDetector.check(skull);
         PENDING.put(SectionPos.asLong(be.getBlockPos()), DELAY_TICKS);
+    }
+
+    private static boolean isPublicIsland() {
+        return !ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).isEmpty();
     }
 
     public static void handleBEUnload(BlockEntity be) {

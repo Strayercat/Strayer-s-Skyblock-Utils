@@ -16,6 +16,10 @@ import java.util.regex.Pattern;
 public class GuildListParser {
     private static final long REFRESH_MS = 10 * 60_000;
     private static final long MANUAL_WINDOW_MS = 3_000;
+    private static final long RETRY_MS = 30_000;
+    private static final long CHANGE_DELAY_MS = 1_000;
+    private static final Pattern MEMBERSHIP_CHANGE = Pattern.compile("^(?:\\[[^]]+] )*\\w{3,16} (?:joined the guild!|left the guild!|was kicked from the guild.*|disbanded the guild\\.)$");
+    private static final Pattern SELF_REMOVED = Pattern.compile("^(?:You left the guild.*|You were kicked from the guild.*|(?:\\[[^]]+] )*\\w{3,16} disbanded the guild\\.)$");
     private static final Pattern MANUAL_COMMAND = Pattern.compile("^(g|guild) (list|online|members|l|o)\\b.*");
     private static final Pattern MEMBER = Pattern.compile("^(?:\\[[^]]+] )*(\\w{3,16})$");
     private static final Pattern RANK_HEADER = Pattern.compile("^-- .+ --$");
@@ -28,6 +32,8 @@ public class GuildListParser {
     private static long manualUntil = 0;
     private static boolean sendingOwnCommand = false;
     private static boolean awaitingResponse = false;
+    private static long rescanAt = 0;
+    private static boolean reportNext = false;
 
     private static final ChatListCapture capture = new ChatListCapture(
             GuildListParser::isStartLine,
@@ -44,24 +50,50 @@ public class GuildListParser {
         capture.tick();
         if (awaitingResponse && !capture.isExpecting()) {
             awaitingResponse = false;
-            onJoinCommandHandled = false;
+            rescanAt = System.currentTimeMillis() + RETRY_MS;
+            if (reportNext) {
+                reportNext = false;
+                ModFunctions.sendSystemMessage("§c[Dev] Guild scan got no response", false);
+            }
         }
     }
 
     public static void tick() {
         if (capture.isExpecting() || PartyListParser.isExpecting()) return;
-        long now = System.currentTimeMillis();
-        if (onJoinCommandHandled && now - lastRequest < REFRESH_MS) return;
         if (ModFunctions.isWorldLoaded()) return;
+        if (Minecraft.getInstance().getConnection() == null) return;
+
+        long now = System.currentTimeMillis();
+        boolean rescanDue = rescanAt > 0 && now >= rescanAt;
+        if (onJoinCommandHandled && !rescanDue && now - lastRequest < REFRESH_MS) return;
 
         onJoinCommandHandled = true;
-        lastRequest = now;
+        requestList();
+    }
+
+    public static void requestList() {
+        if (Minecraft.getInstance().getConnection() == null) return;
+        rescanAt = 0;
+        lastRequest = System.currentTimeMillis();
         awaitingResponse = true;
         capture.expect();
         sendingOwnCommand = true;
+        try {
+            Minecraft.getInstance().getConnection().sendCommand("guild online");
+        } finally {
+            sendingOwnCommand = false;
+        }
+    }
+
+    public static void devScan() {
         if (Minecraft.getInstance().getConnection() == null) return;
-        Minecraft.getInstance().getConnection().sendCommand("guild online");
-        sendingOwnCommand = false;
+        if (capture.isExpecting() || PartyListParser.isExpecting()) {
+            ModFunctions.sendSystemMessage("§e[Dev] A party/guild scan is already in progress", false);
+            return;
+        }
+        reportNext = true;
+        ModFunctions.sendSystemMessage("§7[Dev] Scanning guild...", false);
+        requestList();
     }
 
     public static void onCommandSent(String command) {
@@ -74,8 +106,25 @@ public class GuildListParser {
     }
 
     public static boolean handleMessage(Component message) {
+        checkMembershipChange(message);
         if (System.currentTimeMillis() < manualUntil) return true;
         return capture.handle(message);
+    }
+
+    private static void checkMembershipChange(Component message) {
+        for (String line : message.getString().replaceAll("§.", "").split("\n")) {
+            String text = line.trim();
+            if (SELF_REMOVED.matcher(text).matches()) {
+                members.clear();
+                SSUIndicator.setGuildMembers(members);
+                rescanAt = 0;
+                return;
+            }
+            if (MEMBERSHIP_CHANGE.matcher(text).matches()) {
+                rescanAt = System.currentTimeMillis() + CHANGE_DELAY_MS;
+                return;
+            }
+        }
     }
 
     private static boolean isStartLine(String text) {
@@ -104,6 +153,14 @@ public class GuildListParser {
             members.addAll(parseLines(lines));
         }
         SSUIndicator.setGuildMembers(members);
+        if (reportNext) {
+            reportNext = false;
+            if (members.isEmpty() && lines.stream().anyMatch(line -> line.startsWith(NOT_IN_GUILD))) {
+                ModFunctions.sendSystemMessage("§a[Dev] Guild scan: not in a guild", false);
+            } else {
+                ModFunctions.sendSystemMessage("§a[Dev] Guild scan: " + members.size() + " online member(s): " + String.join(", ", members), false);
+            }
+        }
     }
 
     private static List<String> parseLines(List<String> lines) {
