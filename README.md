@@ -9,15 +9,28 @@ SSU started as a personal project: things I wanted in the game that other mods d
 ---
 
 ## Requirements
--  [Fabric API](https://modrinth.com/mod/fabric-api) : Required
+- [Fabric API](https://modrinth.com/mod/fabric-api) : Required
 - [Cloth Config API](https://modrinth.com/mod/cloth-config) : Required
 - [Mod Menu](https://modrinth.com/mod/modmenu) : Recommended
 
-Everything can be configured with `/ssu config` or through Mod Menu.
+Everything can be configured with `/ssu config` or through Mod Menu. The config is split into **General**, **HUD Settings**, **Chat**, **Per Skill**, **Events** and **Voice Chat** tabs.
 
 ---
 
 ## Features
+
+<details>
+<summary><b>HUD Editor</b></summary>
+
+- Move, scale and resize every SSU HUD with `/ssu hud` or the **Edit HUD Layout** button in the config
+- Drag a HUD to move it, it snaps to the screen edges and center (hold Shift to disable snapping)
+- Scroll over a HUD to scale it (Shift for fine steps), text and images scale with it
+- Drag a HUD's sides to change its width, text wraps to fit
+- Right click resets a HUD, double click resets its width
+- HUDs can't go off screen, corners touching a screen edge are square and every other corner is rounded
+- Works with the SSU HUD, custom sidebar, voice chat HUD, carry tracker and system messages HUD
+
+</details>
 
 <details>
 <summary><b>Voice Chat</b></summary>
@@ -36,11 +49,25 @@ Everything can be configured with `/ssu config` or through Mod Menu.
 <summary><b>SSU Users</b></summary>
 
 - A gem appears next to other SSU users in the tab list, chat and nametags
+- SSU users get a custom nameplate framed in their gem color
 - Gem colors:
     - **Prismatic**: mod developer
     - **Purple**: VIPs who supported the mod during development
     - **Red**: helpers who gave useful feedback, bug reports or ideas
+- A few easter eggs for VIPs and special users, like paw print trails and custom capes
 - Emoji picker in chat, emojis are sent as `:name:` and show up for other SSU users
+
+</details>
+
+<details>
+<summary><b>Slayer</b></summary>
+
+- Carry tracker with `/ssu carry <player> <amount> <price>`
+- Counts a carry every time the player's slayer boss dies
+- Track several carries at once, each with its own progress bar on the carry HUD
+- Prices accept `26k`, `1.2m`, `1,2m`, `1,200,000` and more
+- A title and notification tell you when it's time to collect the payment, with the total owed
+- `/ssu carry stop [player]` cancels a carry and shows how much is owed so far
 
 </details>
 
@@ -59,7 +86,7 @@ Everything can be configured with `/ssu config` or through Mod Menu.
 
 - Corleone timer, reminds you 1 minute after killing him
 - Umber and tungsten vein waypoints in the Glacite Tunnels
-- Powder chest rewards shown as a notification instead of chat spam
+- Powder chest and loot chest rewards shown as a notification instead of chat spam
 
 </details>
 
@@ -84,12 +111,14 @@ Everything can be configured with `/ssu config` or through Mod Menu.
 <details>
 <summary><b>Chat</b></summary>
 
-- Toggleable chat filters (work in progress)
+- Toggleable chat filters (work in progress), including stash reminders and stash pickup messages
 - Stat commands that answer in the same channel: `!tps`, `!ping`, `!fps`
 - Silly percentage commands in party, guild and co-op chat (`!sus`, `!furry` and more)
 - Fancy emotes (`o/` becomes `( ﾟ◡ﾟ)/` and more)
 - Separate HUDs for server messages and player messages
-- Chat peek and server chat history
+- Duplicate counter for system messages, repeated messages show `(x2)`, `(x3)`… with customizable text and color
+- Chat peek and server chat history, with search
+- Copy a system message by middle clicking it in the history, or with a keybind
 - Separator width fix for non-default chat widths
 - Send your coordinates (and location) to chat with a keybind
 
@@ -109,6 +138,7 @@ Everything can be configured with `/ssu config` or through Mod Menu.
 - Contextual HUD with time, ping, TPS, FPS, coordinates, dailies, party info and island fun facts
 - Custom sidebar
 - Customizable mod colors and notification style
+- Notifications and screenshot previews always show on top of everything, including chat and menus
 - Zoom
 - NPC locator with `/ssu npcfinder <npc>`
 - Puff farming helper that tells you when to kill
@@ -127,6 +157,9 @@ Everything can be configured with `/ssu config` or through Mod Menu.
 | Command | Description |
 |---|---|
 | `/ssu config` | Open the config screen |
+| `/ssu hud` | Open the HUD editor |
+| `/ssu carry <player> <amount> <price>` | Start tracking a slayer carry |
+| `/ssu carry stop [player]` | Stop a carry (the player is required when carrying several) |
 | `/ssu autorejoin <floor\|off>` | Auto-rejoin a floor (`m1`–`m7`, `f1`–`f7`) |
 | `/ssu glowingplayers add <player>` | Make a player glow |
 | `/ssu glowingplayers remove <player>` | Remove a glowing player |
@@ -149,6 +182,7 @@ All keybinds can be changed in **Options → Controls → Strayer's Skyblock Uti
 | Zoom | `C` |
 | Chat Peek | `Left Alt` |
 | Server Chat History | `H` |
+| Copy Hovered System Message | Unbound |
 | Send coordinates in chat | `Home` |
 | Corleone Timer | `T` |
 | Puff Timer | `Y` |

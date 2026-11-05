@@ -1,6 +1,7 @@
 package com.skyblockutils.features.chat;
 
 import com.skyblockutils.ModFunctions;
+import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.emoji.EmojiRegistry;
 import com.skyblockutils.mixin.client.ChatComponentAccessor;
 import com.skyblockutils.utils.SSUIndicator;
@@ -47,10 +48,10 @@ public class ChatModifications {
     }
 
     public static String fancyEmotes(String message) {
-        return message.replace("<3", "❤")
+        return ModConfig.INSTANCE.fancyEmotes ? message.replace("<3", "❤")
                 .replace("\\o/", "¯\\_(ツ)_/¯")
                 .replace("o/", "( ﾟ◡ﾟ)/")
-                .replace("O/", "( ﾟ◡ﾟ)/");
+                .replace("O/", "( ﾟ◡ﾟ)/") : message;
     }
 
     public static Component withChatBadge(Component message) {

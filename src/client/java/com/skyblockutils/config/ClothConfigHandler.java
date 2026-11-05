@@ -392,7 +392,7 @@ public class ClothConfigHandler {
         ConfigCategory voice = builder.getOrCreateCategory(Component.literal("Voice Chat"));
 
         voice.addEntry(eb.startBooleanToggle(Component.literal("Voice Chat Enabled"), ModConfig.INSTANCE.voiceChatEnabled)
-                .setDefaultValue(false).setTooltip(Component.literal("Talk directly with SSU users in your party or co-op. Your IP is only shared with players who also have you in their party/co-op with voice chat on"))
+                .setDefaultValue(false).setTooltip(Component.literal("Talk directly with SSU users in your party or co-op."))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.voiceChatEnabled = v).build());
 
         voice.addEntry(eb.startBooleanToggle(Component.literal("Party Voice"), ModConfig.INSTANCE.voiceInParty)
