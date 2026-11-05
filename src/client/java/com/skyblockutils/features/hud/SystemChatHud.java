@@ -2,9 +2,9 @@ package com.skyblockutils.features.hud;
 
 import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.utils.ClipboardUtils;
-import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -16,6 +16,8 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 public class SystemChatHud extends Screen {
+    private static final SystemToast.SystemToastId COPY_TOAST = new SystemToast.SystemToastId(2000L);
+
     private EditBox searchBox;
 
     public SystemChatHud() {
@@ -80,18 +82,14 @@ public class SystemChatHud extends Screen {
         String text = SeparatedChatHud.messageTextAt(mouseX, mouseY);
         if (text == null) return false;
         ClipboardUtils.copyTextToClipboard(text);
-        OnScreenNotification.builder()
-                .title("Copied")
-                .subtitle("System message copied to clipboard")
-                .tickTime(40)
-                .withSound(false)
-                .send();
+        SystemToast.addOrUpdate(this.minecraft.gui.toastManager(), COPY_TOAST,
+                Component.literal("Copied"), Component.literal("System message copied to clipboard"));
         return true;
     }
 
     @Override
-    public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-        if (event.button() == 2 && this.copyAt(event.x(), event.y())) return true;
+    public boolean mouseClicked(final @NotNull MouseButtonEvent event, final boolean doubleClick) {
+        if (ModKeyBindings.COPY_SYSTEM_MESSAGE_KEY.matchesMouse(event) && this.copyAt(event.x(), event.y())) return true;
         if (event.button() == 0 && !this.searchBox.isMouseOver(event.x(), event.y())) {
             boolean insert = this.minecraft.hasShiftDown();
             Style clicked = SeparatedChatHud.findStyleAt(event.x(), event.y(), insert);

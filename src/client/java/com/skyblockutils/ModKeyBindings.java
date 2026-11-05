@@ -77,7 +77,7 @@ public class ModKeyBindings {
     public static final KeyMapping COPY_SYSTEM_MESSAGE_KEY = new KeyMapping(
             "key.ssu.copySystemMessage",
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_UNKNOWN,
+            GLFW.GLFW_MOUSE_BUTTON_MIDDLE,
             SSU_CATEGORY);
 
     public static void init() {
