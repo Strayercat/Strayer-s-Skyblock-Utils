@@ -1,13 +1,11 @@
 package com.skyblockutils.features.party;
 
 import com.skyblockutils.ModFunctions;
-import com.skyblockutils.features.guild.GuildListParser;
-import com.skyblockutils.utils.ChatListCapture;
+import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.utils.PlayerLookup;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.network.chat.Component;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -23,20 +21,34 @@ public class PartyListParser {
     private static long lastRequest = 0;
     private static long manualUntil = 0;
     private static boolean sendingOwnCommand = false;
-    private static boolean requestPending = false;
     private static ClientLevel lastLevel;
     private static boolean awaitingResponse = false;
     private static boolean reportNext = false;
 
-    private static final ChatListCapture capture = new ChatListCapture(
-            PartyListParser::isStartLine,
-            PartyListParser::isListLine,
-            PartyListParser::onListReceived,
-            false
-    );
+    private static final long EXPECT_MS = 5_000;
+    private static long expectingUntil = 0;
+
+    public static final ChatBlockRouter.Handler BLOCK_HANDLER = new ChatBlockRouter.Handler() {
+        @Override
+        public boolean isActive() {
+            long now = System.currentTimeMillis();
+            return now < expectingUntil && now >= manualUntil;
+        }
+
+        @Override
+        public boolean matches(String header) {
+            return isStartLine(header);
+        }
+
+        @Override
+        public void accept(ChatBlockRouter.Block block) {
+            expectingUntil = 0;
+            onListReceived(block.allTexts());
+        }
+    };
 
     public static boolean isExpecting() {
-        return capture.isExpecting();
+        return System.currentTimeMillis() < expectingUntil;
     }
 
     public static void tickCapture() {
@@ -46,8 +58,7 @@ public class PartyListParser {
             if (level != null) onJoinCommandHandled = false;
         }
 
-        capture.tick();
-        if (awaitingResponse && !capture.isExpecting()) {
+        if (awaitingResponse && !isExpecting()) {
             awaitingResponse = false;
             onJoinCommandHandled = false;
             if (reportNext) {
@@ -55,11 +66,10 @@ public class PartyListParser {
                 ModFunctions.sendSystemMessage("§c[Dev] Party scan got no response", false);
             }
         }
-        if (requestPending && !GuildListParser.isExpecting()) requestList();
     }
 
     public static void handleOnJoinCommand() {
-        if (capture.isExpecting() || GuildListParser.isExpecting()) return;
+        if (isExpecting()) return;
         if (onJoinCommandHandled && System.currentTimeMillis() - lastRequest < REFRESH_MS) return;
         if (ModFunctions.isWorldLoaded()) return;
 
@@ -69,15 +79,9 @@ public class PartyListParser {
 
     public static void requestList() {
         if (Minecraft.getInstance().getConnection() == null) return;
-        if (GuildListParser.isExpecting()) {
-            requestPending = true;
-            return;
-        }
-
-        requestPending = false;
         lastRequest = System.currentTimeMillis();
         awaitingResponse = true;
-        capture.expect();
+        expectingUntil = lastRequest + EXPECT_MS;
         sendingOwnCommand = true;
         try {
             Minecraft.getInstance().getConnection().sendCommand("party list");
@@ -88,7 +92,7 @@ public class PartyListParser {
 
     public static void devScan() {
         if (Minecraft.getInstance().getConnection() == null) return;
-        if (capture.isExpecting()) {
+        if (isExpecting()) {
             ModFunctions.sendSystemMessage("§e[Dev] Party scan already in progress", false);
             return;
         }
@@ -103,12 +107,7 @@ public class PartyListParser {
 
         manualUntil = System.currentTimeMillis() + MANUAL_WINDOW_MS;
         awaitingResponse = false;
-        capture.cancel();
-    }
-
-    public static boolean handleMessage(Component message) {
-        if (System.currentTimeMillis() < manualUntil) return true;
-        return capture.handle(message);
+        expectingUntil = 0;
     }
 
     private static boolean isNotInParty(String text) {
@@ -117,10 +116,6 @@ public class PartyListParser {
 
     private static boolean isStartLine(String text) {
         return PARTY_LINE.matcher(text).matches() || isNotInParty(text);
-    }
-
-    private static boolean isListLine(String text) {
-        return text.isEmpty() || isStartLine(text);
     }
 
     private static void onListReceived(List<String> lines) {

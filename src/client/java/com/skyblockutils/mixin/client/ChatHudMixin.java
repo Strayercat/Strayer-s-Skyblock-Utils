@@ -3,9 +3,6 @@ package com.skyblockutils.mixin.client;
 import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.ChatModifications;
-import com.skyblockutils.features.hud.ScreenshotManager;
-import com.skyblockutils.utils.OnScreenNotification;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -64,10 +61,6 @@ public class ChatHudMixin {
             resetChatScroll();
         }
         wasPeeking = isPeeking;
-
-        Minecraft mc = Minecraft.getInstance();
-        OnScreenNotification.render(graphics, mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight());
-        ScreenshotManager.buildScreenshotHud(graphics);
     }
 
     @Inject(

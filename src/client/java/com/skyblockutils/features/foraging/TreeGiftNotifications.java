@@ -3,9 +3,9 @@ package com.skyblockutils.features.foraging;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.SideBarUtils;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -19,84 +19,42 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TreeGiftNotifications {
-    private static boolean reading = false;
-    private static int ticksReading = 0;
-    private static final int MAX_READ_TICKS = 2;
-    private static final List<Component> buffer = new ArrayList<>();
-    private static Component separator;
-
     private static final Pattern PERCENT_SUFFIX = Pattern.compile("\\s*\\(\\d+(?:\\.\\d+)?%\\)");
 
-    static {
-        ClientTickEvents.END_CLIENT_TICK.register(_ -> {
-            if (reading && ++ticksReading > MAX_READ_TICKS) abort();
-        });
-    }
-
-    public static boolean handleMessage(Component message) {
-        String text = message.getString();
-        boolean isSeparator = text.startsWith("▬▬▬▬");
-
-        if (!reading) {
-            if (!isSeparator) return true;
-            if (!ModConfig.INSTANCE.treeGiftNotification) return true;
+    public static final ChatBlockRouter.Handler BLOCK_HANDLER = new ChatBlockRouter.Handler() {
+        @Override
+        public boolean isActive() {
+            if (!ModConfig.INSTANCE.treeGiftNotification) return false;
             String area = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
-            if (!area.equals("Galatea") && !area.equals("Torrhus Canyon")) return true;
-            start(message);
-            return false;
+            return "Galatea".equals(area) || "Torrhus Canyon".equals(area);
         }
 
-        if (buffer.isEmpty() && !text.trim().equals("TREE GIFT")) {
-            abort();
-            if (isSeparator) {
-                start(message);
-                return false;
-            }
-            return true;
+        @Override
+        public boolean matches(String header) {
+            return header.equals("TREE GIFT");
         }
 
-        if (isSeparator) {
-            reading = false;
-            parseBuffer();
-            return false;
+        @Override
+        public void accept(ChatBlockRouter.Block block) {
+            parseLines(block.lines());
         }
+    };
 
-        buffer.add(message);
-        return false;
-    }
-
-    private static void start(Component sep) {
-        buffer.clear();
-        separator = sep;
-        ticksReading = 0;
-        reading = true;
-    }
-
-    private static void abort() {
-        reading = false;
-        Minecraft client = Minecraft.getInstance();
-        client.gui.hud.getChat().addClientSystemMessage(separator);
-        for (Component swallowedMessage : buffer) {
-            client.gui.hud.getChat().addClientSystemMessage(swallowedMessage);
-        }
-        buffer.clear();
-    }
-
-    private static void parseBuffer() {
+    private static void parseLines(List<Component> lines) {
         List<Component> fullList = new ArrayList<>();
 
-        for (Component el : buffer) {
-            if (el.getString().trim().equals("TREE GIFT") || el.getString().trim().equals("BONUS GIFT")) continue;
+        for (Component el : lines) {
+            String text = el.getString().trim();
+            if (text.isEmpty() || text.equals("TREE GIFT") || text.equals("BONUS GIFT")) continue;
 
-            if (el.getString().contains("rewards gained!")) {
+            if (text.contains("rewards gained!")) {
                 findHoverEvent(el).ifPresent(hoverEvent -> {
                     if (hoverEvent instanceof HoverEvent.ShowText(Component value)) {
                         extractHoverLines(value).forEach(line -> fullList.add(format(line)));
                     }
                 });
             } else {
-                if (el.getString().contains("You helped cut") || el.getString().contains("fell from the Tree!"))
-                    continue;
+                if (text.contains("You helped cut") || text.contains("fell from the Tree!")) continue;
                 fullList.add(format(el));
             }
         }
@@ -107,11 +65,11 @@ public class TreeGiftNotifications {
 
         Minecraft client = Minecraft.getInstance();
 
-        if (buffer.stream().anyMatch(e -> e.getString().contains("Phanflare")))
+        if (lines.stream().anyMatch(e -> e.getString().contains("Phanflare")))
             ModFunctions.showTitle(client, "Phanflare", 40, false);
-        if (buffer.stream().anyMatch(e -> e.getString().contains("Dreadwing")))
+        if (lines.stream().anyMatch(e -> e.getString().contains("Dreadwing")))
             ModFunctions.showTitle(client, "Dreadwing", 40, false);
-        if (buffer.stream().anyMatch(e -> e.getString().contains("Phanpyre")))
+        if (lines.stream().anyMatch(e -> e.getString().contains("Phanpyre")))
             ModFunctions.showTitle(client, "Phanpyre", 40, false);
     }
 

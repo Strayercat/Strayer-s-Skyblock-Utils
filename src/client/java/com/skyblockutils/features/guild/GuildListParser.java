@@ -1,8 +1,7 @@
 package com.skyblockutils.features.guild;
 
 import com.skyblockutils.ModFunctions;
-import com.skyblockutils.features.party.PartyListParser;
-import com.skyblockutils.utils.ChatListCapture;
+import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -22,7 +21,6 @@ public class GuildListParser {
     private static final Pattern SELF_REMOVED = Pattern.compile("^(?:You left the guild.*|You were kicked from the guild.*|(?:\\[[^]]+] )*\\w{3,16} disbanded the guild\\.)$");
     private static final Pattern MANUAL_COMMAND = Pattern.compile("^(g|guild) (list|online|members|l|o)\\b.*");
     private static final Pattern MEMBER = Pattern.compile("^(?:\\[[^]]+] )*(\\w{3,16})$");
-    private static final Pattern RANK_HEADER = Pattern.compile("^-- .+ --$");
     private static final String NOT_IN_GUILD = "You must be in a guild";
 
     public static boolean onJoinCommandHandled = false;
@@ -35,20 +33,34 @@ public class GuildListParser {
     private static long rescanAt = 0;
     private static boolean reportNext = false;
 
-    private static final ChatListCapture capture = new ChatListCapture(
-            GuildListParser::isStartLine,
-            GuildListParser::isListLine,
-            GuildListParser::onListReceived,
-            true
-    );
+    private static final long EXPECT_MS = 5_000;
+    private static long expectingUntil = 0;
+
+    public static final ChatBlockRouter.Handler BLOCK_HANDLER = new ChatBlockRouter.Handler() {
+        @Override
+        public boolean isActive() {
+            long now = System.currentTimeMillis();
+            return now < expectingUntil && now >= manualUntil;
+        }
+
+        @Override
+        public boolean matches(String header) {
+            return isStartLine(header);
+        }
+
+        @Override
+        public void accept(ChatBlockRouter.Block block) {
+            expectingUntil = 0;
+            onListReceived(block.allTexts());
+        }
+    };
 
     public static boolean isExpecting() {
-        return capture.isExpecting();
+        return System.currentTimeMillis() < expectingUntil;
     }
 
     public static void tickCapture() {
-        capture.tick();
-        if (awaitingResponse && !capture.isExpecting()) {
+        if (awaitingResponse && !isExpecting()) {
             awaitingResponse = false;
             rescanAt = System.currentTimeMillis() + RETRY_MS;
             if (reportNext) {
@@ -59,7 +71,7 @@ public class GuildListParser {
     }
 
     public static void tick() {
-        if (capture.isExpecting() || PartyListParser.isExpecting()) return;
+        if (isExpecting()) return;
         if (ModFunctions.isWorldLoaded()) return;
         if (Minecraft.getInstance().getConnection() == null) return;
 
@@ -76,7 +88,7 @@ public class GuildListParser {
         rescanAt = 0;
         lastRequest = System.currentTimeMillis();
         awaitingResponse = true;
-        capture.expect();
+        expectingUntil = lastRequest + EXPECT_MS;
         sendingOwnCommand = true;
         try {
             Minecraft.getInstance().getConnection().sendCommand("guild online");
@@ -87,8 +99,8 @@ public class GuildListParser {
 
     public static void devScan() {
         if (Minecraft.getInstance().getConnection() == null) return;
-        if (capture.isExpecting() || PartyListParser.isExpecting()) {
-            ModFunctions.sendSystemMessage("§e[Dev] A party/guild scan is already in progress", false);
+        if (isExpecting()) {
+            ModFunctions.sendSystemMessage("§e[Dev] Guild scan already in progress", false);
             return;
         }
         reportNext = true;
@@ -102,16 +114,10 @@ public class GuildListParser {
 
         manualUntil = System.currentTimeMillis() + MANUAL_WINDOW_MS;
         awaitingResponse = false;
-        capture.cancel();
+        expectingUntil = 0;
     }
 
-    public static boolean handleMessage(Component message) {
-        checkMembershipChange(message);
-        if (System.currentTimeMillis() < manualUntil) return true;
-        return capture.handle(message);
-    }
-
-    private static void checkMembershipChange(Component message) {
+    public static void observeMessage(Component message) {
         for (String line : message.getString().replaceAll("§.", "").split("\n")) {
             String text = line.trim();
             if (SELF_REMOVED.matcher(text).matches()) {
@@ -129,21 +135,6 @@ public class GuildListParser {
 
     private static boolean isStartLine(String text) {
         return text.startsWith("Guild Name:") || text.startsWith(NOT_IN_GUILD);
-    }
-
-    private static boolean isListLine(String text) {
-        if (text.isEmpty()
-                || RANK_HEADER.matcher(text).matches()
-                || text.startsWith("Total Members:")
-                || text.startsWith("Online Members:")
-                || text.startsWith("Offline Members:")) return true;
-
-        if (!text.contains("●")) return false;
-        for (String part : text.split("●")) {
-            String trimmed = part.trim();
-            if (!trimmed.isEmpty() && !MEMBER.matcher(trimmed).matches()) return false;
-        }
-        return true;
     }
 
     private static void onListReceived(List<String> lines) {

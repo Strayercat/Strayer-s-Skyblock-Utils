@@ -125,8 +125,6 @@ public class GlowingPlayerCreationScreen extends Screen {
         renderColorGrid(context, centerX, panelTop + 65, mouseX, mouseY);
 
         super.extractRenderState(context, mouseX, mouseY, delta);
-
-        OnScreenNotification.render(context, this.width, this.height);
     }
 
     private void renderColorGrid(GuiGraphicsExtractor context, int centerX, int gridTop, int mouseX, int mouseY) {

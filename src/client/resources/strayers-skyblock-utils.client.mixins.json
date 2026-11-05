@@ -14,7 +14,6 @@
     "EntitiesDestroyMixin",
     "EntityTrackerUpdateMixin",
     "GameRendererMixin",
-    "InGameHudMixin",
     "ModelManagerAccessor",
     "MouseMixin",
     "NameTagFeatureRendererMixin",

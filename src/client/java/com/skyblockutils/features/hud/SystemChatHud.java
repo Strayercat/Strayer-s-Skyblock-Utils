@@ -1,7 +1,6 @@
-package com.skyblockutils.features.chat;
+package com.skyblockutils.features.hud;
 
 import com.skyblockutils.ModKeyBindings;
-import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.utils.ClipboardUtils;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -16,10 +15,10 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-public class SystemChatScreen extends Screen {
+public class SystemChatHud extends Screen {
     private EditBox searchBox;
 
-    public SystemChatScreen() {
+    public SystemChatHud() {
         super(Component.literal("System Chat"));
     }
 

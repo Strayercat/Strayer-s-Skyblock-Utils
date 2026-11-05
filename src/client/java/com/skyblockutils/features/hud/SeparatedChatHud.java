@@ -5,7 +5,6 @@ import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.ChatLayout;
 import com.skyblockutils.features.chat.SeparatedChat;
-import com.skyblockutils.features.chat.SystemChatScreen;
 import com.skyblockutils.features.hud.layout.HudContext;
 import com.skyblockutils.features.hud.layout.HudElement;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
@@ -92,7 +91,7 @@ public class SeparatedChatHud {
 
         if (!keyDown && heldTicks > 0 && heldTicks <= TAP_TICKS && canPin()) {
             heldTicks = 0;
-            mc.gui.setScreen(new SystemChatScreen());
+            mc.gui.setScreen(new SystemChatHud());
             return;
         }
 
@@ -106,7 +105,7 @@ public class SeparatedChatHud {
     }
 
     private static boolean isPinned() {
-        return Minecraft.getInstance().gui.screen() instanceof SystemChatScreen;
+        return Minecraft.getInstance().gui.screen() instanceof SystemChatHud;
     }
 
     private static boolean isPeeking() {

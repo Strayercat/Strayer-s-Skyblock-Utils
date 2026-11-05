@@ -11,6 +11,7 @@ import com.skyblockutils.features.chat.emoji.EmojiRegistry;
 import com.skyblockutils.features.coop.CoopListParser;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.foraging.TreeGiftNotifications;
+import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.features.guild.GuildListParser;
 import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.features.mining.PowderChestNotifications;
@@ -52,6 +53,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
@@ -59,11 +61,20 @@ import net.minecraft.world.InteractionResult;
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public static boolean isInSkyblock = false;
     public static boolean isOnHypixel = false;
-    private static boolean soundListenerRegistered = false;
 
     @Override
     public void onInitializeClient() {
         ModKeyBindings.init();
+        ChatBlockRouter.setReleaseSink(message -> {
+            if (passesChatFilters(message, false)) Minecraft.getInstance().gui.hud.getChat().addServerSystemMessage(message);
+        });
+        ChatBlockRouter.register(
+                PartyListParser.BLOCK_HANDLER,
+                GuildListParser.BLOCK_HANDLER,
+                PartyInviteNotifications.BLOCK_HANDLER,
+                PowderChestNotifications.BLOCK_HANDLER,
+                TreeGiftNotifications.BLOCK_HANDLER
+        );
         ModConfig.load();
         GuiBlocker.init();
         AboutScreen.registerInfoButton();
@@ -98,18 +109,13 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!soundListenerRegistered) {
-                client.getSoundManager().addListener(new PowderChestNotifications());
-                soundListenerRegistered = true;
-            }
-
             OnScreenNotification.tick();
             ClothConfigHandler.handleConfigScreen(client);
             GlowingPlayersGui.handleConfigScreen(client);
             HudEditScreen.handleRequest(client);
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
             ScreenshotManager.tick();
-            PowderChestNotifications.tick();
+            ChatBlockRouter.tick();
             PartyListParser.tickCapture();
             GuildListParser.tickCapture();
             VoiceChat.tick(client);
@@ -146,25 +152,11 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientReceiveMessageEvents.GAME_CANCELED.register((message, _) -> handleGameMessage(message));
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
-            String cleanMessage = message.getString().replaceAll("§.", "").trim();
-            boolean partyListMessages = PartyListParser.handleMessage(message);
-            boolean guildListMessages = !partyListMessages || GuildListParser.handleMessage(message);
-            boolean partyMsgFilter = PartyInviteNotifications.handleNotifications(message);
-
-            if (!isInSkyblock) return partyListMessages && guildListMessages && partyMsgFilter;
-
-            PowderChestNotifications.handleMessage(message);
-
-            boolean powderChestMessage = PowderChestNotifications.parseChestReward(message);
-            boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
-            boolean treeGiftMessage = TreeGiftNotifications.handleMessage(message);
-            boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
-            boolean eggMessage = EggClickFilter.handleMessage(cleanMessage);
-
-            boolean allowed = chatFilter && eggMessage && partyMsgFilter && partyListMessages && guildListMessages && powderChestMessage && spookyFestMessage && treeGiftMessage;
-            if (!allowed) return false;
-
-            return SeparatedChat.handleMessage(message, overlay);
+            if (!overlay) {
+                GuildListParser.observeMessage(message);
+                if (!ChatBlockRouter.handle(message)) return false;
+            }
+            return passesChatFilters(message, overlay);
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::prepareOutgoingChat);
@@ -176,7 +168,6 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : ChatModifications.fitToChat(EmojiRegistry.withEmojis(message)));
 
         UseBlockCallback.EVENT.register((_, level, _, hitResult) -> {
-            PowderChestNotifications.handleChestClick(hitResult);
             EggClickFilter.handleClick(level, hitResult);
             return InteractionResult.PASS;
         });
@@ -184,6 +175,18 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((be, _) -> SkullRefresher.handleBELoad(be));
         ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((be, _) -> SkullRefresher.handleBEUnload(be));
         ClientChunkEvents.CHUNK_LOAD.register(SkullRefresher::handleChunkLoad);
+    }
+
+    private static boolean passesChatFilters(Component message, boolean overlay) {
+        if (!isInSkyblock) return true;
+
+        String cleanMessage = message.getString().replaceAll("§.", "").trim();
+        boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
+        boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
+        boolean eggMessage = EggClickFilter.handleMessage(cleanMessage);
+        if (!chatFilter || !eggMessage || !spookyFestMessage) return false;
+
+        return SeparatedChat.handleMessage(message, overlay);
     }
 
     private static void handleGameMessage(Component message) {
