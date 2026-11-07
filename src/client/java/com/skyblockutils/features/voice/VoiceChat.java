@@ -177,7 +177,7 @@ public final class VoiceChat {
                     peer.jitter.end(seq);
                     return;
                 }
-                peer.jitter.put(seq, VoiceNetwork.slice(payload, 4));
+                peer.jitter.put(seq, VoiceNetwork.slice(payload));
                 peer.lastAudio = System.currentTimeMillis();
             }
             case VoiceNetwork.BYE -> peer.byeAt = System.currentTimeMillis();
@@ -216,7 +216,7 @@ public final class VoiceChat {
 
     private static void shutdown(boolean disabled) {
         for (VoicePeer peer : peers.values()) {
-            if (peer.state == VoicePeer.State.CONNECTED) network.send(peer, VoiceNetwork.BYE);
+            if (peer.state == VoicePeer.State.CONNECTED) network.send(peer);
             peer.jitter.clear();
         }
         if (disabled && helloSent) sendJson("voice_bye", null);
@@ -329,7 +329,7 @@ public final class VoiceChat {
         for (VoicePeer peer : peers.values()) {
             if (!peer.active) {
                 if (peer.state != VoicePeer.State.IDLE) {
-                    if (peer.state == VoicePeer.State.CONNECTED) network.send(peer, VoiceNetwork.BYE);
+                    if (peer.state == VoicePeer.State.CONNECTED) network.send(peer);
                     peer.setState(VoicePeer.State.IDLE, now);
                     peer.announced = false;
                     peer.away = false;
@@ -372,7 +372,7 @@ public final class VoiceChat {
                     } else if (now - peer.lastPing >= PUNCH_PING_MS) {
                         peer.lastPing = now;
                         sendWithState(peer, VoiceNetwork.PING);
-                        if (peer.lanAddress != null) network.sendTo(peer, peer.lanAddress, VoiceNetwork.PING);
+                        if (peer.lanAddress != null) network.sendTo(peer, peer.lanAddress);
                     }
                 }
                 case CONNECTED -> {

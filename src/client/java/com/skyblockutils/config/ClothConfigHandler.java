@@ -86,6 +86,15 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Whether printing your coordinates (via the keybind) should also send the Skyblock location"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.coordinatesSendLocation = v).build());
 
+        SubCategoryBuilder textures = eb.startSubCategory(Component.literal("Textures"));
+        textures.add(eb.startBooleanToggle(Component.literal("Obvious Gemstones"), ModConfig.INSTANCE.obviousGemstones)
+                .setDefaultValue(true).setTooltip(Component.literal("Replaces gemstone glass and panes with clearer gem textures. Opal on Crimson Isle, Crystal Hollows gems in the Hollows, tunnel gems in the Glacite Tunnels and every gem in mineshafts"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.obviousGemstones = v).build());
+        textures.add(eb.startBooleanToggle(Component.literal("Custom Breaking Animation"), ModConfig.INSTANCE.customBreakingAnimation)
+                .setDefaultValue(true).setTooltip(Component.literal("Replaces the block breaking crack textures"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.customBreakingAnimation = v).build());
+        general.addEntry(textures.build());
+
         general.addEntry(new CustomEntry()
                 .addButton(Component.literal("Glowing Players GUI"), 120, CustomEntry.Alignment.LEFT, () ->
                                 GlowingPlayersGui.configScreenRequested = true
@@ -293,6 +302,14 @@ public class ClothConfigHandler {
     // Chat
     public static void buildChatCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory chat = builder.getOrCreateCategory(Component.literal("Chat"));
+
+        chat.addEntry(eb.startBooleanToggle(Component.literal("SSU Style Chat"), ModConfig.INSTANCE.ssuStyleChat)
+                .setDefaultValue(false).setTooltip(Component.literal("Draws the chat window with SSU's rounded corners and outline, other mods' chat changes are kept"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.ssuStyleChat = v).build());
+
+        chat.addEntry(eb.startBooleanToggle(Component.literal("SSU Style Chat Input"), ModConfig.INSTANCE.ssuStyleChatInput)
+                .setDefaultValue(true).setTooltip(Component.literal("Also styles the chat input box and other input boxes on the chat screen, needs SSU Style Chat on"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.ssuStyleChatInput = v).build());
 
         chat.addEntry(eb.startBooleanToggle(Component.literal("Fancy Emotes"), ModConfig.INSTANCE.fancyEmotes)
                 .setDefaultValue(true).setTooltip(Component.literal("Transforms <3 into ♥ and such"))

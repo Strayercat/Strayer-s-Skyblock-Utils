@@ -45,6 +45,10 @@ public class ModConfig {
     public boolean autoRejoinReminders = false;
     public boolean f7VoidLava = true;
 
+    // Textures
+    public boolean obviousGemstones = true;
+    public boolean customBreakingAnimation = true;
+
     // HUD
     public boolean hudEnabled = true;
     public int hudScale = 100;
@@ -74,6 +78,8 @@ public class ModConfig {
 
     // Chat filters & glowing players
     public boolean separateMessage = false;
+    public boolean ssuStyleChat = false;
+    public boolean ssuStyleChatInput = true;
     public boolean systemDuplicateCounter = true;
     public String systemDuplicateCounterText = "&8(&7x&r$&8)";
     public int systemDuplicateCounterColor = 0xFFFF55;
@@ -204,6 +210,8 @@ public class ModConfig {
             INSTANCE.dungeonPartyCommands = loaded.dungeonPartyCommands;
             INSTANCE.autoRejoinReminders = loaded.autoRejoinReminders;
             INSTANCE.f7VoidLava = loaded.f7VoidLava;
+            INSTANCE.obviousGemstones = loaded.obviousGemstones;
+            INSTANCE.customBreakingAnimation = loaded.customBreakingAnimation;
             INSTANCE.hudEnabled = loaded.hudEnabled;
             INSTANCE.hudScale = loaded.hudScale;
             INSTANCE.hudTime = loaded.hudTime;
@@ -233,6 +241,8 @@ public class ModConfig {
             INSTANCE.glowingPlayers = loaded.glowingPlayers != null ? new ArrayList<>(loaded.glowingPlayers) : new ArrayList<>();
             INSTANCE.dailyReminders = loaded.dailyReminders;
             INSTANCE.separateMessage = loaded.separateMessage;
+            INSTANCE.ssuStyleChat = loaded.ssuStyleChat;
+            INSTANCE.ssuStyleChatInput = loaded.ssuStyleChatInput;
             INSTANCE.systemDuplicateCounter = loaded.systemDuplicateCounter;
             INSTANCE.systemDuplicateCounterText = loaded.systemDuplicateCounterText != null ? loaded.systemDuplicateCounterText : "&8(&7x&r$&8)";
             INSTANCE.systemDuplicateCounterColor = loaded.systemDuplicateCounterColor;

@@ -2,6 +2,7 @@ package com.skyblockutils.features.chat.emoji;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.chat.SsuChatStyle;
 import com.skyblockutils.features.chat.emoji.EmojiRegistry.Emoji;
 import com.skyblockutils.utils.ModStyle;
 import net.minecraft.client.Minecraft;
@@ -134,11 +135,11 @@ public class EmojiPicker {
     }
 
     private static int buttonX() {
-        return 3;
+        return SsuChatStyle.inputEnabled() ? 3 + SsuChatStyle.INPUT_PADDING : 3;
     }
 
     private static int buttonY(int screenHeight) {
-        return screenHeight - 13;
+        return SsuChatStyle.inputEnabled() ? screenHeight - 15 : screenHeight - 13;
     }
 
     private static int panelTop(int screenHeight) {
@@ -146,7 +147,7 @@ public class EmojiPicker {
     }
 
     private static int panelBottom(int screenHeight) {
-        return screenHeight - 16;
+        return SsuChatStyle.inputEnabled() ? screenHeight - 19 : screenHeight - 16;
     }
 
     private static int gridTop(int screenHeight) {

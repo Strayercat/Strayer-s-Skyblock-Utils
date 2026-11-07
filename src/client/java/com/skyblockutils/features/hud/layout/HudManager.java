@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +17,6 @@ public final class HudManager {
     public static final float MIN_SCALE = 0.25f;
     public static final float MAX_SCALE = 4f;
 
-    private static final Map<HudElement, Bounds> lastBounds = new IdentityHashMap<>();
     private static List<HudElement> elements;
 
     private HudManager() {
@@ -97,7 +95,7 @@ public final class HudManager {
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         HudLayoutEntry layout = layout(element);
 
-        int width = Math.max(1, element.contentWidth(layoutWidth(element, preview), preview));
+        int width = Math.max(1, element.contentWidth(layoutWidth(element, preview)));
         int height = Math.max(1, element.height(width, preview));
 
         float scale = Math.min(layout.scale, Math.min(screenWidth / (float) width, screenHeight / (float) height));
@@ -135,7 +133,6 @@ public final class HudManager {
         } finally {
             graphics.pose().popMatrix();
         }
-        lastBounds.put(element, bounds);
         return bounds;
     }
 }

@@ -3,6 +3,7 @@ package com.skyblockutils.mixin.client;
 import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.ChatModifications;
+import com.skyblockutils.features.chat.SsuChatGraphicsAccess;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -25,6 +26,32 @@ public class ChatHudMixin {
 
     @Unique
     private boolean wasPeeking = false;
+
+    @Unique
+    private GuiGraphicsExtractor ssu$graphics;
+
+    @Inject(
+            at = @At("HEAD"),
+            method = "extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/gui/Font;IIILnet/minecraft/client/gui/components/ChatComponent$DisplayMode;Z)V"
+    )
+    private void ssu$captureGraphics(GuiGraphicsExtractor graphics, Font font, int ticks, int mouseX, int mouseY, ChatComponent.DisplayMode displayMode, boolean changeCursorOnInsertions, CallbackInfo ci) {
+        ssu$graphics = graphics;
+    }
+
+    @ModifyArg(
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/gui/components/ChatComponent;extractRenderState(Lnet/minecraft/client/gui/components/ChatComponent$ChatGraphicsAccess;IILnet/minecraft/client/gui/components/ChatComponent$DisplayMode;)V"
+            ),
+            method = "extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/gui/Font;IIILnet/minecraft/client/gui/components/ChatComponent$DisplayMode;Z)V",
+            index = 0
+    )
+    private ChatComponent.ChatGraphicsAccess ssu$styleChat(ChatComponent.ChatGraphicsAccess access) {
+        GuiGraphicsExtractor graphics = ssu$graphics;
+        ssu$graphics = null;
+        if (!ModConfig.INSTANCE.ssuStyleChat || graphics == null) return access;
+        return new SsuChatGraphicsAccess(access, graphics);
+    }
 
     @ModifyArg(
             at = @At(

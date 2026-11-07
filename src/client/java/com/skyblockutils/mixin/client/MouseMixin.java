@@ -20,8 +20,6 @@ public class MouseMixin {
     private void onMouseButton(long handle, MouseButtonInfo rawButtonInfo, int action, CallbackInfo ci) {
         if (action == 1) {
             Minecraft client = Minecraft.getInstance();
-            int sw = client.getWindow().getGuiScaledWidth();
-            int sh = client.getWindow().getGuiScaledHeight();
 
             if (handle == client.getWindow().handle()) {
                 double mouseX = client.mouseHandler.xpos() * client.getWindow().getGuiScaledWidth() / client.getWindow().getWidth();

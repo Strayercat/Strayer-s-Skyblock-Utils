@@ -20,7 +20,7 @@ public class CustomHeadLayerMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HeadedModel;translateToHead(Lcom/mojang/blaze3d/vertex/PoseStack;)V", shift = At.Shift.AFTER),
             require = 1
     )
-    private void ssu$scaleWithBigHead(PoseStack poseStack, SubmitNodeCollector collector, int light, LivingEntityRenderState state, float yRot, float xRot, CallbackInfo ci) {
+    private void ssu$scaleWithBigHead(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, LivingEntityRenderState state, float yRot, float xRot, CallbackInfo ci) {
         if (!(((RenderLayer<?, ?>) (Object) this).getParentModel() instanceof HeadedModel headed)) return;
         ModelPart head = headed.getHead();
         float target = ((SSURenderState) state).ssu$isBigHead() ? SSURenderState.BIG_HEAD_SCALE : 1.0F;

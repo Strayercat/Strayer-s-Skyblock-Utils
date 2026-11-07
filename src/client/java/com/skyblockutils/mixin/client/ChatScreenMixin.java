@@ -1,6 +1,10 @@
 package com.skyblockutils.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.skyblockutils.features.chat.SsuChatStyle;
 import com.skyblockutils.features.chat.emoji.EmojiPicker;
+import com.skyblockutils.utils.RoundedRect;
 import com.skyblockutils.features.chat.emoji.EmojiRegistry;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
@@ -39,6 +43,11 @@ public abstract class ChatScreenMixin extends Screen {
     private void ssu$shiftInput(CallbackInfo ci) {
         this.input.setX(this.input.getX() + EmojiPicker.INPUT_OFFSET);
         this.input.setWidth(this.input.getWidth() - EmojiPicker.INPUT_OFFSET);
+        if (SsuChatStyle.inputEnabled()) {
+            this.input.setX(this.input.getX() + SsuChatStyle.INPUT_PADDING);
+            this.input.setY(this.height - SsuChatStyle.INPUT_TEXT_FROM_BOTTOM);
+            this.input.setWidth(this.width - SsuChatStyle.INPUT_RIGHT_INSET - this.input.getX());
+        }
         this.input.addFormatter((text, _) -> EmojiRegistry.formatInput(text));
         EmojiPicker.bind(ssu$emojiPicker, this.input);
         ssu$limitLength();
@@ -83,6 +92,18 @@ public abstract class ChatScreenMixin extends Screen {
     @Unique
     private void ssu$limitLength() {
         this.input.setMaxLength(MAX_MESSAGE_LENGTH - EmojiRegistry.extraLength(this.input.getValue()));
+    }
+
+    @WrapOperation(
+            method = "extractRenderState",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;fill(IIIII)V", ordinal = 0)
+    )
+    private void ssu$styleInputBackground(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int col, Operation<Void> original) {
+        if (!SsuChatStyle.inputEnabled()) {
+            original.call(graphics, x0, y0, x1, y1, col);
+            return;
+        }
+        RoundedRect.panel(graphics, x0, y0 - SsuChatStyle.INPUT_EXTRA_HEIGHT, x1, y1, SsuChatStyle.INPUT_RADIUS, col, SsuChatStyle.accent());
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"), require = 1)

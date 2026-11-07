@@ -1,6 +1,13 @@
 package com.skyblockutils.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.skyblockutils.features.chat.SsuChatStyle;
 import com.skyblockutils.features.chat.emoji.EmojiPicker;
+import com.skyblockutils.utils.RoundedRect;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -31,5 +38,19 @@ public class EditBoxMixin {
             picker.keyPressed(KEY_BACKSPACE, event.hasControlDownWithQuirk(), _ -> {});
             cir.setReturnValue(true);
         }
+    }
+
+    @WrapOperation(
+            method = "extractWidgetRenderState",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V")
+    )
+    private void ssu$styleBorder(GuiGraphicsExtractor graphics, RenderPipeline renderPipeline, Identifier location, int x, int y, int width, int height, Operation<Void> original) {
+        if (!SsuChatStyle.appliesToCurrentScreen()) {
+            original.call(graphics, renderPipeline, location, x, y, width, height);
+            return;
+        }
+        EditBox self = (EditBox) (Object) this;
+        RoundedRect.panel(graphics, x, y, x + width, y + height, SsuChatStyle.INPUT_RADIUS,
+                SsuChatStyle.editBoxBackground(), SsuChatStyle.editBoxBorder(self.isActive(), self.isFocused()));
     }
 }

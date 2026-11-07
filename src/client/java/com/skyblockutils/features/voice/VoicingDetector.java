@@ -66,6 +66,10 @@ final class VoicingDetector {
         for (int n = start; n < history.length; n++) energy += (history[n] - mean) * (history[n] - mean);
         if (energy <= 1e-6) return 0;
 
+        return getBest(start, mean, energy);
+    }
+
+    private double getBest(int start, double mean, double energy) {
         double best = 0;
         for (int lag = MIN_LAG; lag <= MAX_LAG; lag++) {
             double cross = 0;

@@ -21,7 +21,7 @@ public abstract class HudElement {
 
     public abstract int autoWidth(boolean preview);
 
-    public int contentWidth(int layoutWidth, boolean preview) {
+    public int contentWidth(int layoutWidth) {
         return layoutWidth;
     }
 

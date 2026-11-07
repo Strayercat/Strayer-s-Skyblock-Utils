@@ -14,21 +14,28 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 public final class SkullRefresher {
     private static final int DELAY_TICKS = 5;
     private static final Long2IntOpenHashMap PENDING = new Long2IntOpenHashMap();
+    private static final int LOCATION_TIMEOUT_TICKS = 100;
     private static boolean wasScanning = false;
+    private static @Nullable ClientLevel lastLevel;
+    private static @Nullable String staleLocation;
+    private static int staleTicks = 0;
 
     private SkullRefresher() {
     }
 
     public static void tick(Minecraft client) {
         EggDetector.tick(client);
+        trackLevel(client.level);
+        if (staleLocation != null && (!SideBarUtils.location.equals(staleLocation) || --staleTicks <= 0)) staleLocation = null;
 
-        boolean scanning = client.level != null && StrayersSkyblockUtilsClient.isOnHypixel && !isPublicIsland();
+        boolean scanning = canScan(client.level);
         if (scanning && !wasScanning) rescanLoadedChunks(client);
         wasScanning = scanning;
 
@@ -70,7 +77,7 @@ public final class SkullRefresher {
     }
 
     public static void handleChunkLoad(ClientLevel level, LevelChunk chunk) {
-        if (!StrayersSkyblockUtilsClient.isOnHypixel || isPublicIsland()) return;
+        if (!canScan(level)) return;
         LevelChunkSection[] sections = chunk.getSections();
         int baseX = chunk.getPos().getMinBlockX();
         int baseZ = chunk.getPos().getMinBlockZ();
@@ -96,14 +103,27 @@ public final class SkullRefresher {
     }
 
     public static void handleBELoad(BlockEntity be) {
-        if (!StrayersSkyblockUtilsClient.isOnHypixel || isPublicIsland()) return;
         if (!(be instanceof SkullBlockEntity skull)) return;
+        if (!(be.getLevel() instanceof ClientLevel level) || !canScan(level)) return;
         EggDetector.check(skull);
         PENDING.put(SectionPos.asLong(be.getBlockPos()), DELAY_TICKS);
     }
 
-    private static boolean isPublicIsland() {
-        return !ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).isEmpty();
+    private static void trackLevel(@Nullable ClientLevel level) {
+        if (level == lastLevel) return;
+        lastLevel = level;
+        staleLocation = SideBarUtils.location;
+        staleTicks = LOCATION_TIMEOUT_TICKS;
+        wasScanning = false;
+        PENDING.clear();
+    }
+
+    private static boolean canScan(@Nullable ClientLevel level) {
+        if (level == null || !StrayersSkyblockUtilsClient.isOnHypixel) return false;
+        trackLevel(level);
+        if (staleLocation != null) return false;
+        String location = SideBarUtils.location;
+        return !location.isEmpty() && ModFunctions.mapLocationToGeneralArea(location).isEmpty();
     }
 
     public static void handleBEUnload(BlockEntity be) {

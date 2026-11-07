@@ -33,6 +33,7 @@ public class SeparatedChatHud {
     private static final int SCROLLBAR_WIDTH = 2;
     private static final int TAP_TICKS = 4;
     private static final int SEARCH_BAR_HEIGHT = 12;
+    private static final int SEARCH_BAR_GAP = 2;
     private static final int CORNER_RADIUS = 4;
 
     private static int scrollOffset = 0;
@@ -161,7 +162,9 @@ public class SeparatedChatHud {
         int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
         int x = Mth.floor(b.x());
         int width = Mth.ceil(b.right()) - x;
-        int y = b.bottom() + SEARCH_BAR_HEIGHT <= screenHeight ? Mth.ceil(b.bottom()) : Mth.floor(b.y()) - SEARCH_BAR_HEIGHT;
+        int y = b.bottom() + SEARCH_BAR_GAP + SEARCH_BAR_HEIGHT <= screenHeight
+                ? Mth.ceil(b.bottom()) + SEARCH_BAR_GAP
+                : Mth.floor(b.y()) - SEARCH_BAR_GAP - SEARCH_BAR_HEIGHT;
         return new int[]{x, Math.max(0, y), width, SEARCH_BAR_HEIGHT};
     }
 

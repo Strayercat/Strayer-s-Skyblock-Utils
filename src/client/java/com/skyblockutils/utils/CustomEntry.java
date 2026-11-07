@@ -58,7 +58,7 @@ public class CustomEntry extends AbstractConfigListEntry<Object> {
     }
 
     public CustomEntry addButton(Component label, int width, Alignment alignment, int margin, Runnable onClick, Component... tooltip) {
-        Button button = Button.builder(label, b -> onClick.run())
+        Button button = Button.builder(label, _ -> onClick.run())
                 .size(Math.min(300, width), 20)
                 .build();
         buttons.add(button);
@@ -100,16 +100,16 @@ public class CustomEntry extends AbstractConfigListEntry<Object> {
         for (EntryElement el : elements) {
             int elWidth = getElementWidth(el);
             int elX = switch (el.alignment()) {
-                case Alignment.Left a -> {
+                case Alignment.Left _ -> {
                     int pos = leftCursor;
                     leftCursor += elWidth + el.margin();
                     yield pos;
                 }
-                case Alignment.Right a -> {
+                case Alignment.Right _ -> {
                     rightCursor -= elWidth + el.margin();
                     yield rightCursor;
                 }
-                case Alignment.Center a -> {
+                case Alignment.Center _ -> {
                     int pos = centerCursor;
                     centerCursor += elWidth + el.margin();
                     yield pos;

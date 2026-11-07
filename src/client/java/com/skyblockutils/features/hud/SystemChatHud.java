@@ -1,7 +1,10 @@
 package com.skyblockutils.features.hud;
 
 import com.skyblockutils.ModKeyBindings;
+import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ClipboardUtils;
+import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.RoundedRect;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -27,7 +30,7 @@ public class SystemChatHud extends Screen {
     @Override
     protected void init() {
         int[] bounds = SeparatedChatHud.searchBarBounds();
-        this.searchBox = new EditBox(this.font, bounds[0] + 2, bounds[1] + 2, bounds[2] - 4, bounds[3], Component.literal("Search"));
+        this.searchBox = new EditBox(this.font, bounds[0] + 4, bounds[1] + 2, bounds[2] - 8, bounds[3], Component.literal("Search"));
         this.searchBox.setMaxLength(100);
         this.searchBox.setBordered(false);
         this.searchBox.setCanLoseFocus(false);
@@ -58,7 +61,8 @@ public class SystemChatHud extends Screen {
     public void extractRenderState(final @NotNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
         SeparatedChatHud.renderPinned(graphics);
         int[] bounds = SeparatedChatHud.searchBarBounds();
-        graphics.fill(bounds[0], bounds[1], bounds[0] + bounds[2], bounds[1] + bounds[3], this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
+        int accent = 0xFF000000 | ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
+        RoundedRect.panel(graphics, bounds[0], bounds[1], bounds[0] + bounds[2], bounds[1] + bounds[3], 3, ModStyle.COLOR_BACKGROUND, accent);
         super.extractRenderState(graphics, mouseX, mouseY, a);
     }
 

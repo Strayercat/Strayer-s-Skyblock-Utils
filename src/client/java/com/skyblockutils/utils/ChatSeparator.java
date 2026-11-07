@@ -10,8 +10,8 @@ public class ChatSeparator {
         String text = message.getString().replaceAll("§.", "").trim();
         if (!text.isEmpty()) return text.length() >= 5 && text.chars().allMatch(c -> c == '-' || c == '▬');
 
-        return message.<Boolean>visit((style, segment) ->
-                style.isStrikethrough() && !segment.isEmpty() ? Optional.of(true) : Optional.<Boolean>empty(),
+        return message.visit((style, segment) ->
+                style.isStrikethrough() && !segment.isEmpty() ? Optional.of(true) : Optional.empty(),
                 Style.EMPTY
         ).orElse(false);
     }

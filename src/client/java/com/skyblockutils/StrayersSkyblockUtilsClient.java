@@ -32,6 +32,7 @@ import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.features.slayer.CarryTracker;
 import com.skyblockutils.features.textures.F7VoidLava;
+import com.skyblockutils.features.textures.ObviousGemstones;
 import com.skyblockutils.features.voice.VoiceChat;
 import com.skyblockutils.features.voice.VoiceHud;
 import com.skyblockutils.render.EggDetector;
@@ -80,6 +81,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         AboutScreen.registerInfoButton();
         DailyReminders.init();
         F7VoidLava.register();
+        ObviousGemstones.register();
 
         ClientCommandRegistrationCallback.EVENT.register(ModCommands::register);
 
@@ -110,6 +112,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             OnScreenNotification.tick();
+            ObviousGemstones.tick(client);
             ClothConfigHandler.handleConfigScreen(client);
             GlowingPlayersGui.handleConfigScreen(client);
             HudEditScreen.handleRequest(client);

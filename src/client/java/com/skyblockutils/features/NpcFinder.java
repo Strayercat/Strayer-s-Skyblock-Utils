@@ -105,10 +105,12 @@ public class NpcFinder {
         allSkyblockNpcs.put("Alixer|Hub", new Npc("Alixer", "Hub", new BlockPos(-2, 79, 4)));
         allSkyblockNpcs.put("Oringo|Hub", new Npc("Oringo", "Hub", new BlockPos(-34, 70, 5)));
         allSkyblockNpcs.put("Fear Mongerer|Hub", new Npc("Fear Mongerer", "Hub", new BlockPos(-32, 70, 6)));
-        allSkyblockNpcs.put("Tyashoi Alchemist|Hub", new Npc("Tyashoi Alchemist", "Hub", new BlockPos(41, 68, -55))); //TODO
+        allSkyblockNpcs.put("Tyashoi Alchemist|Hub", new Npc("Tyashoi Alchemist", "Hub", new BlockPos(71, 72, -85)));
         allSkyblockNpcs.put("Hoppity|Hub", new Npc("Hoppity", "Hub", new BlockPos(56, 71, -2)));
         allSkyblockNpcs.put("Susan|Hub", new Npc("Susan", "Hub", new BlockPos(-1, 80, 25)));
         allSkyblockNpcs.put("Feast Chef Ted|Hub", new Npc("Feast Chef Ted", "Hub", new BlockPos(84, 73, -78)));
+        allSkyblockNpcs.put("Agnes|Hub", new Npc("Agnes", "Hub", new BlockPos(10, 76, 2)));
+        allSkyblockNpcs.put("Alcina|Hub", new Npc("Alcina", "Hub", new BlockPos(17, 76, 1)));
 
         // The Barn
         allSkyblockNpcs.put("Farmhand|The Barn", new Npc("Farmhand", "The Barn", new BlockPos(144, 74, -241)));

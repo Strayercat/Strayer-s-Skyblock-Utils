@@ -46,10 +46,10 @@ public class EntityRendererMixin {
             method = "submitNameDisplay(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;I)V",
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V")
     )
-    private void ssu$keepPlateStacked(PoseStack poseStack, float x, float y, float z, Operation<Void> original,
+    private void ssu$keepPlateStacked(PoseStack poseStack, float xo, float yo, float zo, Operation<Void> original,
                                       @Local(argsOnly = true, name = "state") EntityRenderState state) {
         if (state.nameTag != null && NameplateRenderer.markedName(state.nameTag) != null) return;
-        original.call(poseStack, x, y, z);
+        original.call(poseStack, xo, yo, zo);
     }
 
     @WrapOperation(

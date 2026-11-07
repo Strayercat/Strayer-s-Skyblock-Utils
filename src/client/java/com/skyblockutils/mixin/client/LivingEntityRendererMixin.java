@@ -21,7 +21,7 @@ public class LivingEntityRendererMixin {
             method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
             at = @At("TAIL")
     )
-    private void ssu$applySpecialGemModel(LivingEntity entity, LivingEntityRenderState state, float partialTick, CallbackInfo ci) {
+    private void ssu$applySpecialGemModel(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
         String name = entity instanceof Player player ? player.getName().getString() : null;
         boolean special = name != null && SSUIndicator.isSpecialUser(name);
         ((SSURenderState) state).ssu$setBigHead(special);
