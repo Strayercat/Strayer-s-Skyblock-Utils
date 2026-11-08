@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -40,32 +41,28 @@ import java.util.function.Predicate;
 
 public final class ObviousGemstones {
     public enum Gem {
-        RUBY("red", Blocks.STAINED_GLASS.red(), Blocks.STAINED_GLASS_PANE.red()),
-        AMBER("orange", Blocks.STAINED_GLASS.orange(), Blocks.STAINED_GLASS_PANE.orange()),
-        SAPPHIRE("light_blue", Blocks.STAINED_GLASS.lightBlue(), Blocks.STAINED_GLASS_PANE.lightBlue()),
-        JADE("lime", Blocks.STAINED_GLASS.lime(), Blocks.STAINED_GLASS_PANE.lime()),
-        AMETHYST("purple", Blocks.STAINED_GLASS.purple(), Blocks.STAINED_GLASS_PANE.purple()),
-        TOPAZ("yellow", Blocks.STAINED_GLASS.yellow(), Blocks.STAINED_GLASS_PANE.yellow()),
-        JASPER("magenta", Blocks.STAINED_GLASS.magenta(), Blocks.STAINED_GLASS_PANE.magenta()),
-        OPAL("white", Blocks.STAINED_GLASS.white(), Blocks.STAINED_GLASS_PANE.white()),
-        AQUAMARINE("blue", Blocks.STAINED_GLASS.blue(), Blocks.STAINED_GLASS_PANE.blue()),
-        CITRINE("brown", Blocks.STAINED_GLASS.brown(), Blocks.STAINED_GLASS_PANE.brown()),
-        ONYX("black", Blocks.STAINED_GLASS.black(), Blocks.STAINED_GLASS_PANE.black()),
-        PERIDOT("green", Blocks.STAINED_GLASS.green(), Blocks.STAINED_GLASS_PANE.green());
+        RUBY(Blocks.STAINED_GLASS.red(), Blocks.STAINED_GLASS_PANE.red()),
+        AMBER(Blocks.STAINED_GLASS.orange(), Blocks.STAINED_GLASS_PANE.orange()),
+        SAPPHIRE(Blocks.STAINED_GLASS.lightBlue(), Blocks.STAINED_GLASS_PANE.lightBlue()),
+        JADE(Blocks.STAINED_GLASS.lime(), Blocks.STAINED_GLASS_PANE.lime()),
+        AMETHYST(Blocks.STAINED_GLASS.purple(), Blocks.STAINED_GLASS_PANE.purple()),
+        TOPAZ(Blocks.STAINED_GLASS.yellow(), Blocks.STAINED_GLASS_PANE.yellow()),
+        JASPER(Blocks.STAINED_GLASS.magenta(), Blocks.STAINED_GLASS_PANE.magenta()),
+        OPAL(Blocks.STAINED_GLASS.white(), Blocks.STAINED_GLASS_PANE.white()),
+        AQUAMARINE(Blocks.STAINED_GLASS.blue(), Blocks.STAINED_GLASS_PANE.blue()),
+        CITRINE(Blocks.STAINED_GLASS.brown(), Blocks.STAINED_GLASS_PANE.brown()),
+        ONYX(Blocks.STAINED_GLASS.black(), Blocks.STAINED_GLASS_PANE.black()),
+        PERIDOT(Blocks.STAINED_GLASS.green(), Blocks.STAINED_GLASS_PANE.green());
 
         final Block glass;
         final Block pane;
-        final Identifier vanillaGlass;
-        final Identifier vanillaPaneTop;
         final Identifier gemTexture;
         final Identifier gemPaneTexture;
 
-        Gem(String color, Block glass, Block pane) {
+        Gem(Block glass, Block pane) {
             String name = name().toLowerCase(java.util.Locale.ROOT);
             this.glass = glass;
             this.pane = pane;
-            this.vanillaGlass = Identifier.fromNamespaceAndPath("minecraft", "block/" + color + "_stained_glass");
-            this.vanillaPaneTop = Identifier.fromNamespaceAndPath("minecraft", "block/" + color + "_stained_glass_pane_top");
             this.gemTexture = Identifier.fromNamespaceAndPath("skyblockutils", "block/" + name);
             this.gemPaneTexture = Identifier.fromNamespaceAndPath("skyblockutils", "block/" + name + "_pane");
         }
@@ -79,7 +76,9 @@ public final class ObviousGemstones {
     private static final Set<Gem> ALL = Collections.unmodifiableSet(EnumSet.allOf(Gem.class));
     private static final Set<Gem> NONE = Collections.unmodifiableSet(EnumSet.noneOf(Gem.class));
 
+    private static final Identifier OUTERMOST_PHASE = Identifier.fromNamespaceAndPath("skyblockutils", "obvious_gemstones");
     private static final int REBUILD_STEP = 3;
+    private static final float EDGE_WIDTH = 2.5f / 16f;
 
     private static final Map<Identifier, TextureAtlasSprite> spriteCache = new ConcurrentHashMap<>();
     private static volatile Set<Gem> activeGems = NONE;
@@ -97,12 +96,14 @@ public final class ObviousGemstones {
 
         ModelLoadingPlugin.register(context -> {
             spriteCache.clear();
-            context.modifyBlockModelAfterBake().register(ModelModifier.WRAP_PHASE, (model, ctx) -> {
+            var event = context.modifyBlockModelAfterBake();
+            event.addPhaseOrdering(ModelModifier.WRAP_LAST_PHASE, OUTERMOST_PHASE);
+            event.register(OUTERMOST_PHASE, (model, ctx) -> {
                 Block block = ctx.state().getBlock();
                 Gem gem = glassBlocks.get(block);
-                if (gem != null) return new GemstoneModel(model, gem);
+                if (gem != null) return new GemstoneModel(model, gem, false);
                 gem = paneBlocks.get(block);
-                if (gem != null) return new GemstoneModel(model, gem);
+                if (gem != null) return new GemstoneModel(model, gem, true);
                 return model;
             });
         });
@@ -154,11 +155,13 @@ public final class ObviousGemstones {
     private static final class GemstoneModel implements BlockStateModel {
         private final BlockStateModel delegate;
         private final Gem gem;
+        private final boolean pane;
         private final Map<BlockStateModelPart, GemstonePart> parts = new ConcurrentHashMap<>();
 
-        GemstoneModel(BlockStateModel delegate, Gem gem) {
+        GemstoneModel(BlockStateModel delegate, Gem gem, boolean pane) {
             this.delegate = delegate;
             this.gem = gem;
+            this.pane = pane;
         }
 
         private boolean active() {
@@ -173,7 +176,7 @@ public final class ObviousGemstones {
             }
             List<BlockStateModelPart> original = new ArrayList<>();
             delegate.collectParts(random, original);
-            for (BlockStateModelPart part : original) output.add(parts.computeIfAbsent(part, p -> new GemstonePart(p, gem)));
+            for (BlockStateModelPart part : original) output.add(parts.computeIfAbsent(part, p -> new GemstonePart(p, gem, pane)));
         }
 
         @Override
@@ -197,7 +200,7 @@ public final class ObviousGemstones {
         }
 
         @Override
-        public Material.@NotNull  Baked particleMaterial(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state) {
+        public Material.@NotNull Baked particleMaterial(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state) {
             return delegate.particleMaterial(level, pos, state);
         }
 
@@ -215,12 +218,14 @@ public final class ObviousGemstones {
     private static final class GemstonePart implements BlockStateModelPart {
         private final BlockStateModelPart delegate;
         private final Gem gem;
+        private final boolean pane;
         private final List<BakedQuad> generalQuads;
         private final Map<Direction, List<BakedQuad>> sideQuads = new EnumMap<>(Direction.class);
 
-        GemstonePart(BlockStateModelPart delegate, Gem gem) {
+        GemstonePart(BlockStateModelPart delegate, Gem gem, boolean pane) {
             this.delegate = delegate;
             this.gem = gem;
+            this.pane = pane;
             this.generalQuads = retexture(delegate.getQuads(null));
             for (Direction direction : Direction.values()) sideQuads.put(direction, retexture(delegate.getQuads(direction)));
         }
@@ -232,14 +237,12 @@ public final class ObviousGemstones {
 
         private List<BakedQuad> retexture(List<BakedQuad> quads) {
             if (quads.isEmpty()) return quads;
-            TextureAtlasSprite glass = sprite(gem.vanillaGlass);
-            TextureAtlasSprite paneTop = sprite(gem.vanillaPaneTop);
+            TextureAtlasSprite gemSprite = sprite(gem.gemTexture);
+            TextureAtlasSprite edgeSprite = sprite(gem.gemPaneTexture);
             List<BakedQuad> result = new ArrayList<>(quads.size());
             for (BakedQuad quad : quads) {
-                TextureAtlasSprite current = quad.materialInfo().sprite();
-                if (current == paneTop) result.add(remap(quad, sprite(gem.gemPaneTexture)));
-                else if (current == glass) result.add(remap(quad, sprite(gem.gemTexture)));
-                else result.add(quad);
+                boolean edge = pane && isEdgeQuad(quad);
+                result.add(remap(quad, edge ? edgeSprite : gemSprite));
             }
             return result;
         }
@@ -260,8 +263,29 @@ public final class ObviousGemstones {
         }
     }
 
+    private static boolean isEdgeQuad(BakedQuad quad) {
+        Vector3fc[] positions = {quad.position0(), quad.position1(), quad.position2(), quad.position3()};
+        float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE, minZ = Float.MAX_VALUE;
+        float maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE, maxZ = -Float.MAX_VALUE;
+        for (Vector3fc p : positions) {
+            minX = Math.min(minX, p.x());
+            minY = Math.min(minY, p.y());
+            minZ = Math.min(minZ, p.z());
+            maxX = Math.max(maxX, p.x());
+            maxY = Math.max(maxY, p.y());
+            maxZ = Math.max(maxZ, p.z());
+        }
+        float dx = maxX - minX, dy = maxY - minY, dz = maxZ - minZ;
+        return switch (quad.direction().getAxis()) {
+            case X -> Math.min(dy, dz) <= EDGE_WIDTH;
+            case Y -> Math.min(dx, dz) <= EDGE_WIDTH;
+            case Z -> Math.min(dx, dy) <= EDGE_WIDTH;
+        };
+    }
+
     private static BakedQuad remap(BakedQuad quad, TextureAtlasSprite target) {
         TextureAtlasSprite source = quad.materialInfo().sprite();
+        if (source == target) return quad;
         boolean uHigh;
         if (fits(quad, source, true)) uHigh = true;
         else if (fits(quad, source, false)) uHigh = false;
@@ -289,14 +313,14 @@ public final class ObviousGemstones {
             long packed = quad.packedUV(i);
             float u = uHigh ? high(packed) : low(packed);
             float v = uHigh ? low(packed) : high(packed);
-            if (within(u, sprite.getU(0f), sprite.getU(1f)) || within(v, sprite.getV(0f), sprite.getV(1f))) return false;
+            if (outside(u, sprite.getU(0f), sprite.getU(1f)) || outside(v, sprite.getV(0f), sprite.getV(1f))) return false;
         }
         return true;
     }
 
-    private static boolean within(float value, float a, float b) {
+    private static boolean outside(float value, float a, float b) {
         float epsilon = 1.0E-4f;
-        return !(value >= Math.min(a, b) - epsilon) || !(value <= Math.max(a, b) + epsilon);
+        return value < Math.min(a, b) - epsilon || value > Math.max(a, b) + epsilon;
     }
 
     private static float fraction(float value, float start, float end) {
