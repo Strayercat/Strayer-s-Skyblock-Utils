@@ -51,6 +51,7 @@ public class ModConfig {
 
     // HUD
     public boolean hudEnabled = true;
+    public boolean stashHud = false;
     public int hudScale = 100;
     public boolean hudTime = true;
     public boolean hudTime12hFormat = false;
@@ -213,6 +214,7 @@ public class ModConfig {
             INSTANCE.obviousGemstones = loaded.obviousGemstones;
             INSTANCE.customBreakingAnimation = loaded.customBreakingAnimation;
             INSTANCE.hudEnabled = loaded.hudEnabled;
+            INSTANCE.stashHud = loaded.stashHud;
             INSTANCE.hudScale = loaded.hudScale;
             INSTANCE.hudTime = loaded.hudTime;
             INSTANCE.hudTime12hFormat = loaded.hudTime12hFormat;

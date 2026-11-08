@@ -10,15 +10,20 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public final class CustomBreakingAnimation {
-    private static final List<RenderType> DESTROY_TYPES = IntStream.range(0, ModelBakery.DESTROY_STAGE_COUNT)
+    private static final List<RenderType> VANILLA = List.copyOf(ModelBakery.DESTROY_TYPES);
+    private static final List<RenderType> CUSTOM = IntStream.range(0, ModelBakery.DESTROY_STAGE_COUNT)
             .mapToObj(i -> RenderTypes.crumbling(Identifier.fromNamespaceAndPath("skyblockutils", "textures/block/destroy_stage_" + i + ".png")))
             .toList();
+    private static boolean applied = false;
 
     private CustomBreakingAnimation() {
     }
 
-    public static RenderType replace(RenderType original, int progress) {
-        if (!ModConfig.INSTANCE.customBreakingAnimation || progress < 0 || progress >= DESTROY_TYPES.size()) return original;
-        return DESTROY_TYPES.get(progress);
+    public static void tick() {
+        boolean wanted = ModConfig.INSTANCE.customBreakingAnimation;
+        if (wanted == applied) return;
+        List<RenderType> source = wanted ? CUSTOM : VANILLA;
+        for (int i = 0; i < source.size(); i++) ModelBakery.DESTROY_TYPES.set(i, source.get(i));
+        applied = wanted;
     }
 }

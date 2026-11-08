@@ -1,9 +1,8 @@
 package com.skyblockutils.features;
 
-import com.skyblockutils.ModFunctions;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.OnScreenNotification;
-import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -19,9 +18,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class DailyReminders {
     public enum ReminderType {
@@ -45,7 +41,7 @@ public class DailyReminders {
     }
 
     public static void tick(Minecraft client) {
-        String location = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
+        String location = HypixelLocation.isInMineshaft() ? "Glacite Mineshafts" : HypixelLocation.map();
 
         if (client.level == null) return;
 
@@ -57,13 +53,7 @@ public class DailyReminders {
                 if (!alreadyReminded.contains(type) && !ModConfig.INSTANCE.disabledTypes.contains(type)) {
                     alreadyReminded.add(type);
 
-                    if (ModConfig.INSTANCE.dailyReminders) {
-                        scheduler.schedule(() -> client.execute(() -> {
-                            if (!ModConfig.INSTANCE.disabledTypes.contains(type) && !ModConfig.INSTANCE.completedTypes.contains(type)) {
-                                sendReminder(client, type);
-                            }
-                        }), 2, TimeUnit.SECONDS);
-                    }
+                    if (ModConfig.INSTANCE.dailyReminders) sendReminder(client, type);
                 }
 
                 if (type == ReminderType.ISLE && client.level.getGameTime() % 100 == 0) {

@@ -22,9 +22,7 @@ public class PuffTracker {
 
     public static void togglePuffTimer() {
         if (puffTrackerEnabled) {
-            puffTrackerEnabled = false;
-            currentScheduledAction.cancel(true);
-            puffsAroundPlayer.clear();
+            reset();
             ModFunctions.sendSystemMessage("§cPuff Timer toggled off", false);
         } else {
             if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Rift")) {
@@ -35,6 +33,13 @@ public class PuffTracker {
             puffTrackerEnabled = true;
             ModFunctions.sendSystemMessage("§aPuff Timer toggled on", false);
         }
+    }
+
+    public static void reset() {
+        puffTrackerEnabled = false;
+        if (currentScheduledAction != null) currentScheduledAction.cancel(true);
+        currentScheduledAction = null;
+        puffsAroundPlayer.clear();
     }
 
     public static void handleMetadataPacket(int entityId) {

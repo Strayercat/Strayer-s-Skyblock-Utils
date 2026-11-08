@@ -22,6 +22,7 @@ import com.skyblockutils.features.hud.ScreenshotManager;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.features.hud.SsuHud;
+import com.skyblockutils.features.hud.StashHud;
 import com.skyblockutils.features.hud.layout.HudEditScreen;
 import com.skyblockutils.features.hud.layout.HudManager;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
@@ -29,21 +30,22 @@ import com.skyblockutils.features.mining.GlaciteTunnelsWaypoints;
 import com.skyblockutils.features.party.PartyCommands;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.features.party.PartyInviteNotifications;
-import com.skyblockutils.features.party.PartyListParser;
+import com.skyblockutils.features.party.PartyTracker;
 import com.skyblockutils.features.slayer.CarryTracker;
+import com.skyblockutils.features.textures.CustomBreakingAnimation;
 import com.skyblockutils.features.textures.F7VoidLava;
 import com.skyblockutils.features.textures.ObviousGemstones;
 import com.skyblockutils.features.voice.VoiceChat;
 import com.skyblockutils.features.voice.VoiceHud;
-import com.skyblockutils.render.EggDetector;
 import com.skyblockutils.render.EggClickFilter;
-import com.skyblockutils.render.SkullRefresher;
+import com.skyblockutils.render.HeadRestorer;
+import com.skyblockutils.hypixel.HypixelApi;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.utils.*;
 import com.skyblockutils.features.AboutScreen;
 import com.skyblockutils.render.PawPrints;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -70,13 +72,13 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             if (passesChatFilters(message, false)) Minecraft.getInstance().gui.hud.getChat().addServerSystemMessage(message);
         });
         ChatBlockRouter.register(
-                PartyListParser.BLOCK_HANDLER,
                 GuildListParser.BLOCK_HANDLER,
                 PartyInviteNotifications.BLOCK_HANDLER,
                 PowderChestNotifications.BLOCK_HANDLER,
                 TreeGiftNotifications.BLOCK_HANDLER
         );
         ModConfig.load();
+        HypixelApi.init();
         GuiBlocker.init();
         AboutScreen.registerInfoButton();
         DailyReminders.init();
@@ -85,16 +87,10 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register(ModCommands::register);
 
-        ClientPlayConnectionEvents.JOIN.register((handler, _, _) -> {
-            isOnHypixel = handler.getConnection().getRemoteAddress().toString().toLowerCase(java.util.Locale.ROOT).contains("hypixel");
-            if (!isOnHypixel) return;
-            ModFunctions.connectionEventDataReset("Join");
-        });
+        ClientPlayConnectionEvents.JOIN.register((_, _, _) -> isOnHypixel = false);
 
         ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
             isOnHypixel = false;
-            EggDetector.clear();
-            CoopListParser.reset();
             ModFunctions.connectionEventDataReset("Leave");
         });
 
@@ -102,6 +98,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_carry_hud"), (context, _) -> HudManager.render(CarryTracker.ELEMENT, context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_system_messages"), (context, _) -> SeparatedChatHud.render(context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_voice_chat"), (context, _) -> HudManager.render(VoiceHud.ELEMENT, context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_stash_hud"), (context, _) -> HudManager.render(StashHud.ELEMENT, context));
         HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> HudManager.render(CustomSidebar.ELEMENT, context));
 
         LevelRenderEvents.END_MAIN.register(context -> {
@@ -112,40 +109,40 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             OnScreenNotification.tick();
+            PartyTracker.tick(client);
             ObviousGemstones.tick(client);
+            CustomBreakingAnimation.tick();
             ClothConfigHandler.handleConfigScreen(client);
             GlowingPlayersGui.handleConfigScreen(client);
             HudEditScreen.handleRequest(client);
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
             ScreenshotManager.tick();
             ChatBlockRouter.tick();
-            PartyListParser.tickCapture();
             GuildListParser.tickCapture();
             VoiceChat.tick(client);
 
             PawPrints.tick(client);
+            SideBarUtils.tick();
             if (client.level == null) return;
 
             if (client.getConnection() instanceof ClientPacketListener listener) {
                 ModFunctions.calculatePing(client, listener);
             }
 
-            Boolean skyblockCheck = ModFunctions.isInSkyblock(client);
-            if (skyblockCheck != null) isInSkyblock = skyblockCheck;
+            boolean locationKnown = HypixelLocation.isKnown();
+            if (locationKnown) isInSkyblock = HypixelLocation.isSkyBlock();
             if (isOnHypixel || isInSkyblock) SSUIndicator.tick(client);
-            if (skyblockCheck == null) return;
+            if (!locationKnown) return;
             if (!isInSkyblock) return;
 
-            SkullRefresher.tick(client);
             AutoFish.autoFish(client);
             CorlTimer.corlTimerTick(client);
             PuffTracker.tick(client);
             CarryTracker.tick(client);
+            HeadRestorer.tick(client);
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
-            PartyListParser.handleOnJoinCommand();
             GuildListParser.tick();
             CoopListParser.tick(client);
-            SideBarUtils.updateLocation();
             SeparatedChat.tickAllMessages();
             SeparatedChatHud.tick();
             DailyReminders.tick(client);
@@ -164,10 +161,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::prepareOutgoingChat);
         ClientSendMessageEvents.MODIFY_COMMAND.register(ChatModifications::prepareOutgoingCommand);
-        ClientSendMessageEvents.COMMAND.register(command -> {
-            PartyListParser.onCommandSent(command);
-            GuildListParser.onCommandSent(command);
-        });
+        ClientSendMessageEvents.COMMAND.register(GuildListParser::onCommandSent);
         ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : ChatModifications.fitToChat(EmojiRegistry.withEmojis(message)));
 
         UseBlockCallback.EVENT.register((_, level, _, hitResult) -> {
@@ -175,9 +169,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             return InteractionResult.PASS;
         });
 
-        ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register((be, _) -> SkullRefresher.handleBELoad(be));
-        ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((be, _) -> SkullRefresher.handleBEUnload(be));
-        ClientChunkEvents.CHUNK_LOAD.register(SkullRefresher::handleChunkLoad);
+        ClientChunkEvents.CHUNK_LOAD.register(HeadRestorer::onChunkLoad);
     }
 
     private static boolean passesChatFilters(Component message, boolean overlay) {
@@ -187,7 +179,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
         boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
         boolean eggMessage = EggClickFilter.handleMessage(cleanMessage);
-        if (!chatFilter || !eggMessage || !spookyFestMessage) return false;
+        boolean stashMessage = StashHud.handleMessage(cleanMessage);
+        if (!chatFilter || !eggMessage || !spookyFestMessage || !stashMessage) return false;
 
         return SeparatedChat.handleMessage(message, overlay);
     }

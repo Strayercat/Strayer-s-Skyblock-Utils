@@ -296,6 +296,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Show who is connected and talking in the top left corner"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.voiceHud = v).build());
 
+        overlays.add(eb.startBooleanToggle(Component.literal("Stash HUD"), ModConfig.INSTANCE.stashHud)
+                .setDefaultValue(false).setTooltip(Component.literal("Shows how much is in your item and material stash, read from the stash reminders, and hides those reminders from chat"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.stashHud = v).build());
+
         hud.addEntry(overlays.build());
     }
 

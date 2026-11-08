@@ -1,9 +1,9 @@
 package com.skyblockutils.features.mining;
 
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ModStyle;
-import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -66,7 +66,7 @@ public class CorlTimer {
             corlTimerEnabled = false;
             ModFunctions.sendSystemMessage("§cCorleone Timer toggled off", false);
         } else {
-            if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Crystal Hollows")) {
+            if (!HypixelLocation.map().equals("Crystal Hollows")) {
                 ModFunctions.sendSystemMessage("§cYou must be in the Crystal Hollows to use Corleone Timer", false);
                 return;
             }

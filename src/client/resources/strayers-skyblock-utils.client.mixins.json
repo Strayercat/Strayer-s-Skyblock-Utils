@@ -19,8 +19,7 @@
     "NameTagFeatureRendererMixin",
     "RenderTypeFeatureRendererInvoker",
     "ScreenInvoker",
-    "SkullBlockEntityMixin",
-    "SubmitNodeCollectionMixin",
+    "SkullBlockEntityAccessor",
     "WorldTimeMixin"
   ],
   "injectors": {

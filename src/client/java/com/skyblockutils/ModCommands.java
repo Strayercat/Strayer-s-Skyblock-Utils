@@ -13,7 +13,8 @@ import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.slayer.CarryTracker;
 import com.skyblockutils.features.guild.GuildListParser;
-import com.skyblockutils.features.party.PartyListParser;
+import com.skyblockutils.features.party.PartyTracker;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.features.hud.layout.HudEditScreen;
 import com.skyblockutils.utils.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
@@ -232,7 +233,7 @@ public class ModCommands {
                 )
                 .then(ClientCommands.literal("dev")
                         .then(ClientCommands.literal("partyscan").executes(context -> {
-                            PartyListParser.devScan();
+                            PartyTracker.devScan();
                             return 1;
                         }))
                         .then(ClientCommands.literal("guildscan").executes(context -> {
@@ -254,6 +255,10 @@ public class ModCommands {
                         }))
                         .then(ClientCommands.literal("location").executes(context -> {
                             context.getSource().sendFeedback(Component.literal("§6" + SideBarUtils.location));
+                            return 1;
+                        }))
+                        .then(ClientCommands.literal("hypixellocation").executes(context -> {
+                            context.getSource().sendFeedback(Component.literal("§6" + HypixelLocation.describe()));
                             return 1;
                         }))
                         .then(ClientCommands.literal("generallocation").executes(context -> {

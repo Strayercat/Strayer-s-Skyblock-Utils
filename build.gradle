@@ -30,6 +30,11 @@ repositories {
         name 'Xander Maven'
         url 'https://maven.isxander.dev/releases'
     }
+
+    maven {
+        name = "Hypixel"
+        url = "https://repo.hypixel.net/repository/Hypixel/"
+    }
 }
 
 loom {
@@ -55,6 +60,9 @@ dependencies {
     api("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+
+    compileOnly "net.hypixel:mod-api:${project.hypixel_mod_api_version}"
+    include(implementation("maven.modrinth:hypixel-mod-api:${project.hypixel_mod_api_fabric_version}"))
 
     include(implementation("io.github.jaredmdobson:concentus:1.0.2"))
     include(implementation("de.maxhenkel.rnnoise4j:rnnoise4j:2.1.2"))

@@ -1,6 +1,7 @@
 package com.skyblockutils.features.coop;
 
 import com.skyblockutils.ModFunctions;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -68,7 +69,7 @@ public class CoopListParser {
         if (expectOpenUntil != 0 || containerId != -1) return;
         if (client.gui.screen() != null || client.getConnection() == null) return;
         if (ModFunctions.isWorldLoaded()) return;
-        if (!Boolean.TRUE.equals(ModFunctions.isInSkyblock(client))) return;
+        if (!HypixelLocation.isSkyBlock()) return;
         if (ModFunctions.isInDungeons(client)) return;
 
         request(client, now);

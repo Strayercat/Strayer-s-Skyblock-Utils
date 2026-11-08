@@ -1,6 +1,8 @@
 package com.skyblockutils.render;
 
 import net.minecraft.util.Util;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -19,12 +21,16 @@ public final class EggClickFilter {
     }
 
     public static void handleClick(Level level, BlockHitResult hit) {
-        if (!EggDetector.isPlayerHead(level.getBlockState(hit.getBlockPos()))) return;
+        if (!isPlayerHead(level.getBlockState(hit.getBlockPos()))) return;
         long tick = level.getGameTime();
         if (tick == clickTick) return;
         clickTick = tick;
         clickTime = Util.getMillis();
         clickId++;
+    }
+
+    private static boolean isPlayerHead(BlockState state) {
+        return state.is(Blocks.PLAYER_HEAD) || state.is(Blocks.PLAYER_WALL_HEAD);
     }
 
     public static boolean handleMessage(String message) {

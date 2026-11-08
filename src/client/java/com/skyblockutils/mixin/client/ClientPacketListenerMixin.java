@@ -1,12 +1,16 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.features.coop.CoopListParser;
+import com.skyblockutils.render.HeadRestorer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,5 +41,12 @@ public abstract class ClientPacketListenerMixin {
     private void ssu$dropCoopSlots(ClientboundContainerSetSlotPacket packet, CallbackInfo ci) {
         if (!Minecraft.getInstance().isSameThread()) return;
         if (CoopListParser.isHiddenContainer(packet.getContainerId())) ci.cancel();
+    }
+
+    @Inject(method = "handleBlockEntityData", at = @At("TAIL"))
+    private void ssu$cacheHeadData(ClientboundBlockEntityDataPacket packet, CallbackInfo ci) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null || packet.getType() != BlockEntityTypes.SKULL) return;
+        HeadRestorer.onSkullData(level, packet.getPos(), packet.getTag());
     }
 }

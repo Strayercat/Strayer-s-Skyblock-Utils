@@ -1,10 +1,9 @@
 package com.skyblockutils.features.mining;
 
-import com.skyblockutils.ModFunctions;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.utils.OnScreenNotification;
-import com.skyblockutils.utils.SideBarUtils;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -17,7 +16,7 @@ public class PowderChestNotifications {
         @Override
         public boolean isActive() {
             return ModConfig.INSTANCE.powderChestNotification
-                    && "Crystal Hollows".equals(ModFunctions.mapLocationToGeneralArea(SideBarUtils.location));
+                    && "Crystal Hollows".equals(HypixelLocation.map());
         }
 
         @Override

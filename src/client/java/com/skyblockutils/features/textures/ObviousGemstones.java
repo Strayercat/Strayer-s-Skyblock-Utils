@@ -1,6 +1,6 @@
 package com.skyblockutils.features.textures;
 
-import com.skyblockutils.ModFunctions;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.mixin.client.ModelManagerAccessor;
 import com.skyblockutils.utils.SideBarUtils;
@@ -118,13 +118,13 @@ public final class ObviousGemstones {
     private static Set<Gem> computeActiveGems() {
         if (!ModConfig.INSTANCE.obviousGemstones || Minecraft.getInstance().level == null) return NONE;
 
-        String location = SideBarUtils.location;
-        if (location.contains("Mineshaft")) return ALL;
-        if (location.equals("Glacite Tunnels")) return TUNNELS;
+        if (!HypixelLocation.isSkyBlock()) return NONE;
+        if (HypixelLocation.isInMineshaft()) return ALL;
 
-        return switch (ModFunctions.mapLocationToGeneralArea(location)) {
+        return switch (HypixelLocation.map()) {
             case "Crystal Hollows" -> CRYSTAL_HOLLOWS;
             case "Crimson Isle" -> CRIMSON_ISLE;
+            case "Dwarven Mines" -> SideBarUtils.location.equals("Glacite Tunnels") ? TUNNELS : NONE;
             default -> NONE;
         };
     }

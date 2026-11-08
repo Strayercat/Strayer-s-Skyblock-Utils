@@ -6,9 +6,6 @@ import net.minecraft.client.Minecraft;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class PartyInfo {
     public static boolean isInParty = false;
@@ -18,7 +15,7 @@ public class PartyInfo {
 
     public static void handlePartyMessages(String message) {
         if (message.startsWith("You'll be partying with:")) {
-            scheduler.schedule(() -> Minecraft.getInstance().execute(PartyListParser::requestList), 500, TimeUnit.MILLISECONDS);
+            PartyTracker.request();
             return;
         }
 
@@ -43,7 +40,7 @@ public class PartyInfo {
                 message.contains("was removed from your party because they disconnected.") ||
                 message.contains("The party was transferred to")) {
 
-            scheduler.schedule(() -> Minecraft.getInstance().execute(PartyListParser::requestList), 500, TimeUnit.MILLISECONDS);
+            PartyTracker.request();
         }
     }
 }

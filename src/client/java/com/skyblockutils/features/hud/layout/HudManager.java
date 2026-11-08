@@ -4,6 +4,7 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.hud.CustomSidebar;
 import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.features.hud.SsuHud;
+import com.skyblockutils.features.hud.StashHud;
 import com.skyblockutils.features.slayer.CarryTracker;
 import com.skyblockutils.features.voice.VoiceHud;
 import net.minecraft.client.Minecraft;
@@ -55,6 +56,7 @@ public final class HudManager {
                     CarryTracker.ELEMENT,
                     CustomSidebar.ELEMENT,
                     VoiceHud.ELEMENT,
+                    StashHud.ELEMENT,
                     SeparatedChatHud.ELEMENT
             );
         }

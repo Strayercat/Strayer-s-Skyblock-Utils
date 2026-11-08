@@ -3,13 +3,16 @@ package com.skyblockutils;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
 import com.skyblockutils.features.chat.SeparatedChat;
+import com.skyblockutils.features.coop.CoopListParser;
+import com.skyblockutils.features.hud.StashHud;
 import com.skyblockutils.features.hud.SsuHud;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.features.guild.GuildListParser;
-import com.skyblockutils.features.party.PartyListParser;
+import com.skyblockutils.features.party.PartyTracker;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.PingDebugMonitorAccessor;
 import com.skyblockutils.mixin.client.PingDebugMonitorInvoker;
@@ -23,7 +26,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.debugchart.LocalSampleLogger;
-import net.minecraft.world.scores.DisplaySlot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,22 +53,28 @@ public class ModFunctions {
             StrayersSkyblockUtilsClient.isInSkyblock = false;
             AutoRejoin.resetAutoRejoin();
             SSUIndicator.disconnect();
-            PartyListParser.onJoinCommandHandled = false;
+            PartyTracker.reset();
+            HypixelLocation.reset();
             GuildListParser.onJoinCommandHandled = false;
+            CoopListParser.reset();
+            StashHud.reset();
         }
 
         playerWelcomedToIsland = false;
         SsuHud.funFactHandled = false;
-        CorlTimer.corlTimerEnabled = false;
-        PuffTracker.puffTrackerEnabled = false;
 
         DowntimeTracker.resetDowntimeTracker();
-        CorlTimer.resetCorlTimer();
-        AutoFish.resetAutoFish();
+        serverChangeDataReset();
         NpcFinder.clear();
         SideBarUtils.resetLocation();
         ChatBlockRouter.reset();
         DailyReminders.reset();
+    }
+
+    public static void serverChangeDataReset() {
+        CorlTimer.resetCorlTimer();
+        PuffTracker.reset();
+        AutoFish.resetAutoFish();
     }
 
     public static void calculatePing(Minecraft client, ClientPacketListener listener) {
@@ -169,16 +177,8 @@ public class ModFunctions {
         Minecraft client = Minecraft.getInstance();
         LocalPlayer player = client.player;
         ClientLevel level = client.level;
-        if (player == null || level == null || client.getConnection() == null) return true;
+        if (player == null || level == null || client.getConnection() == null || !SideBarUtils.isReady()) return true;
         return !level.getChunkSource().hasChunk(SectionPos.blockToSectionCoord(player.getBlockX()), SectionPos.blockToSectionCoord(player.getBlockZ()));
-    }
-
-    public static Boolean isInSkyblock(Minecraft client) {
-        if (client.level == null) return null;
-        var scoreboard = client.level.getScoreboard();
-        var sidebar = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
-        if (sidebar == null) return null;
-        return sidebar.getDisplayName().getString().contains("SKYBLOCK");
     }
 
     public static Boolean isInDungeons(Minecraft client) {
