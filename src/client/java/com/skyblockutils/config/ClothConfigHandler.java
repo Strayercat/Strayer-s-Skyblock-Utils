@@ -300,6 +300,14 @@ public class ClothConfigHandler {
                 .setDefaultValue(false).setTooltip(Component.literal("Shows how much is in your item and material stash, read from the stash reminders, and hides those reminders from chat"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.stashHud = v).build());
 
+        overlays.add(eb.startBooleanToggle(Component.literal("Bestiary HUD"), ModConfig.INSTANCE.bestiaryHud)
+                .setDefaultValue(true).setTooltip(Component.literal("Tracks your bestiary kills and shows the last 5 mobs you killed, hidden after 2 minutes without a kill"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.bestiaryHud = v).build());
+
+        overlays.add(eb.startBooleanToggle(Component.literal("Hide Bestiary HUD In Catacombs"), ModConfig.INSTANCE.bestiaryHudHideInCatacombs)
+                .setDefaultValue(true).setTooltip(Component.literal("Don't show the bestiary HUD while in the Catacombs"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.bestiaryHudHideInCatacombs = v).build());
+
         hud.addEntry(overlays.build());
     }
 

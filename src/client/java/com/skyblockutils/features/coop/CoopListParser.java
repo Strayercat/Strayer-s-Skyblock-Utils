@@ -67,7 +67,8 @@ public class CoopListParser {
         if (pendingAt < 0 || now < pendingAt) return;
         if (!urgent && now - lastRequest < MIN_INTERVAL_MS) return;
         if (expectOpenUntil != 0 || containerId != -1) return;
-        if (client.gui.screen() != null || client.getConnection() == null) return;
+        if (client.player == null || client.player.containerMenu != client.player.inventoryMenu) return;
+        if (client.getConnection() == null) return;
         if (ModFunctions.isWorldLoaded()) return;
         if (!HypixelLocation.isSkyBlock()) return;
         if (ModFunctions.isInDungeons(client)) return;
@@ -86,6 +87,11 @@ public class CoopListParser {
     }
 
     public static boolean onOpenScreen(int id, Component title) {
+        if (containerId != -1 && id != containerId) {
+            containerId = -1;
+            muteSoundsUntil = 0;
+            return false;
+        }
         if (System.currentTimeMillis() > expectOpenUntil) return false;
         if (!title.getString().replaceAll("§.", "").trim().startsWith("Profile:")) {
             expectOpenUntil = 0;
@@ -112,6 +118,10 @@ public class CoopListParser {
 
     public static boolean isHiddenContainer(int id) {
         return containerId != -1 && id == containerId;
+    }
+
+    public static boolean isBusy() {
+        return expectOpenUntil != 0 || containerId != -1;
     }
 
     public static void reset() {

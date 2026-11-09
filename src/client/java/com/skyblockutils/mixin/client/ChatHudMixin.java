@@ -114,7 +114,7 @@ public class ChatHudMixin {
             argsOnly = true,
             name = "message")
     private Component addChatBadge(Component message) {
-        return ChatModifications.withChatBadge(message);
+        return ChatModifications.withChatBadge(ChatModifications.fitToChat(message));
     }
 
     @Unique

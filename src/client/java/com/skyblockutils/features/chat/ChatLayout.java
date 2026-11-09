@@ -6,7 +6,6 @@ import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ public final class ChatLayout {
     private static final int SERVER_CENTER_MIN = 154;
     private static final int SERVER_CENTER_MAX = 160;
     private static final int SERVER_CENTER_TOLERANCE = 8;
+    private static final int STANDARD_CHAT_WIDTH = 320;
 
     private ChatLayout() {}
 
@@ -37,6 +37,13 @@ public final class ChatLayout {
             }
             return false;
         }
+
+        public boolean hasIndentedLines() {
+            for (ParsedLine line : lines) {
+                if (line.type() == LineType.NORMAL && line.component().getString().startsWith(" ".repeat(MIN_CENTER_PADDING))) return true;
+            }
+            return false;
+        }
     }
 
     public static float chatScale() {
@@ -48,6 +55,48 @@ public final class ChatLayout {
         if (scale <= 0) return 1;
         int chatWidth = ChatComponent.getWidth(Minecraft.getInstance().options.chatWidth().get());
         return Math.max(1, Mth.floor(chatWidth / scale));
+    }
+
+    public static double widthFactor(int width) {
+        return Mth.clamp(width / (double) STANDARD_CHAT_WIDTH, 0.5, 1.5);
+    }
+
+    public static Component indented(Component component, int width) {
+        String plain = component.getString().replaceAll("§.", "");
+        int spaces = 0;
+        while (spaces < plain.length() && plain.charAt(spaces) == ' ') spaces++;
+        if (spaces < MIN_CENTER_PADDING) return component;
+
+        int target = Math.max(1, (int) Math.round(spaces * widthFactor(width)));
+        if (target == spaces) return component;
+
+        int[] remaining = {spaces};
+        MutableComponent out = Component.empty().append(Component.literal(" ".repeat(target)));
+        component.visit((style, text) -> {
+            String stripped = remaining[0] > 0 ? stripSpaces(text, remaining) : text;
+            if (!stripped.isEmpty()) out.append(Component.literal(stripped).setStyle(style));
+            return Optional.<Void>empty();
+        }, Style.EMPTY);
+        return out;
+    }
+
+    private static String stripSpaces(String text, int[] remaining) {
+        StringBuilder out = new StringBuilder();
+        int i = 0;
+        while (i < text.length()) {
+            char c = text.charAt(i);
+            if (remaining[0] > 0 && c == ' ') {
+                remaining[0]--;
+                i++;
+            } else if (remaining[0] > 0 && c == '§' && i + 1 < text.length()) {
+                out.append(c).append(text.charAt(i + 1));
+                i += 2;
+            } else {
+                out.append(text, i, text.length());
+                break;
+            }
+        }
+        return out.toString();
     }
 
     public static ParsedMessage parse(Component message) {
@@ -69,17 +118,6 @@ public final class ChatLayout {
         List<ParsedLine> lines = new ArrayList<>();
         for (List<Segment> segments : rawLines) lines.add(classify(segments));
         return new ParsedMessage(lines);
-    }
-
-    public static int contentWidth(ParsedMessage message, int wrap, Font font) {
-        int width = 0;
-        for (ParsedLine line : message.lines()) {
-            if (line.type() == LineType.SEPARATOR) continue;
-            for (FormattedCharSequence seq : font.split(line.component(), wrap)) {
-                width = Math.max(width, font.width(seq));
-            }
-        }
-        return width;
     }
 
     public static Component separator(ParsedLine line, int width, Font font) {
@@ -107,7 +145,7 @@ public final class ChatLayout {
                     if (spaces > 0) out.append(" ".repeat(spaces));
                     out.append(line.component());
                 }
-                case NORMAL -> out.append(line.component());
+                case NORMAL -> out.append(indented(line.component(), width));
             }
         }
 

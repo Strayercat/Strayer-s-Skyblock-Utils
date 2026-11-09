@@ -94,8 +94,10 @@ public class ChatModifications {
 
     public static Component fitToChat(Component message) {
         ChatLayout.ParsedMessage parsed = ChatLayout.parse(message);
-        if (!parsed.hasLayoutLines()) return message;
-        return ChatLayout.toChatComponent(parsed, ChatLayout.wrapWidth(), Minecraft.getInstance().font);
+        int width = ChatLayout.wrapWidth();
+        boolean indentChanged = Math.abs(ChatLayout.widthFactor(width) - 1) > 0.02 && parsed.hasIndentedLines();
+        if (!parsed.hasLayoutLines() && !indentChanged) return message;
+        return ChatLayout.toChatComponent(parsed, width, Minecraft.getInstance().font);
     }
 
     private static String senderOf(Component message) {

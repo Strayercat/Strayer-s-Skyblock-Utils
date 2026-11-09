@@ -17,6 +17,9 @@ import java.util.regex.Pattern;
 public final class StashHud {
     private static final Pattern AMOUNT = Pattern.compile("You have ([\\d,]+) (items?|materials?) stashed away!");
     private static final Pattern PICKUP = Pattern.compile("^From stash: .+$");
+    private static final Pattern PICKED_ALL = Pattern.compile("^You picked up all (?:items|materials) from your (item|material) stash!$");
+    private static final Pattern PICKED_SOME = Pattern.compile("^You picked up ([\\d,]+) (?:items?|materials?) from your (item|material) stash!$");
+    private static final Pattern STILL_HAVE = Pattern.compile("^You still have ([\\d,]+) (?:items?|materials?) in there!$");
     private static final Pattern STASH_LINE = Pattern.compile("^\\s*(?:You have [\\d,]+ (?:items?|materials?) stashed away!|\\(This totals [\\d,]+ types? of (?:items?|materials?) stashed!\\)|>>> CLICK HERE to pick (?:them|it) up! <<<)\\s*$");
 
     private static final int PADDING = 6;
@@ -27,6 +30,7 @@ public final class StashHud {
 
     private static int materials = 0;
     private static int items = 0;
+    private static boolean lastPickupMaterial = false;
 
     private StashHud() {
     }
@@ -89,6 +93,8 @@ public final class StashHud {
             items = Math.max(0, items - 1);
             return true;
         }
+        if (handlePickupSummary(message)) return true;
+        if (handleClearStash(message)) return true;
 
         boolean stashMessage = false;
         for (String line : message.split("\n")) {
@@ -104,6 +110,47 @@ public final class StashHud {
             else items = value;
         }
         return !stashMessage || !ModConfig.INSTANCE.stashHud;
+    }
+
+    private static boolean handlePickupSummary(String message) {
+        boolean matched = false;
+        for (String line : message.split("\n")) {
+            String trimmed = line.trim();
+            Matcher all = PICKED_ALL.matcher(trimmed);
+            if (all.matches()) {
+                lastPickupMaterial = all.group(1).equals("material");
+                set(lastPickupMaterial, 0);
+                matched = true;
+                continue;
+            }
+            Matcher some = PICKED_SOME.matcher(trimmed);
+            if (some.matches()) {
+                lastPickupMaterial = some.group(2).equals("material");
+                int current = lastPickupMaterial ? materials : items;
+                set(lastPickupMaterial, Math.max(0, current - parse(some.group(1))));
+                matched = true;
+                continue;
+            }
+            Matcher still = STILL_HAVE.matcher(trimmed);
+            if (still.matches()) {
+                set(lastPickupMaterial, parse(still.group(1)));
+                matched = true;
+            }
+        }
+        return matched;
+    }
+
+    private static boolean handleClearStash(String message) {
+        if (message.equals("Your stash has been cleared!")) {
+            reset();
+            return true;
+        }
+        return false;
+    }
+
+    private static void set(boolean material, int value) {
+        if (material) materials = value;
+        else items = value;
     }
 
     public static void reset() {

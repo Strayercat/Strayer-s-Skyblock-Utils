@@ -3,6 +3,7 @@ package com.skyblockutils.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.skyblockutils.features.chat.ChatModifications;
+import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.features.voice.VoiceChat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -194,6 +195,7 @@ public class SSUIndicator {
     public static void disconnect() {
         if (socket == null) return;
         WebSocket ws = socket;
+        CompletableFuture<WebSocket> chain = sendChain != null ? sendChain : CompletableFuture.completedFuture(ws);
         socket = null;
         ready = false;
         nextAttempt = 0;
@@ -212,7 +214,7 @@ public class SSUIndicator {
         tab = new HashSet<>();
 
         VoiceChat.onSocketClosed();
-        ws.sendClose(WebSocket.NORMAL_CLOSURE, "");
+        chain.exceptionally(_ -> ws).thenCompose(w -> w.sendClose(WebSocket.NORMAL_CLOSURE, ""));
     }
 
     private static void replaceWatch(Set<String> watch, Collection<String> names) {
@@ -330,6 +332,8 @@ public class SSUIndicator {
             onReady(System.currentTimeMillis());
         } else if (type.startsWith("voice_") && ws == socket) {
             VoiceChat.handleServerMessage(type, msg);
+        } else if (type.startsWith("profile_") && ws == socket) {
+            BestiaryHud.handleServerMessage(type, msg);
         }
     }
 

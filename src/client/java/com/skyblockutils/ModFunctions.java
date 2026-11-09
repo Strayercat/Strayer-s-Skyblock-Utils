@@ -1,5 +1,6 @@
 package com.skyblockutils;
 
+import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
 import com.skyblockutils.features.chat.SeparatedChat;
@@ -11,7 +12,7 @@ import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.features.guild.GuildListParser;
-import com.skyblockutils.features.party.PartyTracker;
+import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.PingDebugMonitorAccessor;
@@ -52,11 +53,13 @@ public class ModFunctions {
         } else {
             StrayersSkyblockUtilsClient.isInSkyblock = false;
             AutoRejoin.resetAutoRejoin();
+            BestiaryHud.save();
             SSUIndicator.disconnect();
-            PartyTracker.reset();
+            PartyListParser.reset();
             HypixelLocation.reset();
             GuildListParser.onJoinCommandHandled = false;
             CoopListParser.reset();
+            BestiaryHud.reset();
             StashHud.reset();
         }
 

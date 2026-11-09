@@ -1,5 +1,6 @@
 package com.skyblockutils.mixin.client;
 
+import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.features.mining.GemstonePaneFix;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
@@ -31,5 +33,15 @@ public class MinecraftMixin {
                 GemstonePaneFix.latestGemBreaking = blockPos;
             }
         }
+    }
+
+    @Inject(method = "startAttack", at = @At("HEAD"))
+    private void ssu$trackAttackAction(CallbackInfoReturnable<Boolean> cir) {
+        BestiaryHud.onPlayerAction();
+    }
+
+    @Inject(method = "startUseItem", at = @At("HEAD"))
+    private void ssu$trackUseAction(CallbackInfo ci) {
+        BestiaryHud.onPlayerAction();
     }
 }

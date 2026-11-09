@@ -63,7 +63,7 @@ public class SeparatedChatHud {
                 continue;
             }
 
-            List<FormattedCharSequence> wrapped = font.split(line.component(), wrap);
+            List<FormattedCharSequence> wrapped = font.split(ChatLayout.indented(line.component(), wrap), wrap);
             if (wrapped.isEmpty()) {
                 lines.add(new RenderLine(FormattedCharSequence.EMPTY, false, message));
                 continue;
@@ -342,11 +342,19 @@ public class SeparatedChatHud {
         HistoryView view = historyView(bounds.width(), bounds.height());
         if (view.lines().isEmpty()) return null;
 
+        double localX = (mouseX - bounds.x()) / bounds.scale();
         double localY = (mouseY - bounds.y()) / bounds.scale();
-        int index = view.start() + (int) Math.floor((localY - firstLineY(view)) / LINE_HEIGHT);
+        double offsetY = localY - firstLineY(view);
+        if (offsetY < 0) return null;
+        int index = view.start() + (int) Math.floor(offsetY / LINE_HEIGHT);
         if (index < view.start() || index >= view.end()) return null;
 
-        ChatLayout.ParsedMessage message = view.lines().get(index).message();
+        RenderLine hovered = view.lines().get(index);
+        Font font = Minecraft.getInstance().font;
+        int textX = lineX(view, hovered, font);
+        if (localX < textX || localX > textX + font.width(hovered.text())) return null;
+
+        ChatLayout.ParsedMessage message = hovered.message();
         List<String> parts = new ArrayList<>();
         for (ChatLayout.ParsedLine line : message.lines()) {
             if (line.type() == ChatLayout.LineType.SEPARATOR) continue;

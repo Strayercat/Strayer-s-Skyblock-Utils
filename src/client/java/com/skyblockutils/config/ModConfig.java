@@ -37,6 +37,7 @@ public class ModConfig {
     public boolean cat = true;
     public boolean partyGlow = true;
     public boolean screenshotHud = true;
+    public boolean bestiaryHud = true;
     public boolean cancelSwings = false;
 
     // Dungeons
@@ -52,6 +53,7 @@ public class ModConfig {
     // HUD
     public boolean hudEnabled = true;
     public boolean stashHud = false;
+    public boolean bestiaryHudHideInCatacombs = true;
     public int hudScale = 100;
     public boolean hudTime = true;
     public boolean hudTime12hFormat = false;
@@ -272,6 +274,8 @@ public class ModConfig {
             INSTANCE.voiceHud = loaded.voiceHud;
             INSTANCE.voiceMuted = loaded.voiceMuted;
             INSTANCE.voiceDeafened = loaded.voiceDeafened;
+            INSTANCE.bestiaryHud = loaded.bestiaryHud;
+            INSTANCE.bestiaryHudHideInCatacombs = loaded.bestiaryHudHideInCatacombs;
 
             loaded.chatFilters.forEach(INSTANCE::setChatFilter);
         } catch (IOException ignored) {

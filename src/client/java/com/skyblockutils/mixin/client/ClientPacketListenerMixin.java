@@ -1,15 +1,21 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.features.coop.CoopListParser;
+import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.render.HeadRestorer;
+import com.skyblockutils.utils.DamageLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,14 +39,45 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleSoundEvent", at = @At("HEAD"), cancellable = true)
     private void ssu$muteCoopLeverClick(ClientboundSoundPacket packet, CallbackInfo ci) {
         if (!Minecraft.getInstance().isSameThread()) return;
+        String sound = packet.getSound().value().location().getPath();
+        if (sound.equals("entity.experience_orb.pickup")) BestiaryHud.onXpSound();
         if (!CoopListParser.shouldMuteSounds()) return;
-        if (packet.getSound().value().location().getPath().equals("block.lever.click")) ci.cancel();
+        if (sound.equals("block.lever.click")) ci.cancel();
     }
 
     @Inject(method = "handleContainerSetSlot", at = @At("HEAD"), cancellable = true)
     private void ssu$dropCoopSlots(ClientboundContainerSetSlotPacket packet, CallbackInfo ci) {
         if (!Minecraft.getInstance().isSameThread()) return;
         if (CoopListParser.isHiddenContainer(packet.getContainerId())) ci.cancel();
+    }
+
+    @Inject(method = "handleContainerClose", at = @At("HEAD"), cancellable = true)
+    private void ssu$keepScreenOnHiddenClose(ClientboundContainerClosePacket packet, CallbackInfo ci) {
+        if (!Minecraft.getInstance().isSameThread()) return;
+        if (CoopListParser.isHiddenContainer(packet.getContainerId())) ci.cancel();
+    }
+
+    @Inject(method = "handleEntityEvent", at = @At("HEAD"))
+    private void ssu$trackEntityDeath(ClientboundEntityEventPacket packet, CallbackInfo ci) {
+        Minecraft client = Minecraft.getInstance();
+        if (!client.isSameThread() || client.level == null) return;
+        int event = packet.getEventId();
+        if (event != 2 && event != 3) return;
+        Entity entity = packet.getEntity(client.level);
+        if (entity == null) return;
+        if (event == 2) {
+            BestiaryHud.onEntityHurt(entity);
+            return;
+        }
+        DamageLogger.onDeath(entity);
+        BestiaryHud.onEntityDeath(entity);
+    }
+
+    @Inject(method = "handleDamageEvent", at = @At("HEAD"))
+    private void ssu$logDamage(ClientboundDamageEventPacket packet, CallbackInfo ci) {
+        if (!Minecraft.getInstance().isSameThread()) return;
+        DamageLogger.onDamage(packet);
+        BestiaryHud.onDamageEvent(packet);
     }
 
     @Inject(method = "handleBlockEntityData", at = @At("TAIL"))

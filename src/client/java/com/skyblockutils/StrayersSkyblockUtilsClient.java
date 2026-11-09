@@ -11,18 +11,14 @@ import com.skyblockutils.features.chat.emoji.EmojiRegistry;
 import com.skyblockutils.features.coop.CoopListParser;
 import com.skyblockutils.features.events.spookyfest.SpookyMessageHandler;
 import com.skyblockutils.features.foraging.TreeGiftNotifications;
+import com.skyblockutils.features.hud.*;
 import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.features.guild.GuildListParser;
-import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.features.mining.PowderChestNotifications;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
-import com.skyblockutils.features.hud.CustomSidebar;
-import com.skyblockutils.features.hud.ScreenshotManager;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
-import com.skyblockutils.features.hud.SsuHud;
-import com.skyblockutils.features.hud.StashHud;
 import com.skyblockutils.features.hud.layout.HudEditScreen;
 import com.skyblockutils.features.hud.layout.HudManager;
 import com.skyblockutils.features.dungeons.DungeonPartyCommands;
@@ -30,7 +26,7 @@ import com.skyblockutils.features.mining.GlaciteTunnelsWaypoints;
 import com.skyblockutils.features.party.PartyCommands;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.features.party.PartyInviteNotifications;
-import com.skyblockutils.features.party.PartyTracker;
+import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.features.slayer.CarryTracker;
 import com.skyblockutils.features.textures.CustomBreakingAnimation;
 import com.skyblockutils.features.textures.F7VoidLava;
@@ -69,10 +65,12 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public void onInitializeClient() {
         ModKeyBindings.init();
         ChatBlockRouter.setReleaseSink(message -> {
-            if (passesChatFilters(message, false)) Minecraft.getInstance().gui.hud.getChat().addServerSystemMessage(message);
+            if (passesChatFilters(message, false)) Minecraft.getInstance().gui.hud.getChat().addServerSystemMessage(EmojiRegistry.withEmojis(message));
         });
+        ChatBlockRouter.setHoldAll(() -> isInSkyblock);
         ChatBlockRouter.register(
                 GuildListParser.BLOCK_HANDLER,
+                PartyListParser.BLOCK_HANDLER,
                 PartyInviteNotifications.BLOCK_HANDLER,
                 PowderChestNotifications.BLOCK_HANDLER,
                 TreeGiftNotifications.BLOCK_HANDLER
@@ -80,6 +78,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ModConfig.load();
         HypixelApi.init();
         GuiBlocker.init();
+        BestiaryHud.register();
         AboutScreen.registerInfoButton();
         DailyReminders.init();
         F7VoidLava.register();
@@ -99,6 +98,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_system_messages"), (context, _) -> SeparatedChatHud.render(context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_voice_chat"), (context, _) -> HudManager.render(VoiceHud.ELEMENT, context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_stash_hud"), (context, _) -> HudManager.render(StashHud.ELEMENT, context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_bestiary_hud"), (context, _) -> HudManager.render(BestiaryHud.ELEMENT, context));
         HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> HudManager.render(CustomSidebar.ELEMENT, context));
 
         LevelRenderEvents.END_MAIN.register(context -> {
@@ -109,7 +109,6 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             OnScreenNotification.tick();
-            PartyTracker.tick(client);
             ObviousGemstones.tick(client);
             CustomBreakingAnimation.tick();
             ClothConfigHandler.handleConfigScreen(client);
@@ -119,6 +118,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ScreenshotManager.tick();
             ChatBlockRouter.tick();
             GuildListParser.tickCapture();
+            PartyListParser.tickCapture();
             VoiceChat.tick(client);
 
             PawPrints.tick(client);
@@ -134,13 +134,14 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             if (isOnHypixel || isInSkyblock) SSUIndicator.tick(client);
             if (!locationKnown) return;
             if (!isInSkyblock) return;
-
+            BestiaryHud.tick(client);
             AutoFish.autoFish(client);
             CorlTimer.corlTimerTick(client);
             PuffTracker.tick(client);
             CarryTracker.tick(client);
             HeadRestorer.tick(client);
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
+            PartyListParser.handleOnJoinCommand();
             GuildListParser.tick();
             CoopListParser.tick(client);
             SeparatedChat.tickAllMessages();
@@ -154,15 +155,20 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             if (!overlay) {
                 GuildListParser.observeMessage(message);
-                if (!ChatBlockRouter.handle(message)) return false;
+                Filtered filtered = new Filtered(message);
+                if (!ChatBlockRouter.handle(message, filtered::get)) return false;
+                return passesChatFilters(message, false, filtered);
             }
             return passesChatFilters(message, overlay);
         });
 
         ClientSendMessageEvents.MODIFY_CHAT.register(ChatModifications::prepareOutgoingChat);
         ClientSendMessageEvents.MODIFY_COMMAND.register(ChatModifications::prepareOutgoingCommand);
-        ClientSendMessageEvents.COMMAND.register(GuildListParser::onCommandSent);
-        ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : ChatModifications.fitToChat(EmojiRegistry.withEmojis(message)));
+        ClientSendMessageEvents.COMMAND.register(command -> {
+            PartyListParser.onCommandSent(command);
+            GuildListParser.onCommandSent(command);
+        });
+        ClientReceiveMessageEvents.MODIFY_GAME.register((message, overlay) -> overlay ? message : EmojiRegistry.withEmojis(message));
 
         UseBlockCallback.EVENT.register((_, level, _, hitResult) -> {
             EggClickFilter.handleClick(level, hitResult);
@@ -172,16 +178,38 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientChunkEvents.CHUNK_LOAD.register(HeadRestorer::onChunkLoad);
     }
 
-    private static boolean passesChatFilters(Component message, boolean overlay) {
-        if (!isInSkyblock) return true;
+    private static final class Filtered {
+        private final Component message;
+        private Boolean value;
+
+        private Filtered(Component message) {
+            this.message = message;
+        }
+
+        private boolean get() {
+            if (value == null) value = isFilteredOut(message);
+            return value;
+        }
+    }
+
+    private static boolean isFilteredOut(Component message) {
+        if (!isInSkyblock) return false;
 
         String cleanMessage = message.getString().replaceAll("§.", "").trim();
         boolean spookyFestMessage = SpookyMessageHandler.handleMessage(message);
         boolean chatFilter = !ChatFilter.filterMessages(cleanMessage);
         boolean eggMessage = EggClickFilter.handleMessage(cleanMessage);
         boolean stashMessage = StashHud.handleMessage(cleanMessage);
-        if (!chatFilter || !eggMessage || !spookyFestMessage || !stashMessage) return false;
+        return !chatFilter || !eggMessage || !spookyFestMessage || !stashMessage;
+    }
 
+    private static boolean passesChatFilters(Component message, boolean overlay) {
+        return passesChatFilters(message, overlay, new Filtered(message));
+    }
+
+    private static boolean passesChatFilters(Component message, boolean overlay, Filtered filtered) {
+        if (!isInSkyblock) return true;
+        if (filtered.get()) return false;
         return SeparatedChat.handleMessage(message, overlay);
     }
 
@@ -190,6 +218,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         PartyCommands.handlePartyCommands(cleanMessage);
         PartyInfo.handlePartyMessages(cleanMessage);
         CoopListParser.handleMessage(cleanMessage);
+        BestiaryHud.handleMessage(cleanMessage);
         if (!isInSkyblock) return;
         DowntimeTracker.trackDowntime(cleanMessage);
         DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);

@@ -1,6 +1,7 @@
 package com.skyblockutils.features.hud.layout;
 
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.features.hud.CustomSidebar;
 import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.features.hud.SsuHud;
@@ -57,6 +58,7 @@ public final class HudManager {
                     CustomSidebar.ELEMENT,
                     VoiceHud.ELEMENT,
                     StashHud.ELEMENT,
+                    BestiaryHud.ELEMENT,
                     SeparatedChatHud.ELEMENT
             );
         }
