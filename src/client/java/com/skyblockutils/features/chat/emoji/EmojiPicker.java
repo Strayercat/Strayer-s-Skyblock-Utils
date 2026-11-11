@@ -160,6 +160,12 @@ public class EmojiPicker {
         return mouseX >= x && mouseX < x + BUTTON_SIZE && mouseY >= y && mouseY < y + BUTTON_SIZE;
     }
 
+    public static boolean suppressHover = false;
+
+    public boolean blocksMouse(double mouseX, double mouseY, int screenHeight) {
+        return isOverButton(mouseX, mouseY, screenHeight) || isOverPanel(mouseX, mouseY, screenHeight);
+    }
+
     private boolean isOverPanel(double mouseX, double mouseY, int screenHeight) {
         return open && mouseX >= PANEL_X && mouseX < PANEL_X + WIDTH
                 && mouseY >= panelTop(screenHeight) && mouseY < panelBottom(screenHeight);

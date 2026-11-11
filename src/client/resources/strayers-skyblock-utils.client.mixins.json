@@ -14,6 +14,7 @@
     "EntitiesDestroyMixin",
     "EntityTrackerUpdateMixin",
     "GameRendererMixin",
+    "GuiGraphicsExtractorMixin",
     "LocalPlayerMixin",
     "ModelManagerAccessor",
     "MouseMixin",

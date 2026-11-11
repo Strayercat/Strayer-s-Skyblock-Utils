@@ -5,6 +5,8 @@ import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 
+import java.util.Objects;
+
 public class PartyCommands {
     public static boolean allInvEnabled = false;
 
@@ -15,16 +17,15 @@ public class PartyCommands {
         ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
         if (networkHandler == null) return;
 
-        String[] parts = message.split(": ", 2);
+        String[] parts = message.split(": ");
         if (parts.length < 2) return;
 
-        String messageContent = parts[1].trim();
-        if (!messageContent.startsWith("!")) return;
-        if (PartyInfo.isLeader()) return;
+        String messageContent = parts[1];
 
         if (messageContent.equalsIgnoreCase("!pt") || messageContent.equalsIgnoreCase("!ptme")) {
-            String[] header = parts[0].split(" ");
-            String username = header[header.length - 1];
+            if (!Objects.equals(PartyInfo.leader, Minecraft.getInstance().getUser().getName())) return;
+
+            String username = parts[0].split(" ")[parts[0].split(" ").length - 1];
 
             if (username.equalsIgnoreCase(Minecraft.getInstance().getUser().getName())) return;
 
@@ -35,12 +36,15 @@ public class PartyCommands {
                 messageContent.equalsIgnoreCase("!pw") ||
                 messageContent.equalsIgnoreCase("!pwarp") ||
                 messageContent.equalsIgnoreCase("!warp")) {
+            if (!Objects.equals(PartyInfo.leader, Minecraft.getInstance().getUser().getName())) return;
             networkHandler.sendCommand("party warp");
         }
 
         if (messageContent.equalsIgnoreCase("!allinv")) {
+            if (!Objects.equals(PartyInfo.leader, Minecraft.getInstance().getUser().getName())) return;
+
             if (allInvEnabled) {
-                networkHandler.sendCommand("pc Allinv is already enabled");
+                networkHandler.sendChat("Allinv is already enabled");
                 return;
             }
 

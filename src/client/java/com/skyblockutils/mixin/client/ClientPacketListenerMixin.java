@@ -60,15 +60,9 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleEntityEvent", at = @At("HEAD"))
     private void ssu$trackEntityDeath(ClientboundEntityEventPacket packet, CallbackInfo ci) {
         Minecraft client = Minecraft.getInstance();
-        if (!client.isSameThread() || client.level == null) return;
-        int event = packet.getEventId();
-        if (event != 2 && event != 3) return;
+        if (!client.isSameThread() || client.level == null || packet.getEventId() != 3) return;
         Entity entity = packet.getEntity(client.level);
         if (entity == null) return;
-        if (event == 2) {
-            BestiaryHud.onEntityHurt(entity);
-            return;
-        }
         DamageLogger.onDeath(entity);
         BestiaryHud.onEntityDeath(entity);
     }
@@ -77,7 +71,6 @@ public abstract class ClientPacketListenerMixin {
     private void ssu$logDamage(ClientboundDamageEventPacket packet, CallbackInfo ci) {
         if (!Minecraft.getInstance().isSameThread()) return;
         DamageLogger.onDamage(packet);
-        BestiaryHud.onDamageEvent(packet);
     }
 
     @Inject(method = "handleBlockEntityData", at = @At("TAIL"))

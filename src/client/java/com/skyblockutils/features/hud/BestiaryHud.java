@@ -23,13 +23,10 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -111,13 +108,10 @@ public class BestiaryHud {
     private static final Pattern TIER_SUFFIX = Pattern.compile("\\s+[IVXLCDM]+$");
 
     private static final long MATCH_WINDOW_MS = 600;
-    private static final long DELAYED_DEATH_MS = 2_000;
-    private static final long DAMAGE_LOG_MS = 15_000;
-    private static final long REMOVAL_WINDOW_MS = 5_000;
     private static final long MELEE_TAG_MS = 5_000;
     private static final long PROJECTILE_TAG_MS = 3_000;
-    private static final long ABILITY_TAG_MS = 4_000;
-    private static final int NAME_SCAN_INTERVAL = 10;
+    private static final long ABILITY_TAG_MS = 1_500;
+    private static final double ABILITY_RADIUS = 12.0;
     private static final double PROJECTILE_RADIUS = 2.5;
     private static final double PROJECTILE_SCAN_RANGE = 128.0;
     private static final double NAMETAG_RADIUS = 1.0;
@@ -126,31 +120,18 @@ public class BestiaryHud {
     private static final Pattern NAMETAG_SYMBOLS = Pattern.compile("[^\\p{L}\\p{N} '\\-]");
     private static final Pattern NAMETAG_HEALTH = Pattern.compile("\\s+[\\d,.]+[kKmMbB]?(?:/[\\d,.]+[kKmMbB]?)?❤.*$");
 
-    private static final Map<String, String> NAME_ALIASES = Map.of(
-            "Fireslinger", "Goblin",
-            "Knifethrower", "Goblin",
-            "Weakling", "Goblin",
-            "Pitfighter", "Goblin",
-            "Goblin Flamethrower", "Goblin",
-            "Creeperlobber", "Goblin",
-            "Murderlover", "Goblin"
-    );
-
     private enum Evidence { WEAK, MEDIUM, STRONG }
 
-    private record PendingDeath(String name, long at, Evidence evidence, boolean logged) {}
+    private record PendingDeath(String name, long at, Evidence evidence) {}
 
-    private record Damaged(String name, long at, Evidence evidence) {}
+    private record Ability(Vec3 pos, long at) {}
 
     private static final List<PendingDeath> deaths = new ArrayList<>();
     private static final List<Long> dings = new ArrayList<>();
-    private static final Map<Integer, Damaged> damaged = new HashMap<>();
-    private static final Map<Integer, Long> handled = new HashMap<>();
     private static final Map<Integer, Long> meleeTags = new HashMap<>();
     private static final Map<Integer, Long> projectileTags = new HashMap<>();
     private static final Map<Integer, Vec3> ownProjectiles = new HashMap<>();
-    private static long lastAbilityAt = 0;
-    private static final Map<Integer, String> names = new HashMap<>();
+    private static final Deque<Ability> abilities = new ArrayDeque<>();
     private static final List<BestiaryEntity> allMobs = new ArrayList<>();
     private static final LinkedHashMap<BestiaryEntity, Long> recent = new LinkedHashMap<>();
     private static final Map<String, ItemStack> skinIcons = new HashMap<>();
@@ -250,8 +231,6 @@ public class BestiaryHud {
 
         recent.values().removeIf(at -> now - at > HUD_TIMEOUT_MS);
         trackProjectiles(client, now);
-        if (ticks % NAME_SCAN_INTERVAL == 0) cacheNames(client);
-        refreshNames(client);
         resolveKills(now);
         if (dirty && now - lastSaveAt >= AUTOSAVE_MS) save();
         if (++ticks % PAGE_READ_INTERVAL == 0) readOpenBestiary(client);
@@ -454,13 +433,10 @@ public class BestiaryHud {
         attempts = 0;
         deaths.clear();
         dings.clear();
-        damaged.clear();
-        handled.clear();
         meleeTags.clear();
         projectileTags.clear();
         ownProjectiles.clear();
-        lastAbilityAt = 0;
-        names.clear();
+        abilities.clear();
     }
 
     public static void devCopy() {
@@ -479,10 +455,7 @@ public class BestiaryHud {
 
     public static void register() {
         AttackEntityCallback.EVENT.register((player, _, _, entity, _) -> {
-            if (player == Minecraft.getInstance().player) {
-                meleeTags.put(entity.getId(), System.currentTimeMillis());
-                logDamage(entity, Evidence.STRONG);
-            }
+            if (player == Minecraft.getInstance().player) meleeTags.put(entity.getId(), System.currentTimeMillis());
             return InteractionResult.PASS;
         });
     }
@@ -490,60 +463,18 @@ public class BestiaryHud {
     public static void onPlayerAction() {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || !loaded) return;
-        lastAbilityAt = System.currentTimeMillis();
+        abilities.addLast(new Ability(client.player.position(), System.currentTimeMillis()));
+        while (abilities.size() > 20) abilities.pollFirst();
     }
 
     public static void onEntityDeath(Entity entity) {
         Minecraft client = Minecraft.getInstance();
         if (!ModConfig.INSTANCE.bestiaryHud || !loaded || client.player == null) return;
         if (!(entity instanceof LivingEntity) || entity instanceof ArmorStand || entity == client.player) return;
-        String name = resolveName(entity);
-        long now = System.currentTimeMillis();
-        int id = entity.getId();
-        if (handled.containsKey(id)) return;
-        Damaged log = damaged.remove(id);
-        if (log != null && log.name() != null) name = log.name();
+        String name = nametagName(entity);
         if (name == null) return;
-        handled.put(id, now);
-        Evidence evidence = evidence(entity, now, log);
-        deaths.add(new PendingDeath(name, now, evidence, log != null || evidence != Evidence.WEAK));
-    }
-
-    public static void onEntityRemoved(int id) {
-        Minecraft client = Minecraft.getInstance();
-        if (!ModConfig.INSTANCE.bestiaryHud || !loaded || client.player == null) return;
-        Damaged log = damaged.get(id);
         long now = System.currentTimeMillis();
-        if (log == null || log.name() == null || handled.containsKey(id) || now - log.at() > REMOVAL_WINDOW_MS) return;
-        damaged.remove(id);
-        handled.put(id, now);
-        deaths.add(new PendingDeath(log.name(), now, log.evidence(), true));
-    }
-
-    public static void onEntityHurt(Entity entity) {
-        long now = System.currentTimeMillis();
-        Evidence evidence = evidence(entity, now, damaged.get(entity.getId()));
-        if (evidence != Evidence.WEAK) logDamage(entity, evidence);
-    }
-
-    public static void onDamageEvent(ClientboundDamageEventPacket packet) {
-        Minecraft client = Minecraft.getInstance();
-        if (client.player == null || client.level == null) return;
-        int me = client.player.getId();
-        if (packet.sourceCauseId() != me && packet.sourceDirectId() != me) return;
-        Entity entity = client.level.getEntity(packet.entityId());
-        if (entity != null) logDamage(entity, Evidence.STRONG);
-    }
-
-    private static void logDamage(Entity entity, Evidence evidence) {
-        Minecraft client = Minecraft.getInstance();
-        if (!ModConfig.INSTANCE.bestiaryHud || !loaded || client.player == null) return;
-        if (!(entity instanceof LivingEntity) || entity instanceof ArmorStand || entity == client.player) return;
-        Damaged previous = damaged.get(entity.getId());
-        String name = resolveName(entity);
-        if (name == null && previous != null) name = previous.name();
-        Evidence best = previous != null && previous.evidence().compareTo(evidence) > 0 ? previous.evidence() : evidence;
-        damaged.put(entity.getId(), new Damaged(name, System.currentTimeMillis(), best));
+        deaths.add(new PendingDeath(name, now, evidence(entity, now)));
     }
 
     public static void onXpSound() {
@@ -551,19 +482,23 @@ public class BestiaryHud {
         dings.add(System.currentTimeMillis());
     }
 
-    private static Evidence evidence(Entity entity, long now, Damaged log) {
-        if (log != null && now - log.at() <= DAMAGE_LOG_MS) return log.evidence();
+    private static Evidence evidence(Entity entity, long now) {
         Long melee = meleeTags.get(entity.getId());
         if (melee != null && now - melee <= MELEE_TAG_MS) return Evidence.STRONG;
         Long projectile = projectileTags.get(entity.getId());
         if (projectile != null && now - projectile <= PROJECTILE_TAG_MS) return Evidence.STRONG;
-        if (now - lastAbilityAt <= ABILITY_TAG_MS) return Evidence.MEDIUM;
+        for (Ability ability : abilities) {
+            if (now - ability.at() <= ABILITY_TAG_MS && entity.position().distanceToSqr(ability.pos()) <= ABILITY_RADIUS * ABILITY_RADIUS) {
+                return Evidence.MEDIUM;
+            }
+        }
         return Evidence.WEAK;
     }
 
     private static void trackProjectiles(Minecraft client, long now) {
         meleeTags.values().removeIf(at -> now - at > MELEE_TAG_MS);
         projectileTags.values().removeIf(at -> now - at > PROJECTILE_TAG_MS);
+        abilities.removeIf(ability -> now - ability.at() > ABILITY_TAG_MS);
         if (client.level == null || client.player == null) {
             ownProjectiles.clear();
             return;
@@ -584,67 +519,34 @@ public class BestiaryHud {
             AABB area = AABB.ofSize(entry.getValue(), PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2);
             for (LivingEntity hit : client.level.getEntitiesOfClass(LivingEntity.class, area, e -> !(e instanceof ArmorStand) && e != client.player)) {
                 projectileTags.put(hit.getId(), now);
-                logDamage(hit, Evidence.STRONG);
             }
-        }
-    }
-
-    private static void cacheNames(Minecraft client) {
-        if (client.level == null) {
-            names.clear();
-            return;
-        }
-        names.keySet().removeIf(id -> client.level.getEntity(id) == null);
-        for (Entity entity : client.level.entitiesForRendering()) {
-            if (!(entity instanceof LivingEntity) || entity instanceof ArmorStand || entity instanceof Player) continue;
-            String name = nametagName(entity);
-            if (name != null) names.put(entity.getId(), name);
-        }
-    }
-
-    private static String resolveName(Entity entity) {
-        String name = nametagName(entity);
-        return name != null ? name : names.get(entity.getId());
-    }
-
-    private static void refreshNames(Minecraft client) {
-        if (client.level == null) return;
-        for (Map.Entry<Integer, Damaged> entry : damaged.entrySet()) {
-            Entity entity = client.level.getEntity(entry.getKey());
-            if (entity == null) continue;
-            String name = nametagName(entity);
-            Damaged log = entry.getValue();
-            if (name != null && !name.equals(log.name())) entry.setValue(new Damaged(name, log.at(), log.evidence()));
         }
     }
 
     private static void resolveKills(long now) {
-        dings.removeIf(ding -> now - ding > DELAYED_DEATH_MS + MATCH_WINDOW_MS);
-        damaged.values().removeIf(log -> now - log.at() > DAMAGE_LOG_MS);
-        handled.values().removeIf(at -> now - at > DAMAGE_LOG_MS);
-        if (deaths.isEmpty()) return;
+        if (deaths.isEmpty() && dings.isEmpty()) return;
+        long start = Long.MAX_VALUE;
+        for (PendingDeath death : deaths) start = Math.min(start, death.at());
+        for (long ding : dings) start = Math.min(start, ding);
+        if (now - start < MATCH_WINDOW_MS) return;
 
-        List<PendingDeath> ready = new ArrayList<>();
-        for (PendingDeath death : deaths) {
-            if (now - death.at() >= MATCH_WINDOW_MS) ready.add(death);
+        long end = start + MATCH_WINDOW_MS;
+        List<PendingDeath> group = new ArrayList<>();
+        deaths.removeIf(death -> {
+            if (death.at() > end) return false;
+            group.add(death);
+            return true;
+        });
+        int confirmations = 0;
+        Iterator<Long> it = dings.iterator();
+        while (it.hasNext()) {
+            if (it.next() > end) continue;
+            it.remove();
+            confirmations++;
         }
-        ready.sort(Comparator.comparing(PendingDeath::evidence).reversed().thenComparingLong(PendingDeath::at));
 
-        for (PendingDeath death : ready) {
-            long forward = death.logged() ? DELAYED_DEATH_MS : MATCH_WINDOW_MS;
-            Long best = null;
-            for (long ding : dings) {
-                if (ding < death.at() - MATCH_WINDOW_MS || ding > death.at() + forward) continue;
-                if (best == null || Math.abs(ding - death.at()) < Math.abs(best - death.at())) best = ding;
-            }
-            if (best != null) {
-                dings.remove(best);
-                deaths.remove(death);
-                handleMobKill(death.name());
-            } else if (now - death.at() >= forward) {
-                deaths.remove(death);
-            }
-        }
+        group.sort(Comparator.comparing(PendingDeath::evidence).reversed().thenComparingLong(PendingDeath::at));
+        for (int i = 0; i < Math.min(confirmations, group.size()); i++) handleMobKill(group.get(i).name());
     }
 
     private static String nametagName(Entity entity) {
@@ -654,7 +556,7 @@ public class BestiaryHud {
         for (ArmorStand stand : entity.level().getEntitiesOfClass(ArmorStand.class, box)) {
             Component customName = stand.getCustomName();
             if (customName == null) continue;
-            String text = visibleText(customName);
+            String text = customName.getString();
             if (!text.contains("❤")) continue;
             if (closest == null || stand.distanceToSqr(entity) < closest.distanceToSqr(entity)) {
                 closest = stand;
@@ -674,8 +576,10 @@ public class BestiaryHud {
 
     public static void addMobKill(String mobName) {
         String mode = HypixelLocation.mode();
-        String family = NAME_ALIASES.getOrDefault(mobName, mobName);
-        BestiaryEntity entity = find(family, e -> e.island.equals(mode));
+        BestiaryEntity entity = find(mobName, e -> e.island.equals(mode));
+        ModFunctions.sendSystemMessage(entity == null
+                ? "§7You killed §f" + mobName + " §c(not in bestiary)"
+                : "§7You killed §f" + entity.name + " §7(" + entity.islandName + ")", false);
         if (entity == null) return;
         entity.currentKills++;
         dirty = true;
@@ -691,29 +595,6 @@ public class BestiaryHud {
         List<String> lines = new ArrayList<>();
         for (Component line : lore.lines()) lines.add(clean(line.getString()));
         return lines;
-    }
-
-    private static String visibleText(Component component) {
-        StringBuilder out = new StringBuilder();
-        component.visit((style, text) -> {
-            if (!style.isObfuscated()) appendVisible(out, text);
-            return Optional.<Void>empty();
-        }, Style.EMPTY);
-        return out.toString();
-    }
-
-    private static void appendVisible(StringBuilder out, String text) {
-        boolean hidden = false;
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c == '§' && i + 1 < text.length()) {
-                char code = Character.toLowerCase(text.charAt(++i));
-                if (code == 'k') hidden = true;
-                else if (code == 'r' || (code >= '0' && code <= '9') || (code >= 'a' && code <= 'f')) hidden = false;
-                continue;
-            }
-            if (!hidden) out.append(c);
-        }
     }
 
     private static String clean(String text) {

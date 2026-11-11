@@ -8,6 +8,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class DungeonPartyCommands {
     public static final Map<Integer, String> translations = Map.of(
@@ -22,18 +23,15 @@ public class DungeonPartyCommands {
 
     public static void handleDungeonPartyCommands(String message) {
         if (!ModConfig.INSTANCE.dungeonPartyCommands) return;
+        if (!Objects.equals(PartyInfo.leader, Minecraft.getInstance().getUser().getName())) return;
+        LocalPlayer player = Minecraft.getInstance().player;
+
         if (!message.startsWith("Party >")) return;
-        if (PartyInfo.isLeader()) return;
-
-        String[] parts = message.split(": ", 2);
-        if (parts.length < 2) return;
-
-        String messageContent = parts[1].trim().toLowerCase();
+        String messageContent = message.split(": ")[1].toLowerCase();
         if (!messageContent.matches("![mf][1-7]")) return;
 
         int floor = Character.getNumericValue(messageContent.charAt(2));
 
-        LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
         ClientPacketListener clientNetworkHandler = player.connection;
 

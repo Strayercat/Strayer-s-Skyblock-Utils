@@ -3,6 +3,7 @@ package com.skyblockutils.mixin.client;
 import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.ChatModifications;
+import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.chat.SsuChatGraphicsAccess;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -26,6 +27,11 @@ public class ChatHudMixin {
 
     @Unique
     private boolean wasPeeking = false;
+
+    @Inject(method = "addClientSystemMessage(Lnet/minecraft/network/chat/Component;)V", at = @At("HEAD"), cancellable = true)
+    private void ssu$routeRewrittenMessage(Component message, CallbackInfo ci) {
+        if (SeparatedChat.replaceRewrite(message)) ci.cancel();
+    }
 
     @Unique
     private GuiGraphicsExtractor ssu$graphics;
@@ -114,7 +120,7 @@ public class ChatHudMixin {
             argsOnly = true,
             name = "message")
     private Component addChatBadge(Component message) {
-        return ChatModifications.withChatBadge(ChatModifications.fitToChat(message));
+        return ChatModifications.withChatBadge(message);
     }
 
     @Unique

@@ -284,7 +284,7 @@ public class SsuHud {
         }
 
         lines.add(HudLine.of("Leader:", COLOR_SUBTITLE));
-        lines.add(HudLine.of(PartyInfo.leader == null ? "Loading..." : PartyInfo.leader, COLOR_TEXT));
+        lines.add(HudLine.of(PartyInfo.leader, COLOR_TEXT));
         lines.add(HudLine.of("Members:", COLOR_SUBTITLE));
 
         String memberList = PartyInfo.members.toString().replace("[", "").replace("]", "");

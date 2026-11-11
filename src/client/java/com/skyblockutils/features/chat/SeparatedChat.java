@@ -23,12 +23,18 @@ public class SeparatedChat {
     private static final Pattern USER_SHOW_PATTERN = Pattern.compile(".+? (?:is holding|is wearing|is friends with a|has) \\[.+]$");
     private static final Pattern LEVEL_PREFIX_PATTERN = Pattern.compile("^\\[\\d{1,4}] .+");
     private static final List<String> USER_CHANNEL_PREFIXES = List.of("Party > ", "Guild > ", "Officer > ", "Co-op > ", "From ", "To ");
+    private static final long REWRITE_WINDOW_MS = 2_000;
+    private static final Pattern NON_ALNUM = Pattern.compile("[^\\p{L}\\p{N}]");
 
     public record HistoryEntry(ChatLayout.ParsedMessage message, String searchText) {}
 
     private static String lastClean = null;
     private static ChatLayout.ParsedMessage lastBase = null;
     private static int duplicateCount = 1;
+
+    private record Recent(String key, long at, HistoryEntry entry, SystemChat chat) {}
+
+    private static final List<Recent> recent = new ArrayList<>();
 
     private static class SystemChat {
         private ChatLayout.ParsedMessage message;
@@ -79,8 +85,44 @@ public class SeparatedChat {
         systemChats.add(chat);
         history.add(entry);
         if (history.size() > MAX_HISTORY) history.removeFirst();
+        remember(cleanMessage, entry, chat);
 
         SeparatedChatHud.onMessageAdded(entry);
+    }
+
+    private static void remember(String cleanMessage, HistoryEntry entry, SystemChat chat) {
+        long now = System.currentTimeMillis();
+        recent.removeIf(r -> now - r.at() > REWRITE_WINDOW_MS);
+        String key = rewriteKey(cleanMessage);
+        if (!key.isEmpty()) recent.add(new Recent(key, now, entry, chat));
+    }
+
+    public static boolean replaceRewrite(Component message) {
+        if (!ModConfig.INSTANCE.separateMessage || recent.isEmpty()) return false;
+        long now = System.currentTimeMillis();
+        recent.removeIf(r -> now - r.at() > REWRITE_WINDOW_MS);
+        String cleanMessage = clean(message);
+        String key = rewriteKey(cleanMessage);
+        if (key.isEmpty()) return false;
+
+        for (int i = recent.size() - 1; i >= 0; i--) {
+            Recent match = recent.get(i);
+            if (!match.key().equals(key)) continue;
+            recent.remove(i);
+
+            ChatLayout.ParsedMessage parsed = ChatLayout.parse(message);
+            int index = history.indexOf(match.entry());
+            if (index != -1) history.set(index, new HistoryEntry(parsed, cleanMessage.toLowerCase(Locale.ROOT)));
+            match.chat().message = parsed;
+            match.chat().base = parsed;
+            if (lastBase == match.entry().message()) lastBase = parsed;
+            return true;
+        }
+        return false;
+    }
+
+    private static String rewriteKey(String cleanMessage) {
+        return NON_ALNUM.matcher(cleanMessage).replaceAll("").toLowerCase(Locale.ROOT);
     }
 
     private static void addDuplicate(String cleanMessage) {
@@ -166,6 +208,7 @@ public class SeparatedChat {
     public static void tickAllMessages() {
         if (!ModConfig.INSTANCE.separateMessage) {
             systemChats.clear();
+            recent.clear();
             return;
         }
 

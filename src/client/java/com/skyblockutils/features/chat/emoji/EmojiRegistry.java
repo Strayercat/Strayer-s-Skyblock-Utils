@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +42,7 @@ public final class EmojiRegistry {
     }
 
     private static final String INDEX_PATH = "/assets/skyblockutils/emojis/index.json";
+    private static final String DISCORD_PATH = "/assets/skyblockutils/emojis/discord.json";
     private static final Pattern SHORTCODE = Pattern.compile(":([a-z0-9_+\\-]+):");
     private static final Pattern NAME = Pattern.compile("[a-z0-9_+\\-]+");
     private static final int GLYPH_MIN = 0xE800;
@@ -186,27 +188,55 @@ public final class EmojiRegistry {
         if (loaded) return;
         loaded = true;
 
+        Map<String, List<String>> discord = loadDiscordNames();
         try (InputStream in = EmojiRegistry.class.getResourceAsStream(INDEX_PATH)) {
             if (in == null) return;
             JsonObject root = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
-            normal = parse(root.getAsJsonArray("normal"));
-            custom = parse(root.getAsJsonArray("custom"));
+            normal = parse(root.getAsJsonArray("normal"), discord);
+            custom = parse(root.getAsJsonArray("custom"), discord);
         } catch (IOException | RuntimeException e) {
             System.err.println("[SSU] Failed to load emoji index: " + e.getMessage());
         }
+
+        for (Emoji emoji : custom) byName.put(emoji.name(), emoji);
+        for (Emoji emoji : normal) byName.putIfAbsent(emoji.name(), emoji);
+        for (Emoji emoji : custom) for (String alias : emoji.aliases()) byName.putIfAbsent(alias, emoji);
+        for (Emoji emoji : normal) for (String alias : emoji.aliases()) byName.putIfAbsent(alias, emoji);
     }
 
-    private static List<Emoji> parse(JsonArray array) {
+    private static Map<String, List<String>> loadDiscordNames() {
+        Map<String, List<String>> names = new HashMap<>();
+        try (InputStream in = EmojiRegistry.class.getResourceAsStream(DISCORD_PATH)) {
+            if (in == null) return names;
+            JsonObject root = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
+                List<String> list = new ArrayList<>();
+                entry.getValue().getAsJsonArray().forEach(name -> list.add(name.getAsString()));
+                names.put(entry.getKey(), list);
+            }
+        } catch (IOException | RuntimeException e) {
+            System.err.println("[SSU] Failed to load Discord emoji names: " + e.getMessage());
+        }
+        return names;
+    }
+
+    private static List<Emoji> parse(JsonArray array, Map<String, List<String>> discord) {
         List<Emoji> list = new ArrayList<>(array.size());
         for (JsonElement element : array) {
             JsonObject obj = element.getAsJsonObject();
-            List<String> aliases = new ArrayList<>();
-            if (obj.has("aliases")) obj.getAsJsonArray("aliases").forEach(alias -> aliases.add(alias.getAsString()));
+            String original = obj.get("name").getAsString();
+            List<String> legacy = new ArrayList<>();
+            legacy.add(original);
+            if (obj.has("aliases")) obj.getAsJsonArray("aliases").forEach(alias -> legacy.add(alias.getAsString()));
 
-            Emoji emoji = new Emoji(obj.get("name").getAsString(), List.copyOf(aliases), obj.get("cp").getAsInt());
+            LinkedHashSet<String> names = new LinkedHashSet<>(discord.getOrDefault(original, List.of()));
+            for (String name : legacy) names.add(name.replace('-', '_'));
+            names.addAll(legacy);
+            names.removeIf(name -> !NAME.matcher(name).matches());
+
+            List<String> ordered = new ArrayList<>(names);
+            Emoji emoji = new Emoji(ordered.getFirst(), List.copyOf(ordered.subList(1, ordered.size())), obj.get("cp").getAsInt());
             list.add(emoji);
-            byName.put(emoji.name(), emoji);
-            for (String alias : emoji.aliases()) byName.putIfAbsent(alias, emoji);
             byCodepoint.put(emoji.codepoint(), emoji);
         }
         return List.copyOf(list);

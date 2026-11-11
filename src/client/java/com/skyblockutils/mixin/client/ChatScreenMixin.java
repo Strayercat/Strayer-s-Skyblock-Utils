@@ -1,5 +1,6 @@
 package com.skyblockutils.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.skyblockutils.features.chat.SsuChatStyle;
@@ -66,7 +67,7 @@ public abstract class ChatScreenMixin extends Screen {
         EmojiRegistry.Emoji emoji = EmojiRegistry.shortcodeEndingAt(value, cursor);
         if (emoji == null) return;
 
-        int start = cursor - emoji.shortcode().length();
+        int start = value.lastIndexOf(':', cursor - 2);
         int newCursor = start + emoji.text().length();
 
         ssu$replacing = true;
@@ -106,8 +107,11 @@ public abstract class ChatScreenMixin extends Screen {
         RoundedRect.panel(graphics, x0, y0 - SsuChatStyle.INPUT_EXTRA_HEIGHT, x1, y1, SsuChatStyle.INPUT_RADIUS, col, SsuChatStyle.accent());
     }
 
-    @Inject(method = "extractRenderState", at = @At("TAIL"), require = 1)
-    private void ssu$renderEmojiPicker(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
+    @WrapMethod(method = "extractRenderState")
+    private void ssu$hideMouseBehindPicker(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, Operation<Void> original) {
+        boolean blocked = ssu$emojiPicker.blocksMouse(mouseX, mouseY, this.height);
+        EmojiPicker.suppressHover = blocked;
+        original.call(graphics, blocked ? -10_000 : mouseX, blocked ? -10_000 : mouseY, a);
         ssu$emojiPicker.renderButton(graphics, mouseX, mouseY, this.height);
         ssu$emojiPicker.render(graphics, mouseX, mouseY, this.height);
     }

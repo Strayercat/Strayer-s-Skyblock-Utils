@@ -106,6 +106,7 @@ public class DailyReminders {
 
                 if (type == ReminderType.MATRIARCH && client.level.getGameTime() % 100 == 0) {
                     String matriarchStatus = getMatriarchStatus(client);
+                    System.out.println(matriarchStatus);
                     if (matriarchStatus.contains("Available")) continue;
 
                     ModConfig.INSTANCE.completedTypes.add(type);
