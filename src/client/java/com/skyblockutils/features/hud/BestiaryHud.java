@@ -577,9 +577,6 @@ public class BestiaryHud {
     public static void addMobKill(String mobName) {
         String mode = HypixelLocation.mode();
         BestiaryEntity entity = find(mobName, e -> e.island.equals(mode));
-        ModFunctions.sendSystemMessage(entity == null
-                ? "§7You killed §f" + mobName + " §c(not in bestiary)"
-                : "§7You killed §f" + entity.name + " §7(" + entity.islandName + ")", false);
         if (entity == null) return;
         entity.currentKills++;
         dirty = true;

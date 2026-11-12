@@ -31,8 +31,10 @@ public class CarryTracker {
     private static final Pattern PRICE_PATTERN = Pattern.compile("^([0-9][0-9.,]*)([kmb]?)$");
     private static final Pattern THOUSANDS_PATTERN = Pattern.compile("^\\d{1,3}(,\\d{3})+(\\.\\d+)?$");
 
-    private static final int MISSING_TICKS_TO_COMPLETE = 5;
+    private static final int MISSING_TICKS_TO_COMPLETE = 20;
     private static final double MAX_TRACK_DISTANCE_SQ = 40 * 40;
+    private static final double BOSS_SEARCH_RADIUS_SQ = 50 * 50;
+    private static final long DEATH_WINDOW_MS = 3_000;
 
     private static final int HUD_MIN_WIDTH = 160;
     private static final int HUD_PADDING = 6;
@@ -45,17 +47,21 @@ public class CarryTracker {
     private static final class Carry {
         final String target;
         final Pattern bossPattern;
+        final Pattern namePattern;
         final int amount;
         final BigDecimal price;
         int completed = 0;
         boolean bossSeen = false;
         int missingTicks = 0;
         Vec3 lastBossPos = null;
+        long missingSince = 0;
+        long lastDeathAt = 0;
         float displayedProgress = 0f;
 
         Carry(String target, int amount, BigDecimal price) {
             this.target = target;
             this.bossPattern = Pattern.compile("(?:^|[^A-Za-z0-9_])" + Pattern.quote(target) + "'s SLAYER BOSS", Pattern.CASE_INSENSITIVE);
+            this.namePattern = Pattern.compile("(?:^|[^A-Za-z0-9_])" + Pattern.quote(target) + "(?![A-Za-z0-9_])", Pattern.CASE_INSENSITIVE);
             this.amount = amount;
             this.price = price;
         }
@@ -70,6 +76,7 @@ public class CarryTracker {
             bossSeen = false;
             missingTicks = 0;
             lastBossPos = null;
+            missingSince = 0;
         }
 
         BigDecimal total() {
@@ -149,6 +156,14 @@ public class CarryTracker {
         lastLevel = null;
     }
 
+    public static void handleMessage(String message) {
+        if (carries.isEmpty() || !message.startsWith("☠")) return;
+        long now = System.currentTimeMillis();
+        for (Carry carry : carries.values()) {
+            if (carry.namePattern.matcher(message).find()) carry.lastDeathAt = now;
+        }
+    }
+
     public static void tick(Minecraft client) {
         if (carries.isEmpty() || client.level == null || client.player == null) return;
 
@@ -160,10 +175,11 @@ public class CarryTracker {
 
         List<Carry> finished = new ArrayList<>();
         for (Carry carry : carries.values()) {
-            Entity boss = findBossTag(client.level, carry.bossPattern);
+            Entity boss = findBossTag(client.level, carry.bossPattern, carry.bossSeen ? carry.lastBossPos : null);
             if (boss != null) {
                 carry.bossSeen = true;
                 carry.missingTicks = 0;
+                carry.missingSince = 0;
                 carry.lastBossPos = boss.position();
                 continue;
             }
@@ -175,17 +191,26 @@ public class CarryTracker {
                 continue;
             }
 
-            if (++carry.missingTicks >= MISSING_TICKS_TO_COMPLETE) {
-                carry.resetBossState();
-                if (completeCarry(client, carry)) finished.add(carry);
+            long now = System.currentTimeMillis();
+            if (carry.missingTicks++ == 0) carry.missingSince = now;
+            if (carry.missingTicks < MISSING_TICKS_TO_COMPLETE) continue;
+
+            boolean died = carry.lastDeathAt != 0 && carry.lastDeathAt >= carry.missingSince - DEATH_WINDOW_MS;
+            carry.resetBossState();
+            if (died) {
+                carry.lastDeathAt = 0;
+                ModFunctions.sendSystemMessage("§c" + carry.target + " died, carry not counted (" + carry.completed + "/" + carry.amount + ")", false);
+                continue;
             }
+            if (completeCarry(client, carry)) finished.add(carry);
         }
 
         for (Carry carry : finished) carries.remove(key(carry.target));
     }
 
-    private static Entity findBossTag(ClientLevel level, Pattern bossPattern) {
+    private static Entity findBossTag(ClientLevel level, Pattern bossPattern, Vec3 near) {
         for (Entity entity : level.entitiesForRendering()) {
+            if (near != null && entity.position().distanceToSqr(near) > BOSS_SEARCH_RADIUS_SQ) continue;
             Component name = entity.getCustomName();
             if (name == null) continue;
             String clean = name.getString().replaceAll("§.", "");

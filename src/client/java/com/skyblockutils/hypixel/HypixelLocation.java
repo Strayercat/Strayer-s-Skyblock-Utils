@@ -1,7 +1,6 @@
 package com.skyblockutils.hypixel;
 
 import com.skyblockutils.ModFunctions;
-import com.skyblockutils.features.party.PartyTracker;
 import net.hypixel.data.type.GameType;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
@@ -24,7 +23,6 @@ public final class HypixelLocation {
             current = packet;
             if (serverChanged) ModFunctions.serverChangeDataReset();
             packetLevel = Minecraft.getInstance().level;
-            PartyTracker.request();
         }));
     }
 

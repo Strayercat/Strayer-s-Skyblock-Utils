@@ -1,21 +1,23 @@
 package com.skyblockutils.features.party;
 
-import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class PartyInfo {
     public static boolean isInParty = false;
-    public static String leader = Minecraft.getInstance().getUser().getName();
+    public static @Nullable String leader = null;
     public static List<String> members = new ArrayList<>();
-    public static List<UUID> memberUuids = new ArrayList<>();
+
+    public static boolean isLeader() {
+        return !isInParty || leader == null || !leader.equalsIgnoreCase(Minecraft.getInstance().getUser().getName());
+    }
 
     public static void handlePartyMessages(String message) {
         if (message.startsWith("You'll be partying with:")) {
-            PartyTracker.request();
+            PartyListParser.requestListDelayed();
             return;
         }
 
@@ -24,12 +26,10 @@ public class PartyInfo {
         if (message.contains("has disbanded the party") ||
                 message.contains("You left the party") ||
                 message.contains("You have been kicked from the party by") ||
-                message.contains("The party was disbanded")) {
-            isInParty = false;
-            leader = null;
-            members.clear();
-            memberUuids.clear();
-            SSUIndicator.setPartyMembers(List.of());
+                message.contains("The party was disbanded") ||
+                message.contains("You are not currently in a party")) {
+            PartyListParser.clear();
+            return;
         }
 
         if (message.contains("has left the party") ||
@@ -38,9 +38,10 @@ public class PartyInfo {
                 (message.startsWith("You have joined") && message.contains("'s party")) ||
                 message.contains("joined the dungeon group!") ||
                 message.contains("was removed from your party because they disconnected.") ||
-                message.contains("The party was transferred to")) {
+                message.contains("The party was transferred to") ||
+                message.contains("to Party Leader")) {
 
-            PartyTracker.request();
+            PartyListParser.requestListDelayed();
         }
     }
 }

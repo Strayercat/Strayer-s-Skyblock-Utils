@@ -63,7 +63,7 @@ public class SeparatedChatHud {
                 continue;
             }
 
-            List<FormattedCharSequence> wrapped = font.split(line.component(), wrap);
+            List<FormattedCharSequence> wrapped = font.split(ChatLayout.indented(line.component(), wrap), wrap);
             if (wrapped.isEmpty()) {
                 lines.add(new RenderLine(FormattedCharSequence.EMPTY, false, message));
                 continue;

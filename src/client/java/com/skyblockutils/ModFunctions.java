@@ -12,7 +12,7 @@ import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.dungeons.DowntimeTracker;
 import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.features.guild.GuildListParser;
-import com.skyblockutils.features.party.PartyTracker;
+import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.PingDebugMonitorAccessor;
@@ -55,7 +55,7 @@ public class ModFunctions {
             AutoRejoin.resetAutoRejoin();
             BestiaryHud.save();
             SSUIndicator.disconnect();
-            PartyTracker.reset();
+            PartyListParser.reset();
             HypixelLocation.reset();
             GuildListParser.onJoinCommandHandled = false;
             CoopListParser.reset();
