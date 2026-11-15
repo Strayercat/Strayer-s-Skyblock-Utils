@@ -130,6 +130,12 @@ public class ClothConfigHandler {
                 .setDefaultValue(false).setTooltip(Component.literal("Reminds you that auto-rejoin is still enabled every time a run ends"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.autoRejoinReminders = v).build());
 
+        dungeons.add(eb.startIntSlider(Component.literal("Auto-Rejoin Timer"), Math.round(ModConfig.INSTANCE.autoRejoinTimer * 10), 1, 150)
+                .setDefaultValue(20)
+                .setTextGetter(v -> Component.literal(v / 10f + "s"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.autoRejoinTimer = v / 10f)
+                .build());
+
         dungeons.add(eb.startBooleanToggle(Component.literal("F7/M7 Void Lava"), ModConfig.INSTANCE.f7VoidLava)
                 .setDefaultValue(false).setTooltip(Component.literal("Have a custom void texture for F7 or M7 boss lava"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.f7VoidLava = v).build());
@@ -307,6 +313,10 @@ public class ClothConfigHandler {
         overlays.add(eb.startBooleanToggle(Component.literal("Hide Bestiary HUD In Catacombs"), ModConfig.INSTANCE.bestiaryHudHideInCatacombs)
                 .setDefaultValue(true).setTooltip(Component.literal("Don't show the bestiary HUD while in the Catacombs"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.bestiaryHudHideInCatacombs = v).build());
+
+        overlays.add(eb.startBooleanToggle(Component.literal("Show Maxed Bestiary Mobs"), ModConfig.INSTANCE.bestiaryHudShowMaxed)
+                .setDefaultValue(true).setTooltip(Component.literal("Show mobs whose bestiary is already maxed in the bestiary HUD"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.bestiaryHudShowMaxed = v).build());
 
         hud.addEntry(overlays.build());
     }

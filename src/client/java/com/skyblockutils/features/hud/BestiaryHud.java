@@ -326,12 +326,16 @@ public class BestiaryHud {
     }
 
     private static List<BestiaryEntity> shown(boolean preview) {
-        if (!recent.isEmpty()) {
-            List<BestiaryEntity> list = new ArrayList<>(recent.keySet());
+        List<BestiaryEntity> list = new ArrayList<>(recent.keySet());
+        if (!ModConfig.INSTANCE.bestiaryHudShowMaxed) list.removeIf(BestiaryEntity::isMaxed);
+        if (!list.isEmpty()) {
             Collections.reverse(list);
             return list;
         }
-        return preview ? preview() : List.of();
+        if (!preview) return List.of();
+        List<BestiaryEntity> mobs = new ArrayList<>(preview());
+        if (!ModConfig.INSTANCE.bestiaryHudShowMaxed) mobs.removeIf(BestiaryEntity::isMaxed);
+        return mobs;
     }
 
     private static List<BestiaryEntity> preview() {
@@ -582,6 +586,7 @@ public class BestiaryHud {
         dirty = true;
 
         recent.remove(entity);
+        if (entity.isMaxed() && !ModConfig.INSTANCE.bestiaryHudShowMaxed) return;
         recent.put(entity, System.currentTimeMillis());
         while (recent.size() > HUD_ENTRIES) recent.remove(recent.keySet().iterator().next());
     }

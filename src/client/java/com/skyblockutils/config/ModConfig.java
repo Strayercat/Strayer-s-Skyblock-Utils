@@ -44,6 +44,7 @@ public class ModConfig {
     public boolean downtimeTracker = true;
     public boolean dungeonPartyCommands = true;
     public boolean autoRejoinReminders = false;
+    public float autoRejoinTimer = 5.0F;
     public boolean f7VoidLava = true;
 
     // Textures
@@ -54,6 +55,7 @@ public class ModConfig {
     public boolean hudEnabled = true;
     public boolean stashHud = false;
     public boolean bestiaryHudHideInCatacombs = true;
+    public boolean bestiaryHudShowMaxed = true;
     public int hudScale = 100;
     public boolean hudTime = true;
     public boolean hudTime12hFormat = false;
@@ -276,6 +278,7 @@ public class ModConfig {
             INSTANCE.voiceDeafened = loaded.voiceDeafened;
             INSTANCE.bestiaryHud = loaded.bestiaryHud;
             INSTANCE.bestiaryHudHideInCatacombs = loaded.bestiaryHudHideInCatacombs;
+            INSTANCE.bestiaryHudShowMaxed = loaded.bestiaryHudShowMaxed;
 
             loaded.chatFilters.forEach(INSTANCE::setChatFilter);
         } catch (IOException ignored) {
