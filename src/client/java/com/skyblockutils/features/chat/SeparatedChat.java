@@ -1,5 +1,6 @@
 package com.skyblockutils.features.chat;
 
+import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.hud.SeparatedChatHud;
 import net.minecraft.ChatFormatting;
@@ -54,15 +55,43 @@ public class SeparatedChat {
         }
     }
 
+    private static String incomingKey = null;
+    private static boolean incomingSeparates = false;
+    private static boolean incomingRouted = false;
+
+    public static void beginIncoming(Component message, boolean overlay) {
+        incomingRouted = false;
+        if (overlay) {
+            incomingKey = null;
+            incomingSeparates = false;
+            return;
+        }
+        String cleanMessage = clean(message);
+        incomingKey = rewriteKey(cleanMessage);
+        incomingSeparates = StrayersSkyblockUtilsClient.isInSkyblock && separates(cleanMessage);
+    }
+
+    public static void endIncoming() {
+        incomingKey = null;
+        incomingSeparates = false;
+        incomingRouted = false;
+    }
+
     public static boolean handleMessage(Component message, boolean overlay) {
         if (overlay) return true;
         if (!ModConfig.INSTANCE.separateMessage) return true;
         String cleanMessage = clean(message);
-        if (isUserMessage(cleanMessage)) return true;
-        if (cleanMessage.matches("You are now in the .* channel") || cleanMessage.matches("Friend > .* (left|joined)\\.")) return true;
+        if (!separates(cleanMessage)) return true;
+        if (incomingRouted && rewriteKey(cleanMessage).equals(incomingKey)) return false;
 
         add(message, cleanMessage);
         return false;
+    }
+
+    private static boolean separates(String cleanMessage) {
+        if (!ModConfig.INSTANCE.separateMessage) return false;
+        if (isUserMessage(cleanMessage)) return false;
+        return !cleanMessage.matches("You are now in the .* channel") && !cleanMessage.matches("Friend > .* (left|joined)\\.");
     }
 
     public static void addMessage(Component message) {
@@ -98,7 +127,7 @@ public class SeparatedChat {
     }
 
     public static boolean replaceRewrite(Component message) {
-        if (!ModConfig.INSTANCE.separateMessage || recent.isEmpty()) return false;
+        if (!ModConfig.INSTANCE.separateMessage || (recent.isEmpty() && !incomingSeparates)) return false;
         long now = System.currentTimeMillis();
         recent.removeIf(r -> now - r.at() > REWRITE_WINDOW_MS);
         String cleanMessage = clean(message);
@@ -116,6 +145,12 @@ public class SeparatedChat {
             match.chat().message = parsed;
             match.chat().base = parsed;
             if (lastBase == match.entry().message()) lastBase = parsed;
+            return true;
+        }
+
+        if (incomingSeparates && key.equals(incomingKey)) {
+            add(message, cleanMessage);
+            incomingRouted = true;
             return true;
         }
         return false;

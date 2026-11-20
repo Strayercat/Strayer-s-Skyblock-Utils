@@ -3,6 +3,14 @@ package com.skyblockutils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.context.StringRange;
+import com.mojang.brigadier.suggestion.Suggestion;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.DailyReminders;
@@ -27,10 +35,61 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class ModCommands {
+
+    private static final class OrderedSuggestion extends Suggestion {
+        private final int order;
+
+        OrderedSuggestion(StringRange range, String text, int order) {
+            super(range, text);
+            this.order = order;
+        }
+
+        @Override
+        public int compareTo(Suggestion other) {
+            return other instanceof OrderedSuggestion o ? Integer.compare(order, o.order) : super.compareTo(other);
+        }
+
+        @Override
+        public int compareToIgnoreCase(Suggestion other) {
+            return other instanceof OrderedSuggestion o ? Integer.compare(order, o.order) : super.compareToIgnoreCase(other);
+        }
+
+        @Override
+        public Suggestion expand(String command, StringRange range) {
+            if (range.equals(getRange())) return this;
+            return new OrderedSuggestion(range, super.expand(command, range).getText(), order);
+        }
+    }
+
+    private static CompletableFuture<Suggestions> orderedSuggestions(SuggestionsBuilder builder, Set<String> texts) {
+        if (texts.isEmpty()) return Suggestions.empty();
+        StringRange range = StringRange.between(builder.getStart(), builder.getInput().length());
+        List<Suggestion> list = new ArrayList<>();
+        int i = 0;
+        for (String text : texts) list.add(new OrderedSuggestion(range, text, i++));
+        return CompletableFuture.completedFuture(new Suggestions(range, list));
+    }
+
+    private static <S> LiteralCommandNode<S> quietLiteral(LiteralArgumentBuilder<S> builder) {
+        LiteralCommandNode<S> built = builder.build();
+        LiteralCommandNode<S> quiet = new LiteralCommandNode<>(built.getLiteral(), built.getCommand(), built.getRequirement(),
+                built.getRedirect(), built.getRedirectModifier(), built.isFork()) {
+            @Override
+            public CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder suggestions) {
+                return Suggestions.empty();
+            }
+        };
+        for (CommandNode<S> child : built.getChildren()) quiet.addChild(child);
+        return quiet;
+    }
 
     private static Stream<String> fuzzyMatch(Stream<String> candidates, String remaining) {
         List<String> all = candidates.toList();
@@ -95,7 +154,39 @@ public class ModCommands {
                         )
                 )
                 .then(ClientCommands.literal("carry")
-                        .then(ClientCommands.literal("stop")
+                        .then(quietLiteral(ClientCommands.literal("adjust")
+                                .then(ClientCommands.argument("username", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> {
+                                            fuzzyMatch(CarryTracker.activeTargets().stream(), builder.getRemaining()).forEach(builder::suggest);
+                                            return builder.buildFuture();
+                                        })
+                                        .then(ClientCommands.literal("add")
+                                                .executes(context -> {
+                                                    CarryTracker.adjust(StringArgumentType.getString(context, "username"), 1);
+                                                    return 1;
+                                                })
+                                                .then(ClientCommands.argument("count", IntegerArgumentType.integer(1))
+                                                        .executes(context -> {
+                                                            CarryTracker.adjust(StringArgumentType.getString(context, "username"), IntegerArgumentType.getInteger(context, "count"));
+                                                            return 1;
+                                                        })
+                                                )
+                                        )
+                                        .then(ClientCommands.literal("remove")
+                                                .executes(context -> {
+                                                    CarryTracker.adjust(StringArgumentType.getString(context, "username"), -1);
+                                                    return 1;
+                                                })
+                                                .then(ClientCommands.argument("count", IntegerArgumentType.integer(1))
+                                                        .executes(context -> {
+                                                            CarryTracker.adjust(StringArgumentType.getString(context, "username"), -IntegerArgumentType.getInteger(context, "count"));
+                                                            return 1;
+                                                        })
+                                                )
+                                        )
+                                )
+                        ))
+                        .then(quietLiteral(ClientCommands.literal("stop")
                                 .executes(context -> {
                                     CarryTracker.stop(null);
                                     return 1;
@@ -110,9 +201,14 @@ public class ModCommands {
                                             return 1;
                                         })
                                 )
-                        )
+                        ))
                         .then(ClientCommands.argument("username", StringArgumentType.word())
                                 .suggests((ctx, builder) -> {
+                                    String lower = builder.getRemaining().toLowerCase(Locale.ROOT);
+                                    Set<String> texts = new LinkedHashSet<>();
+                                    for (String literal : List.of("adjust", "stop")) {
+                                        if (literal.startsWith(lower)) texts.add(literal);
+                                    }
                                     var connection = client.getConnection();
                                     if (connection != null) {
                                         fuzzyMatch(
@@ -120,9 +216,9 @@ public class ModCommands {
                                                         .map(entry -> entry.getProfile().name())
                                                         .filter(name -> name.matches("^[A-Za-z0-9_]{1,16}$")),
                                                 builder.getRemaining()
-                                        ).forEach(builder::suggest);
+                                        ).forEach(texts::add);
                                     }
-                                    return builder.buildFuture();
+                                    return orderedSuggestions(builder, texts);
                                 })
                                 .then(ClientCommands.argument("amount", IntegerArgumentType.integer(1))
                                         .then(ClientCommands.argument("price", StringArgumentType.greedyString())

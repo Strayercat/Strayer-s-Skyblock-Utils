@@ -12,9 +12,12 @@ import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.math.BigDecimal;
@@ -30,11 +33,15 @@ import java.util.regex.Pattern;
 public class CarryTracker {
     private static final Pattern PRICE_PATTERN = Pattern.compile("^([0-9][0-9.,]*)([kmb]?)$");
     private static final Pattern THOUSANDS_PATTERN = Pattern.compile("^\\d{1,3}(,\\d{3})+(\\.\\d+)?$");
+    private static final Pattern TIMER_PATTERN = Pattern.compile("(?:^|\\s)(\\d{1,2}):(\\d{2})(?:\\s|$)");
 
     private static final int MISSING_TICKS_TO_COMPLETE = 20;
     private static final double MAX_TRACK_DISTANCE_SQ = 40 * 40;
     private static final double BOSS_SEARCH_RADIUS_SQ = 50 * 50;
     private static final long DEATH_WINDOW_MS = 3_000;
+    private static final long TIMER_EXPIRY_GRACE_MS = 1_500;
+    private static final double TIMER_SEARCH_HORIZONTAL = 1.5;
+    private static final double TIMER_SEARCH_VERTICAL = 3.0;
 
     private static final int HUD_MIN_WIDTH = 160;
     private static final int HUD_PADDING = 6;
@@ -56,6 +63,9 @@ public class CarryTracker {
         Vec3 lastBossPos = null;
         long missingSince = 0;
         long lastDeathAt = 0;
+        long goneSince = 0;
+        int timerSeconds = -1;
+        long timerSeenAt = 0;
         float displayedProgress = 0f;
 
         Carry(String target, int amount, BigDecimal price) {
@@ -77,6 +87,14 @@ public class CarryTracker {
             missingTicks = 0;
             lastBossPos = null;
             missingSince = 0;
+            timerSeconds = -1;
+            timerSeenAt = 0;
+        }
+
+        boolean timerExpired() {
+            if (timerSeenAt == 0 || timerSeconds < 0) return false;
+            long remaining = timerSeconds * 1000L - (missingSince - timerSeenAt);
+            return remaining <= TIMER_EXPIRY_GRACE_MS;
         }
 
         BigDecimal total() {
@@ -169,18 +187,26 @@ public class CarryTracker {
 
         if (client.level != lastLevel) {
             lastLevel = client.level;
-            carries.values().forEach(Carry::resetBossState);
+            carries.values().forEach(carry -> {
+                carry.resetBossState();
+                carry.goneSince = 0;
+            });
             return;
         }
 
+        long now = System.currentTimeMillis();
         List<Carry> finished = new ArrayList<>();
         for (Carry carry : carries.values()) {
+            if (isInTab(client, carry)) carry.goneSince = 0;
+            else if (carry.goneSince == 0) carry.goneSince = now;
+
             Entity boss = findBossTag(client.level, carry.bossPattern, carry.bossSeen ? carry.lastBossPos : null);
             if (boss != null) {
                 carry.bossSeen = true;
                 carry.missingTicks = 0;
                 carry.missingSince = 0;
                 carry.lastBossPos = boss.position();
+                readTimer(client.level, boss, carry, now);
                 continue;
             }
 
@@ -191,15 +217,24 @@ public class CarryTracker {
                 continue;
             }
 
-            long now = System.currentTimeMillis();
             if (carry.missingTicks++ == 0) carry.missingSince = now;
             if (carry.missingTicks < MISSING_TICKS_TO_COMPLETE) continue;
 
             boolean died = carry.lastDeathAt != 0 && carry.lastDeathAt >= carry.missingSince - DEATH_WINDOW_MS;
+            boolean left = carry.goneSince != 0;
+            boolean expired = carry.timerExpired();
             carry.resetBossState();
             if (died) {
                 carry.lastDeathAt = 0;
                 ModFunctions.sendSystemMessage("§c" + carry.target + " died, carry not counted (" + carry.completed + "/" + carry.amount + ")", false);
+                continue;
+            }
+            if (left) {
+                ModFunctions.sendSystemMessage("§c" + carry.target + " left the server, carry not counted (" + carry.completed + "/" + carry.amount + ")", false);
+                continue;
+            }
+            if (expired) {
+                ModFunctions.sendSystemMessage("§c" + carry.target + "'s boss timer ran out, carry not counted (" + carry.completed + "/" + carry.amount + ")", false);
                 continue;
             }
             if (completeCarry(client, carry)) finished.add(carry);
@@ -219,6 +254,58 @@ public class CarryTracker {
         return null;
     }
 
+    private static boolean isInTab(Minecraft client, Carry carry) {
+        ClientPacketListener connection = client.getConnection();
+        if (connection == null || connection.getOnlinePlayers().isEmpty()) return true;
+        for (PlayerInfo info : connection.getOnlinePlayers()) {
+            if (info.getProfile().name().equalsIgnoreCase(carry.target)) return true;
+            Component display = info.getTabListDisplayName();
+            if (display != null && carry.namePattern.matcher(display.getString().replaceAll("§.", "")).find()) return true;
+        }
+        return false;
+    }
+
+    private static void readTimer(ClientLevel level, Entity boss, Carry carry, long now) {
+        AABB area = boss.getBoundingBox().inflate(TIMER_SEARCH_HORIZONTAL, TIMER_SEARCH_VERTICAL, TIMER_SEARCH_HORIZONTAL);
+        Integer best = null;
+        double bestDistance = Double.MAX_VALUE;
+        for (Entity entity : level.getEntities(null, area)) {
+            Component name = entity.getCustomName();
+            if (name == null) continue;
+            Matcher m = TIMER_PATTERN.matcher(name.getString().replaceAll("§.", "").trim());
+            if (!m.find()) continue;
+            double distance = entity.distanceToSqr(boss);
+            if (distance >= bestDistance) continue;
+            bestDistance = distance;
+            best = Integer.parseInt(m.group(1)) * 60 + Integer.parseInt(m.group(2));
+        }
+        if (best == null) return;
+        carry.timerSeconds = best;
+        carry.timerSeenAt = now;
+    }
+
+    public static void adjust(String username, int delta) {
+        Carry carry = carries.get(key(username));
+        if (carry == null) {
+            ModFunctions.sendSystemMessage("§cYou aren't carrying " + username + ".", false);
+            return;
+        }
+
+        int updated = Math.clamp(carry.completed + (long) delta, 0, carry.amount);
+        if (updated == carry.completed) {
+            ModFunctions.sendSystemMessage("§e" + carry.target + " is already at " + carry.completed + "/" + carry.amount, false);
+            return;
+        }
+
+        carry.completed = updated;
+        if (carry.completed >= carry.amount) {
+            finishCarry(Minecraft.getInstance(), carry);
+            carries.remove(key(carry.target));
+            return;
+        }
+        ModFunctions.sendSystemMessage("§aAdjusted carry for " + carry.target + " (" + carry.completed + "/" + carry.amount + ")", false);
+    }
+
     private static boolean completeCarry(Minecraft client, Carry carry) {
         carry.completed++;
 
@@ -227,6 +314,11 @@ public class CarryTracker {
             return false;
         }
 
+        finishCarry(client, carry);
+        return true;
+    }
+
+    private static void finishCarry(Minecraft client, Carry carry) {
         String owed = formatCoins(carry.total());
         ModFunctions.showTitle(client, Component.literal("COLLECT PAYMENT")
                 .withColor(ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN)), 60, true);
@@ -237,7 +329,6 @@ public class CarryTracker {
                 .withSound(false)
                 .send();
         ModFunctions.sendSystemMessage("§aAll " + carry.amount + " carries done for " + carry.target + "! Collect §6" + owed + " coins", false);
-        return true;
     }
 
     public static BigDecimal parsePrice(String input) {

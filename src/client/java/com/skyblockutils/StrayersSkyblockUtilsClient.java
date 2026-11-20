@@ -51,6 +51,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -149,8 +150,21 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             DailyReminders.tick(client);
         });
 
-        ClientReceiveMessageEvents.GAME.register((message, _) -> handleGameMessage(message));
-        ClientReceiveMessageEvents.GAME_CANCELED.register((message, _) -> handleGameMessage(message));
+        Identifier incomingPhase = Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "incoming");
+        ClientReceiveMessageEvents.ALLOW_GAME.addPhaseOrdering(incomingPhase, Event.DEFAULT_PHASE);
+        ClientReceiveMessageEvents.ALLOW_GAME.register(incomingPhase, (message, overlay) -> {
+            SeparatedChat.beginIncoming(message, overlay);
+            return true;
+        });
+
+        ClientReceiveMessageEvents.GAME.register((message, _) -> {
+            SeparatedChat.endIncoming();
+            handleGameMessage(message);
+        });
+        ClientReceiveMessageEvents.GAME_CANCELED.register((message, _) -> {
+            SeparatedChat.endIncoming();
+            handleGameMessage(message);
+        });
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             if (!overlay) {

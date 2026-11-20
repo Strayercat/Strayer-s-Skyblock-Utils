@@ -44,7 +44,7 @@ public class ModConfig {
     public boolean downtimeTracker = true;
     public boolean dungeonPartyCommands = true;
     public boolean autoRejoinReminders = false;
-    public float autoRejoinTimer = 5.0F;
+    public float autoRejoinTimer = 2.0F;
     public boolean f7VoidLava = true;
 
     // Textures
