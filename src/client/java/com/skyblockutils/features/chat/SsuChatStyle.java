@@ -1,7 +1,7 @@
 package com.skyblockutils.features.chat;
 
 import com.skyblockutils.config.ModConfig;
-import com.skyblockutils.features.hud.SystemChatHud;
+import com.skyblockutils.features.hud.MessageHistoryScreen;
 import com.skyblockutils.utils.ModStyle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -26,7 +26,7 @@ public final class SsuChatStyle {
     public static boolean appliesToCurrentScreen() {
         if (!inputEnabled()) return false;
         Screen screen = Minecraft.getInstance().gui.screen();
-        return screen instanceof ChatScreen || screen instanceof SystemChatHud;
+        return screen instanceof ChatScreen || screen instanceof MessageHistoryScreen;
     }
 
     public static int accent() {

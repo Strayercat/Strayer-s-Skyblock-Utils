@@ -17,16 +17,19 @@ import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.utils.ClipboardUtils;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SSUIndicator;
+import com.skyblockutils.utils.SideBarUtils;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -107,31 +110,46 @@ public class BestiaryHud {
     private static final Pattern PAGE_PREFIX = Pattern.compile("^\\(\\d+/\\d+\\)\\s*");
     private static final Pattern TIER_SUFFIX = Pattern.compile("\\s+[IVXLCDM]+$");
 
-    private static final long MATCH_WINDOW_MS = 600;
-    private static final long MELEE_TAG_MS = 5_000;
-    private static final long PROJECTILE_TAG_MS = 3_000;
-    private static final long ABILITY_TAG_MS = 1_500;
-    private static final double ABILITY_RADIUS = 12.0;
-    private static final double PROJECTILE_RADIUS = 2.5;
+    private static final long MATCH_WINDOW_MS = 150;
+    private static final long RESOLVE_DELAY_MS = 1_600;
+    private static final long DEATH_EXPIRY_MS = 2_000;
+    private static final long PASSIVE_COINS_BEFORE_MS = 300;
+    private static final long PASSIVE_COINS_AFTER_MS = 1_500;
+    private static final long PASSIVE_COIN_AMOUNT = 5;
+    private static final Pattern PURSE = Pattern.compile("(?:Purse|Piggy): ([\\d,]+)");
+    private static final long TAG_MS = 5_000;
+    private static final long ACTION_WINDOW_MS = 1_000;
+    private static final long COIN_WINDOW_MS = 300;
+    private static final float KILL_DING_PITCH = 1.4921f;
+    private static final float PITCH_TOLERANCE = 0.01f;
+    private static final double PROJECTILE_HIT_MARGIN = 0.6;
     private static final double PROJECTILE_SCAN_RANGE = 128.0;
+    private static final double INDICATOR_SCAN_RANGE = 32.0;
+    private static final double INDICATOR_HORIZONTAL = 2.5;
+    private static final double INDICATOR_VERTICAL = 3.5;
+    private static final Pattern DAMAGE_INDICATOR = Pattern.compile("^[^\\p{L}\\p{N}]*\\d[\\d,.]*[kKmMbB]?[^\\p{L}\\p{N}]*$");
     private static final double NAMETAG_RADIUS = 1.0;
     private static final double NAMETAG_HEIGHT = 2.5;
     private static final Pattern NAMETAG_LEVEL = Pattern.compile("^.*?\\[Lv[\\d,]+]\\s*");
     private static final Pattern NAMETAG_SYMBOLS = Pattern.compile("[^\\p{L}\\p{N} '\\-]");
     private static final Pattern NAMETAG_HEALTH = Pattern.compile("\\s+[\\d,.]+[kKmMbB]?(?:/[\\d,.]+[kKmMbB]?)?❤.*$");
 
-    private enum Evidence { WEAK, MEDIUM, STRONG }
+    private enum Tier { NONE, MEDIUM, STRONG }
 
-    private record PendingDeath(String name, long at, Evidence evidence) {}
-
-    private record Ability(Vec3 pos, long at) {}
+    private record PendingDeath(int id, String name, long at, Tier tier) {}
 
     private static final List<PendingDeath> deaths = new ArrayList<>();
     private static final List<Long> dings = new ArrayList<>();
-    private static final Map<Integer, Long> meleeTags = new HashMap<>();
-    private static final Map<Integer, Long> projectileTags = new HashMap<>();
+    private static final List<Long> coinPickups = new ArrayList<>();
+    private static final List<Long> passiveCoins = new ArrayList<>();
+    private static long lastPurse = -1;
+    private static final Map<Integer, Long> strongTags = new HashMap<>();
+    private static final Map<Integer, Long> mediumTags = new HashMap<>();
+    private static long lastActionAt = 0;
+    private static long lastHurtAt = 0;
+    private static int lastHurtTime = 0;
     private static final Map<Integer, Vec3> ownProjectiles = new HashMap<>();
-    private static final Deque<Ability> abilities = new ArrayDeque<>();
+    private static final Set<Integer> scannedStands = new HashSet<>();
     private static final List<BestiaryEntity> allMobs = new ArrayList<>();
     private static final LinkedHashMap<BestiaryEntity, Long> recent = new LinkedHashMap<>();
     private static final Map<String, ItemStack> skinIcons = new HashMap<>();
@@ -244,7 +262,12 @@ public class BestiaryHud {
         }
 
         recent.values().removeIf(at -> now - at > HUD_TIMEOUT_MS);
+        strongTags.values().removeIf(at -> now - at > TAG_MS);
+        mediumTags.values().removeIf(at -> now - at > TAG_MS);
+        trackHurt(client, now);
+        trackPurse(now);
         trackProjectiles(client, now);
+        trackDamageIndicators(client, now);
         resolveKills(now);
         if (dirty && now - lastSaveAt >= AUTOSAVE_MS) save();
         if (++ticks % PAGE_READ_INTERVAL == 0) readOpenBestiary(client);
@@ -451,10 +474,13 @@ public class BestiaryHud {
         attempts = 0;
         deaths.clear();
         dings.clear();
-        meleeTags.clear();
-        projectileTags.clear();
+        coinPickups.clear();
+        passiveCoins.clear();
+        lastPurse = -1;
+        strongTags.clear();
+        mediumTags.clear();
         ownProjectiles.clear();
-        abilities.clear();
+        scannedStands.clear();
     }
 
     public static void devCopy() {
@@ -473,50 +499,84 @@ public class BestiaryHud {
 
     public static void register() {
         AttackEntityCallback.EVENT.register((player, _, _, entity, _) -> {
-            if (player == Minecraft.getInstance().player) meleeTags.put(entity.getId(), System.currentTimeMillis());
+            if (player == Minecraft.getInstance().player) strongTags.put(entity.getId(), System.currentTimeMillis());
             return InteractionResult.PASS;
         });
     }
 
     public static void onPlayerAction() {
+        lastActionAt = System.currentTimeMillis();
+    }
+
+    public static void onDamage(ClientboundDamageEventPacket packet) {
         Minecraft client = Minecraft.getInstance();
-        if (client.player == null || !loaded) return;
-        abilities.addLast(new Ability(client.player.position(), System.currentTimeMillis()));
-        while (abilities.size() > 20) abilities.pollFirst();
+        if (!ModConfig.INSTANCE.bestiaryHud || !loaded || client.player == null) return;
+        long now = System.currentTimeMillis();
+        int me = client.player.getId();
+        if (packet.entityId() == me) {
+            int attacker = packet.sourceCauseId() >= 0 ? packet.sourceCauseId() : packet.sourceDirectId();
+            if (attacker >= 0 && attacker != me) strongTags.put(attacker, now);
+            return;
+        }
+        if (packet.sourceCauseId() == me || packet.sourceDirectId() == me || ownProjectiles.containsKey(packet.sourceDirectId())) {
+            strongTags.put(packet.entityId(), now);
+        }
     }
 
     public static void onEntityDeath(Entity entity) {
         Minecraft client = Minecraft.getInstance();
         if (!ModConfig.INSTANCE.bestiaryHud || !loaded || client.player == null) return;
         if (!(entity instanceof LivingEntity) || entity instanceof ArmorStand || entity == client.player) return;
+        for (PendingDeath death : deaths) {
+            if (death.id() == entity.getId()) return;
+        }
         String name = nametagName(entity);
         if (name == null) return;
         long now = System.currentTimeMillis();
-        deaths.add(new PendingDeath(name, now, evidence(entity, now)));
+        deaths.add(new PendingDeath(entity.getId(), name, now, tier(entity.getId(), now)));
     }
 
-    public static void onXpSound() {
+    private static Tier tier(int entityId, long now) {
+        Long strong = strongTags.get(entityId);
+        if (strong != null && now - strong <= TAG_MS) return Tier.STRONG;
+        Long medium = mediumTags.get(entityId);
+        if (medium != null && now - medium <= TAG_MS) return Tier.MEDIUM;
+        return Tier.NONE;
+    }
+
+    public static void onXpSound(float pitch) {
         if (!ModConfig.INSTANCE.bestiaryHud || !loaded) return;
+        if (Math.abs(pitch - KILL_DING_PITCH) > PITCH_TOLERANCE) return;
         dings.add(System.currentTimeMillis());
     }
 
-    private static Evidence evidence(Entity entity, long now) {
-        Long melee = meleeTags.get(entity.getId());
-        if (melee != null && now - melee <= MELEE_TAG_MS) return Evidence.STRONG;
-        Long projectile = projectileTags.get(entity.getId());
-        if (projectile != null && now - projectile <= PROJECTILE_TAG_MS) return Evidence.STRONG;
-        for (Ability ability : abilities) {
-            if (now - ability.at() <= ABILITY_TAG_MS && entity.position().distanceToSqr(ability.pos()) <= ABILITY_RADIUS * ABILITY_RADIUS) {
-                return Evidence.MEDIUM;
-            }
+    public static void onItemPickup(int collectorId, Entity item) {
+        Minecraft client = Minecraft.getInstance();
+        if (!ModConfig.INSTANCE.bestiaryHud || !loaded || client.player == null || collectorId != client.player.getId()) return;
+        if (item instanceof ItemEntity itemEntity && itemEntity.getItem().is(Items.PLAYER_HEAD)) coinPickups.add(System.currentTimeMillis());
+    }
+
+    private static void trackPurse(long now) {
+        long purse = -1;
+        for (String line : SideBarUtils.getSidebarLines()) {
+            Matcher m = PURSE.matcher(clean(line).replaceAll("[^\\x20-\\x7E]", ""));
+            if (!m.find()) continue;
+            purse = Long.parseLong(m.group(1).replace(",", ""));
+            break;
         }
-        return Evidence.WEAK;
+        if (purse < 0) return;
+        if (lastPurse >= 0 && purse - lastPurse == PASSIVE_COIN_AMOUNT) passiveCoins.add(now);
+        lastPurse = purse;
+    }
+
+    private static void trackHurt(Minecraft client, long now) {
+        if (client.player == null) return;
+        int hurtTime = client.player.hurtTime;
+        if (hurtTime > lastHurtTime) lastHurtAt = now;
+        lastHurtTime = hurtTime;
     }
 
     private static void trackProjectiles(Minecraft client, long now) {
-        meleeTags.values().removeIf(at -> now - at > MELEE_TAG_MS);
-        projectileTags.values().removeIf(at -> now - at > PROJECTILE_TAG_MS);
-        abilities.removeIf(ability -> now - ability.at() > ABILITY_TAG_MS);
         if (client.level == null || client.player == null) {
             ownProjectiles.clear();
             return;
@@ -534,37 +594,105 @@ public class BestiaryHud {
             Map.Entry<Integer, Vec3> entry = it.next();
             if (alive.contains(entry.getKey())) continue;
             it.remove();
-            AABB area = AABB.ofSize(entry.getValue(), PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2);
+            Vec3 last = entry.getValue();
+            AABB area = AABB.ofSize(last, 4, 4, 4);
             for (LivingEntity hit : client.level.getEntitiesOfClass(LivingEntity.class, area, e -> !(e instanceof ArmorStand) && e != client.player)) {
-                projectileTags.put(hit.getId(), now);
+                if (hit.getBoundingBox().inflate(PROJECTILE_HIT_MARGIN).contains(last)) strongTags.put(hit.getId(), now);
             }
         }
     }
 
-    private static void resolveKills(long now) {
-        if (deaths.isEmpty() && dings.isEmpty()) return;
-        long start = Long.MAX_VALUE;
-        for (PendingDeath death : deaths) start = Math.min(start, death.at());
-        for (long ding : dings) start = Math.min(start, ding);
-        if (now - start < MATCH_WINDOW_MS) return;
-
-        long end = start + MATCH_WINDOW_MS;
-        List<PendingDeath> group = new ArrayList<>();
-        deaths.removeIf(death -> {
-            if (death.at() > end) return false;
-            group.add(death);
-            return true;
-        });
-        int confirmations = 0;
-        Iterator<Long> it = dings.iterator();
-        while (it.hasNext()) {
-            if (it.next() > end) continue;
-            it.remove();
-            confirmations++;
+    private static void trackDamageIndicators(Minecraft client, long now) {
+        if (client.level == null || client.player == null) {
+            scannedStands.clear();
+            return;
         }
 
-        group.sort(Comparator.comparing(PendingDeath::evidence).reversed().thenComparingLong(PendingDeath::at));
-        for (int i = 0; i < Math.min(confirmations, group.size()); i++) handleMobKill(group.get(i).name());
+        Set<Integer> present = new HashSet<>();
+        AABB around = client.player.getBoundingBox().inflate(INDICATOR_SCAN_RANGE);
+        for (ArmorStand stand : client.level.getEntitiesOfClass(ArmorStand.class, around, ArmorStand::hasCustomName)) {
+            present.add(stand.getId());
+            if (scannedStands.contains(stand.getId())) continue;
+            Component customName = stand.getCustomName();
+            if (customName == null) continue;
+            String text = clean(customName.getString());
+            if (text.isEmpty()) continue;
+            scannedStands.add(stand.getId());
+            if (text.contains("❤") || !DAMAGE_INDICATOR.matcher(text).matches()) continue;
+
+            LivingEntity target = null;
+            double best = Double.MAX_VALUE;
+            AABB area = stand.getBoundingBox().inflate(INDICATOR_HORIZONTAL, INDICATOR_VERTICAL, INDICATOR_HORIZONTAL);
+            for (LivingEntity entity : client.level.getEntitiesOfClass(LivingEntity.class, area, e -> !(e instanceof ArmorStand) && e != client.player && e.isAlive())) {
+                double dx = entity.getX() - stand.getX();
+                double dz = entity.getZ() - stand.getZ();
+                double distance = dx * dx + dz * dz;
+                if (distance < best) {
+                    best = distance;
+                    target = entity;
+                }
+            }
+            if (target != null && now - Math.max(lastActionAt, lastHurtAt) <= ACTION_WINDOW_MS) mediumTags.put(target.getId(), now);
+        }
+        scannedStands.retainAll(present);
+    }
+
+    private static void resolveKills(long now) {
+        coinPickups.removeIf(at -> now - at > RESOLVE_DELAY_MS + COIN_WINDOW_MS);
+        passiveCoins.removeIf(at -> now - at > RESOLVE_DELAY_MS + PASSIVE_COINS_BEFORE_MS);
+        Iterator<Long> it = dings.iterator();
+        while (it.hasNext()) {
+            long ding = it.next();
+            if (now - ding < RESOLVE_DELAY_MS) break;
+            it.remove();
+
+            if (consumeCoinPickup(ding)) {
+                consumePassiveCoins(ding);
+                LogHud.addLog("§7[Bestiary] kill ding ignored, coin pickup");
+                continue;
+            }
+            if (consumePassiveCoins(ding)) {
+                LogHud.addLog("§7[Bestiary] kill ding ignored, passive +" + PASSIVE_COIN_AMOUNT + " coins");
+                continue;
+            }
+
+            PendingDeath best = null;
+            for (PendingDeath death : deaths) {
+                long gap = Math.abs(death.at() - ding);
+                if (gap > MATCH_WINDOW_MS) continue;
+                if (best == null || death.tier().compareTo(best.tier()) > 0
+                        || (death.tier() == best.tier() && gap < Math.abs(best.at() - ding))) best = death;
+            }
+            if (best == null) {
+                LogHud.addLog("§7[Bestiary] kill ding with no matching death");
+                continue;
+            }
+            deaths.remove(best);
+            LogHud.addLog("§7[Bestiary] §f" + best.name() + " §7" + best.tier().name().toLowerCase(Locale.ROOT) + " " + Math.abs(best.at() - ding) + "ms");
+            handleMobKill(best.name());
+        }
+        deaths.removeIf(death -> now - death.at() > DEATH_EXPIRY_MS);
+    }
+
+    private static boolean consumePassiveCoins(long ding) {
+        Iterator<Long> it = passiveCoins.iterator();
+        while (it.hasNext()) {
+            long at = it.next();
+            if (at < ding - PASSIVE_COINS_BEFORE_MS || at > ding + PASSIVE_COINS_AFTER_MS) continue;
+            it.remove();
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean consumeCoinPickup(long ding) {
+        Iterator<Long> it = coinPickups.iterator();
+        while (it.hasNext()) {
+            if (Math.abs(it.next() - ding) > COIN_WINDOW_MS) continue;
+            it.remove();
+            return true;
+        }
+        return false;
     }
 
     private static String nametagName(Entity entity) {

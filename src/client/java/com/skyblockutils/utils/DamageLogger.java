@@ -1,9 +1,12 @@
 package com.skyblockutils.utils;
 
 import com.skyblockutils.ModFunctions;
+import com.skyblockutils.features.hud.LogHud;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.world.entity.Entity;
+
+import java.util.Locale;
 
 public class DamageLogger {
     public static boolean enabled = false;
@@ -15,15 +18,15 @@ public class DamageLogger {
 
     public static void onDamage(ClientboundDamageEventPacket packet) {
         if (!enabled) return;
-        ModFunctions.sendSystemMessage("§7[DMG] §f" + describe(packet.entityId())
+        LogHud.addLog("§7[DMG] §f" + describe(packet.entityId())
                 + " §7type=§e" + packet.sourceType().getRegisteredName()
                 + " §7cause=§f" + describe(packet.sourceCauseId())
-                + " §7direct=§f" + describe(packet.sourceDirectId()), false);
+                + " §7direct=§f" + describe(packet.sourceDirectId()));
     }
 
-    public static void onDeath(Entity entity) {
+    public static void onXpSound(float pitch, float volume) {
         if (!enabled) return;
-        ModFunctions.sendSystemMessage("§7[DEATH] §f" + describe(entity.getId()), false);
+        LogHud.addLog(String.format(Locale.ROOT, "§7[XP] §fpitch=§e%.4f §7volume=§e%.2f", pitch, volume));
     }
 
     private static String describe(int id) {

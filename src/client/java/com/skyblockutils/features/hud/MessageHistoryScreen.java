@@ -18,26 +18,28 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-public class SystemChatHud extends Screen {
+public class MessageHistoryScreen extends Screen {
     private static final SystemToast.SystemToastId COPY_TOAST = new SystemToast.SystemToastId(2000L);
 
+    final MessageHud hud;
     private EditBox searchBox;
 
-    public SystemChatHud() {
-        super(Component.literal("System Chat"));
+    public MessageHistoryScreen(MessageHud hud) {
+        super(Component.literal(hud.title));
+        this.hud = hud;
     }
 
     @Override
     protected void init() {
-        int[] bounds = SeparatedChatHud.searchBarBounds();
+        int[] bounds = hud.searchBarBounds();
         this.searchBox = new EditBox(this.font, bounds[0] + 4, bounds[1] + 2, bounds[2] - 8, bounds[3], Component.literal("Search"));
         this.searchBox.setMaxLength(100);
         this.searchBox.setBordered(false);
         this.searchBox.setCanLoseFocus(false);
         this.searchBox.setHint(Component.literal("Search..."));
-        this.searchBox.setValue(SeparatedChatHud.searchQuery());
+        this.searchBox.setValue(hud.searchQuery());
         this.searchBox.setResponder(value -> {
-            SeparatedChatHud.setSearch(value);
+            hud.setSearch(value);
             this.updateSearchColor();
         });
         this.updateSearchColor();
@@ -50,7 +52,7 @@ public class SystemChatHud extends Screen {
     }
 
     private void updateSearchColor() {
-        this.searchBox.setTextColor(SeparatedChatHud.hasNoMatch() ? 0xFFFF5555 : 0xFFE0E0E0);
+        this.searchBox.setTextColor(hud.hasNoMatch() ? 0xFFFF5555 : 0xFFE0E0E0);
     }
 
     @Override
@@ -59,8 +61,8 @@ public class SystemChatHud extends Screen {
 
     @Override
     public void extractRenderState(final @NotNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
-        SeparatedChatHud.renderPinned(graphics);
-        int[] bounds = SeparatedChatHud.searchBarBounds();
+        hud.renderPinned(graphics);
+        int[] bounds = hud.searchBarBounds();
         int accent = 0xFF000000 | ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
         RoundedRect.panel(graphics, bounds[0], bounds[1], bounds[0] + bounds[2], bounds[1] + bounds[3], 3, ModStyle.COLOR_BACKGROUND, accent);
         super.extractRenderState(graphics, mouseX, mouseY, a);
@@ -83,11 +85,11 @@ public class SystemChatHud extends Screen {
     }
 
     private boolean copyAt(final double mouseX, final double mouseY) {
-        String text = SeparatedChatHud.messageTextAt(mouseX, mouseY);
+        String text = hud.messageTextAt(mouseX, mouseY);
         if (text == null) return false;
         ClipboardUtils.copyTextToClipboard(text);
         SystemToast.addOrUpdate(this.minecraft.gui.toastManager(), COPY_TOAST,
-                Component.literal("Copied"), Component.literal("System message copied to clipboard"));
+                Component.literal("Copied"), Component.literal(hud.copiedText));
         return true;
     }
 
@@ -96,7 +98,7 @@ public class SystemChatHud extends Screen {
         if (ModKeyBindings.COPY_SYSTEM_MESSAGE_KEY.matchesMouse(event) && this.copyAt(event.x(), event.y())) return true;
         if (event.button() == 0 && !this.searchBox.isMouseOver(event.x(), event.y())) {
             boolean insert = this.minecraft.hasShiftDown();
-            Style clicked = SeparatedChatHud.findStyleAt(event.x(), event.y(), insert);
+            Style clicked = hud.findStyleAt(event.x(), event.y(), insert);
             if (clicked != null && this.handleComponentClicked(clicked, insert)) return true;
         }
         return super.mouseClicked(event, doubleClick);
@@ -104,13 +106,13 @@ public class SystemChatHud extends Screen {
 
     @Override
     public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
-        SeparatedChatHud.scrollHistory(Mth.clamp(scrollY, -1.0, 1.0));
+        hud.scrollHistory(Mth.clamp(scrollY, -1.0, 1.0));
         return true;
     }
 
     @Override
     public void removed() {
-        SeparatedChatHud.resetPinnedState();
+        hud.resetPinnedState();
     }
 
     private boolean handleComponentClicked(final Style clicked, final boolean insert) {

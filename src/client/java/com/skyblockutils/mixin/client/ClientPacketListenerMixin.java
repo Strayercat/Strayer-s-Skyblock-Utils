@@ -15,6 +15,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +41,10 @@ public abstract class ClientPacketListenerMixin {
     private void ssu$muteCoopLeverClick(ClientboundSoundPacket packet, CallbackInfo ci) {
         if (!Minecraft.getInstance().isSameThread()) return;
         String sound = packet.getSound().value().location().getPath();
-        if (sound.equals("entity.experience_orb.pickup")) BestiaryHud.onXpSound();
+        if (sound.equals("entity.experience_orb.pickup")) {
+            DamageLogger.onXpSound(packet.getPitch(), packet.getVolume());
+            BestiaryHud.onXpSound(packet.getPitch());
+        }
         if (!CoopListParser.shouldMuteSounds()) return;
         if (sound.equals("block.lever.click")) ci.cancel();
     }
@@ -63,7 +67,6 @@ public abstract class ClientPacketListenerMixin {
         if (!client.isSameThread() || client.level == null || packet.getEventId() != 3) return;
         Entity entity = packet.getEntity(client.level);
         if (entity == null) return;
-        DamageLogger.onDeath(entity);
         BestiaryHud.onEntityDeath(entity);
     }
 
@@ -71,6 +74,14 @@ public abstract class ClientPacketListenerMixin {
     private void ssu$logDamage(ClientboundDamageEventPacket packet, CallbackInfo ci) {
         if (!Minecraft.getInstance().isSameThread()) return;
         DamageLogger.onDamage(packet);
+        BestiaryHud.onDamage(packet);
+    }
+
+    @Inject(method = "handleTakeItemEntity", at = @At("HEAD"))
+    private void ssu$trackItemPickup(ClientboundTakeItemEntityPacket packet, CallbackInfo ci) {
+        Minecraft client = Minecraft.getInstance();
+        if (!client.isSameThread() || client.level == null) return;
+        BestiaryHud.onItemPickup(packet.getPlayerId(), client.level.getEntity(packet.getItemId()));
     }
 
     @Inject(method = "handleBlockEntityData", at = @At("TAIL"))

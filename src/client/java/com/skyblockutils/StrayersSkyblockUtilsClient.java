@@ -65,6 +65,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        LogCapture.install();
         ModKeyBindings.init();
         ChatBlockRouter.setReleaseSink(message -> {
             if (passesChatFilters(message, false)) Minecraft.getInstance().gui.hud.getChat().addServerSystemMessage(EmojiRegistry.withEmojis(message));
@@ -102,6 +103,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_voice_chat"), (context, _) -> HudManager.render(VoiceHud.ELEMENT, context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_stash_hud"), (context, _) -> HudManager.render(StashHud.ELEMENT, context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_bestiary_hud"), (context, _) -> HudManager.render(BestiaryHud.ELEMENT, context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_log_hud"), (context, _) -> LogHud.render(context));
         HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_custom_scoreboard"), (context, _) -> HudManager.render(CustomSidebar.ELEMENT, context));
 
         LevelRenderEvents.END_MAIN.register(context -> {
@@ -125,6 +127,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             VoiceChat.tick(client);
 
             PawPrints.tick(client);
+            LogHud.tick();
             SideBarUtils.tick();
             if (client.level == null) return;
 

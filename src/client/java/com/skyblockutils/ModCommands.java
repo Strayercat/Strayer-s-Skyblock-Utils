@@ -25,6 +25,7 @@ import com.skyblockutils.features.guild.GuildListParser;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.features.hud.BestiaryHud;
+import com.skyblockutils.features.hud.LogHud;
 import com.skyblockutils.features.hud.layout.HudEditScreen;
 import com.skyblockutils.utils.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
@@ -347,6 +348,10 @@ public class ModCommands {
                         }))
                         .then(ClientCommands.literal("bestiary").executes(context -> {
                             BestiaryHud.devCopy();
+                            return 1;
+                        }))
+                        .then(ClientCommands.literal("loghud").executes(context -> {
+                            LogHud.toggle();
                             return 1;
                         }))
                         .then(ClientCommands.literal("damagelog").executes(context -> {

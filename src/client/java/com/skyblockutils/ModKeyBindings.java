@@ -50,6 +50,12 @@ public class ModKeyBindings {
             GLFW.GLFW_KEY_H,
             SSU_CATEGORY);
 
+    public static final KeyMapping LOG_HISTORY_KEY = new KeyMapping(
+            "key.ssu.logHistory",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_J,
+            SSU_CATEGORY);
+
     public static final KeyMapping VOICE_PTT_KEY = new KeyMapping(
             "key.ssu.voicePushToTalk",
             InputConstants.Type.KEYSYM,
@@ -82,6 +88,7 @@ public class ModKeyBindings {
         KeyMappingHelper.registerKeyMapping(ZOOM_KEY);
         KeyMappingHelper.registerKeyMapping(PUFF_TIMER_KEY);
         KeyMappingHelper.registerKeyMapping(SYSTEM_CHAT_HISTORY_KEY);
+        KeyMappingHelper.registerKeyMapping(LOG_HISTORY_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_PTT_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_MUTE_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_DEAFEN_KEY);
