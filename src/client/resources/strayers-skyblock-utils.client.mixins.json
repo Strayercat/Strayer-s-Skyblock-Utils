@@ -3,6 +3,7 @@
   "package": "com.skyblockutils.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "AbstractContainerScreenMixin",
     "BossBarHudMixin",
     "BossHealthOverlayAccessor",
     "ChatComponentAccessor",
@@ -16,6 +17,7 @@
     "GameRendererMixin",
     "GuiGraphicsExtractorMixin",
     "LocalPlayerMixin",
+    "MCEFBrowserImplMixin",
     "ModelManagerAccessor",
     "MouseMixin",
     "NameTagFeatureRendererMixin",

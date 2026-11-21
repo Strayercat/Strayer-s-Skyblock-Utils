@@ -110,7 +110,7 @@ public class BestiaryHud {
     private static final Pattern PAGE_PREFIX = Pattern.compile("^\\(\\d+/\\d+\\)\\s*");
     private static final Pattern TIER_SUFFIX = Pattern.compile("\\s+[IVXLCDM]+$");
 
-    private static final long MATCH_WINDOW_MS = 150;
+    private static final long MATCH_WINDOW_MS = 60;
     private static final long RESOLVE_DELAY_MS = 1_600;
     private static final long DEATH_EXPIRY_MS = 2_000;
     private static final long PASSIVE_COINS_BEFORE_MS = 300;
@@ -120,6 +120,10 @@ public class BestiaryHud {
     private static final long TAG_MS = 5_000;
     private static final long ACTION_WINDOW_MS = 1_000;
     private static final long COIN_WINDOW_MS = 300;
+    private static final long LATE_TAG_MS = 400;
+    private static final long NAME_CACHE_MS = 10_000;
+    private static final int NAME_SCAN_INTERVAL = 5;
+    private static final double NAME_SCAN_RANGE = 48.0;
     private static final float KILL_DING_PITCH = 1.4921f;
     private static final float PITCH_TOLERANCE = 0.01f;
     private static final double PROJECTILE_HIT_MARGIN = 0.6;
@@ -136,11 +140,26 @@ public class BestiaryHud {
 
     private enum Tier { NONE, MEDIUM, STRONG }
 
-    private record PendingDeath(int id, String name, long at, Tier tier) {}
+    private record PendingDeath(int id, String name, int standId, long at, double distanceSq) {}
+
+    private record Split(String parent, String child, int count) {}
+
+    private static final List<Split> SPLITS = List.of(new Split("Splitter Spider", "Silverfish", 2));
+    private static final long SPLIT_WINDOW_MS = 150;
+    private static final Map<String, Long> UNSEEN_DEATHS = Map.of("Silverfish", 2_000L);
+    private static final Map<String, Long> lastCredited = new HashMap<>();
+    private static String splitChild = null;
+    private static int splitRemaining = 0;
+    private static long splitAt = 0;
+
+    private record Nametag(String name, int standId) {}
+
+    private record CachedName(Nametag tag, long at) {}
 
     private static final List<PendingDeath> deaths = new ArrayList<>();
     private static final List<Long> dings = new ArrayList<>();
     private static final List<Long> coinPickups = new ArrayList<>();
+    private static final Map<Integer, CachedName> names = new HashMap<>();
     private static final List<Long> passiveCoins = new ArrayList<>();
     private static long lastPurse = -1;
     private static final Map<Integer, Long> strongTags = new HashMap<>();
@@ -266,6 +285,7 @@ public class BestiaryHud {
         mediumTags.values().removeIf(at -> now - at > TAG_MS);
         trackHurt(client, now);
         trackPurse(now);
+        if (ticks % NAME_SCAN_INTERVAL == 0) cacheNames(client, now);
         trackProjectiles(client, now);
         trackDamageIndicators(client, now);
         resolveKills(now);
@@ -446,6 +466,8 @@ public class BestiaryHud {
         if (entity == null) entity = find(name, e -> e.islandName.equals(islandName));
         if (entity == null) return;
         if (entity.currentKills != kills) {
+            int diff = entity.currentKills - kills;
+            LogHud.addLog("§e[Bestiary] corrected " + entity.name + " " + entity.currentKills + " -> " + kills + " (" + (diff > 0 ? "counted " + diff + " too many" : "missed " + (-diff)) + ")");
             entity.currentKills = kills;
             dirty = true;
         }
@@ -475,6 +497,8 @@ public class BestiaryHud {
         deaths.clear();
         dings.clear();
         coinPickups.clear();
+        lastCredited.clear();
+        names.clear();
         passiveCoins.clear();
         lastPurse = -1;
         strongTags.clear();
@@ -530,17 +554,61 @@ public class BestiaryHud {
         for (PendingDeath death : deaths) {
             if (death.id() == entity.getId()) return;
         }
-        String name = nametagName(entity);
-        if (name == null) return;
         long now = System.currentTimeMillis();
-        deaths.add(new PendingDeath(entity.getId(), name, now, tier(entity.getId(), now)));
+        Nametag tag = nametag(entity);
+        if (tag == null) {
+            CachedName cached = names.get(entity.getId());
+            if (cached != null && now - cached.at() <= NAME_CACHE_MS) tag = cached.tag();
+        }
+        if (tag == null && (entity.isPassenger() || entity.isVehicle())) {
+            List<Entity> linked = new ArrayList<>(entity.getPassengers());
+            if (entity.getVehicle() != null) linked.add(entity.getVehicle());
+            for (Entity other : linked) {
+                tag = nametag(other);
+                if (tag == null) {
+                    CachedName cached = names.get(other.getId());
+                    if (cached != null && now - cached.at() <= NAME_CACHE_MS) tag = cached.tag();
+                }
+                if (tag != null) break;
+            }
+            if (tag == null) {
+                LogHud.addLog("§8[Bestiary] mount or rider without a name, " + entity.getType().getDescription().getString());
+                return;
+            }
+        }
+        if (tag == null) {
+            String type = entity.getType().getDescription().getString();
+            String mode = HypixelLocation.mode();
+            if (find(type, e -> e.island.equals(mode)) == null) {
+                LogHud.addLog("§8[Bestiary] death without a name, " + type);
+                return;
+            }
+            tag = new Nametag(type, -1);
+        }
+        if (tag.standId() >= 0) {
+            for (PendingDeath death : deaths) {
+                if (death.standId() == tag.standId()) return;
+            }
+        }
+        deaths.add(new PendingDeath(entity.getId(), tag.name(), tag.standId(), now, entity.distanceToSqr(client.player)));
     }
 
-    private static Tier tier(int entityId, long now) {
-        Long strong = strongTags.get(entityId);
-        if (strong != null && now - strong <= TAG_MS) return Tier.STRONG;
-        Long medium = mediumTags.get(entityId);
-        if (medium != null && now - medium <= TAG_MS) return Tier.MEDIUM;
+    private static void cacheNames(Minecraft client, long now) {
+        names.values().removeIf(cached -> now - cached.at() > NAME_CACHE_MS);
+        if (client.level == null || client.player == null) return;
+        AABB around = client.player.getBoundingBox().inflate(NAME_SCAN_RANGE);
+        for (LivingEntity entity : client.level.getEntitiesOfClass(LivingEntity.class, around, e -> !(e instanceof ArmorStand) && e != client.player && e.isAlive())) {
+            Nametag tag = nametag(entity);
+            if (tag != null) names.put(entity.getId(), new CachedName(tag, now));
+        }
+    }
+
+    private static Tier tier(PendingDeath death) {
+        long limit = death.at() + LATE_TAG_MS;
+        Long strong = strongTags.get(death.id());
+        if (strong != null && strong <= limit && death.at() - strong <= TAG_MS) return Tier.STRONG;
+        Long medium = mediumTags.get(death.id());
+        if (medium != null && medium <= limit && death.at() - medium <= TAG_MS) return Tier.MEDIUM;
         return Tier.NONE;
     }
 
@@ -623,7 +691,7 @@ public class BestiaryHud {
             LivingEntity target = null;
             double best = Double.MAX_VALUE;
             AABB area = stand.getBoundingBox().inflate(INDICATOR_HORIZONTAL, INDICATOR_VERTICAL, INDICATOR_HORIZONTAL);
-            for (LivingEntity entity : client.level.getEntitiesOfClass(LivingEntity.class, area, e -> !(e instanceof ArmorStand) && e != client.player && e.isAlive())) {
+            for (LivingEntity entity : client.level.getEntitiesOfClass(LivingEntity.class, area, e -> !(e instanceof ArmorStand) && e != client.player)) {
                 double dx = entity.getX() - stand.getX();
                 double dz = entity.getZ() - stand.getZ();
                 double distance = dx * dx + dz * dz;
@@ -657,21 +725,86 @@ public class BestiaryHud {
             }
 
             PendingDeath best = null;
+            Tier bestTier = Tier.NONE;
+            int candidates = 0;
             for (PendingDeath death : deaths) {
                 long gap = Math.abs(death.at() - ding);
                 if (gap > MATCH_WINDOW_MS) continue;
-                if (best == null || death.tier().compareTo(best.tier()) > 0
-                        || (death.tier() == best.tier() && gap < Math.abs(best.at() - ding))) best = death;
+                candidates++;
+                Tier tier = tier(death);
+                if (best == null || tier.compareTo(bestTier) > 0
+                        || (tier == bestTier && gap < Math.abs(best.at() - ding))) {
+                    best = death;
+                    bestTier = tier;
+                }
             }
-            if (best == null) {
-                LogHud.addLog("§7[Bestiary] kill ding with no matching death");
+            boolean splitPending = splitChild != null && splitRemaining > 0 && Math.abs(ding - splitAt) <= SPLIT_WINDOW_MS;
+            if (splitPending && (best == null || bestTier == Tier.NONE)) {
+                splitRemaining--;
+                LogHud.addLog("§7[Bestiary] §f" + splitChild + " §7split" + (best != null ? " over " + best.name() : ""));
+                handleMobKill(splitChild);
                 continue;
             }
+            if (best == null) {
+                String unseen = unseenFamily(ding);
+                if (unseen != null) {
+                    LogHud.addLog("§7[Bestiary] §f" + unseen + " §7unseen");
+                    handleMobKill(unseen);
+                } else {
+                    LogHud.addLog("§7[Bestiary] kill ding with no matching death");
+                }
+                continue;
+            }
+            String pick = "";
+            if (bestTier == Tier.NONE && candidates > 1 && !sameName(ding)) {
+                best = closest(ding);
+                pick = " closest";
+            }
             deaths.remove(best);
-            LogHud.addLog("§7[Bestiary] §f" + best.name() + " §7" + best.tier().name().toLowerCase(Locale.ROOT) + " " + Math.abs(best.at() - ding) + "ms");
+            LogHud.addLog("§7[Bestiary] §f" + best.name() + " §7" + bestTier.name().toLowerCase(Locale.ROOT) + " " + Math.abs(best.at() - ding) + "ms" + (candidates > 1 ? " of " + candidates : "") + pick);
             handleMobKill(best.name());
+            for (Split split : SPLITS) {
+                if (!split.parent().equals(best.name())) continue;
+                boolean stacking = split.child().equals(splitChild) && splitRemaining > 0 && Math.abs(ding - splitAt) <= SPLIT_WINDOW_MS;
+                splitChild = split.child();
+                splitRemaining = (stacking ? splitRemaining : 0) + split.count();
+                splitAt = ding;
+            }
         }
         deaths.removeIf(death -> now - death.at() > DEATH_EXPIRY_MS);
+    }
+
+    private static String unseenFamily(long ding) {
+        String family = null;
+        long latest = Long.MIN_VALUE;
+        for (Map.Entry<String, Long> entry : UNSEEN_DEATHS.entrySet()) {
+            Long at = lastCredited.get(entry.getKey());
+            if (at == null || ding - at > entry.getValue() || ding < at - MATCH_WINDOW_MS) continue;
+            if (at > latest) {
+                latest = at;
+                family = entry.getKey();
+            }
+        }
+        return family;
+    }
+
+    private static PendingDeath closest(long ding) {
+        PendingDeath best = null;
+        for (PendingDeath death : deaths) {
+            if (Math.abs(death.at() - ding) > MATCH_WINDOW_MS) continue;
+            if (best == null || death.distanceSq() < best.distanceSq()) best = death;
+        }
+        return best;
+    }
+
+    private static boolean sameName(long ding) {
+        String name = null;
+        for (PendingDeath death : deaths) {
+            if (Math.abs(death.at() - ding) > MATCH_WINDOW_MS) continue;
+            if (name == null) name = death.name();
+            else if (!name.equals(death.name())) return false;
+        }
+        return name != null;
     }
 
     private static boolean consumePassiveCoins(long ding) {
@@ -695,7 +828,7 @@ public class BestiaryHud {
         return false;
     }
 
-    private static String nametagName(Entity entity) {
+    private static Nametag nametag(Entity entity) {
         AABB box = entity.getBoundingBox().inflate(NAMETAG_RADIUS, 0, NAMETAG_RADIUS).expandTowards(0, NAMETAG_HEIGHT, 0);
         ArmorStand closest = null;
         String raw = null;
@@ -713,10 +846,11 @@ public class BestiaryHud {
         String name = NAMETAG_LEVEL.matcher(clean(raw)).replaceFirst("");
         name = NAMETAG_HEALTH.matcher(name).replaceFirst("");
         name = NAMETAG_SYMBOLS.matcher(name).replaceAll("").replaceAll("\\s+", " ").trim();
-        return name.isEmpty() ? null : name;
+        return name.isEmpty() ? null : new Nametag(name, closest.getId());
     }
 
     public static void handleMobKill(String mobName) {
+        if (UNSEEN_DEATHS.containsKey(mobName)) lastCredited.put(mobName, System.currentTimeMillis() - RESOLVE_DELAY_MS);
         addMobKill(mobName);
     }
 
@@ -728,7 +862,6 @@ public class BestiaryHud {
         dirty = true;
 
         recent.remove(entity);
-        if (entity.isMaxed() && !ModConfig.INSTANCE.bestiaryHudShowMaxed) return;
         recent.put(entity, System.currentTimeMillis());
         while (recent.size() > HUD_ENTRIES) recent.remove(recent.keySet().iterator().next());
     }

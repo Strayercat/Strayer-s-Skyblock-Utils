@@ -350,10 +350,16 @@ public class ModCommands {
                             BestiaryHud.devCopy();
                             return 1;
                         }))
-                        .then(ClientCommands.literal("loghud").executes(context -> {
-                            LogHud.toggle();
-                            return 1;
-                        }))
+                        .then(ClientCommands.literal("loghud")
+                                .executes(context -> {
+                                    LogHud.toggle();
+                                    return 1;
+                                })
+                                .then(ClientCommands.literal("copy").executes(context -> {
+                                    LogHud.copy();
+                                    return 1;
+                                }))
+                        )
                         .then(ClientCommands.literal("damagelog").executes(context -> {
                             DamageLogger.toggle();
                             return 1;

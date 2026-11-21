@@ -2,15 +2,19 @@ package com.skyblockutils.features.hud;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.ModKeyBindings;
+import com.skyblockutils.features.chat.ChatLayout;
 import com.skyblockutils.features.chat.MessageFeed;
 import com.skyblockutils.features.hud.layout.HudElement;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
+import com.skyblockutils.utils.ClipboardUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class LogHud {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -54,6 +58,23 @@ public final class LogHud {
         };
         String source = logger.startsWith("SSU ") ? logger.substring(4) : logger;
         addLog(color + "[" + source + "] " + message);
+    }
+
+    public static void copy() {
+        List<String> lines = new ArrayList<>();
+        for (MessageFeed.HistoryEntry entry : FEED.history()) {
+            for (ChatLayout.ParsedLine line : entry.message().lines()) {
+                if (line.type() == ChatLayout.LineType.SEPARATOR) continue;
+                String text = line.component().getString().replaceAll("§.", "").strip();
+                if (!text.isEmpty()) lines.add(text);
+            }
+        }
+        if (lines.isEmpty()) {
+            ModFunctions.sendSystemMessage("§cThe log is empty", false);
+            return;
+        }
+        ClipboardUtils.copyTextToClipboard(String.join("\n", lines));
+        ModFunctions.sendSystemMessage("§aCopied " + lines.size() + " log lines to your clipboard", false);
     }
 
     public static void clear() {

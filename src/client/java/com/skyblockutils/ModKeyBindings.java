@@ -80,6 +80,12 @@ public class ModKeyBindings {
             GLFW.GLFW_MOUSE_BUTTON_MIDDLE,
             SSU_CATEGORY);
 
+    public static final KeyMapping WIKI_KEY = new KeyMapping(
+            "key.ssu.openWiki",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_U,
+            SSU_CATEGORY);
+
     public static void init() {
         KeyMappingHelper.registerKeyMapping(CORLEONE_TIMER_KEY);
         KeyMappingHelper.registerKeyMapping(HUD_KEY);
@@ -93,5 +99,6 @@ public class ModKeyBindings {
         KeyMappingHelper.registerKeyMapping(VOICE_MUTE_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_DEAFEN_KEY);
         KeyMappingHelper.registerKeyMapping(COPY_SYSTEM_MESSAGE_KEY);
+        KeyMappingHelper.registerKeyMapping(WIKI_KEY);
     }
 }

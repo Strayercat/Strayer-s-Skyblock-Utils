@@ -191,13 +191,15 @@ public class SsuHud {
         List<HudLine> lines = new ArrayList<>();
         lines.add(HudLine.rich(SSU.getHudTitle()));
         lines.add(HudLine.divider());
-        lines.add(HudLine.of("Current time: 12:00", COLOR_TEXT));
-        lines.add(HudLine.of("Ping: 42", COLOR_TEXT));
-        lines.add(HudLine.of("Server tps: 20.0", COLOR_TEXT));
-        lines.add(HudLine.of("Fps: 144", COLOR_TEXT));
-        lines.add(HudLine.divider());
-        lines.add(HudLine.of("Party Info", COLOR_TITLE));
-        lines.add(HudLine.of("Not currently in a party", COLOR_TEXT));
+        if (ELEMENT.show("time")) lines.add(HudLine.of("Current time: " + (ELEMENT.show("time12h") ? "12:00 PM" : "12:00"), COLOR_TEXT));
+        if (ELEMENT.show("ping")) lines.add(HudLine.of("Ping: 42", COLOR_TEXT));
+        if (ELEMENT.show("tps")) lines.add(HudLine.of("Server tps: 20.0", COLOR_TEXT));
+        if (ELEMENT.show("fps")) lines.add(HudLine.of("Fps: 144", COLOR_TEXT));
+        if (ELEMENT.show("party")) {
+            lines.add(HudLine.divider());
+            lines.add(HudLine.of("Party Info", COLOR_TITLE));
+            lines.add(HudLine.of("Not currently in a party", COLOR_TEXT));
+        }
         return lines;
     }
 

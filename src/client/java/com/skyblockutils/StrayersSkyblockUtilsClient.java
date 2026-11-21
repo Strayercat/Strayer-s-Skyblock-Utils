@@ -1,5 +1,6 @@
 package com.skyblockutils;
 
+import com.skyblockutils.features.wiki.WikiLookup;
 import com.skyblockutils.config.ClothConfigHandler;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
@@ -82,6 +83,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         HypixelApi.init();
         GuiBlocker.init();
         BestiaryHud.register();
+        WikiLookup.register();
         AboutScreen.registerInfoButton();
         DailyReminders.init();
         F7VoidLava.register();

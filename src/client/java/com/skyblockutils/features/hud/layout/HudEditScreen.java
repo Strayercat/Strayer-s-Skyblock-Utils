@@ -33,6 +33,11 @@ public class HudEditScreen extends Screen {
     private static final int BOTTOM_MARGIN = 6;
     private static final int DROPDOWN_WIDTH = 170;
     private static final int SMALL_BUTTON_WIDTH = 90;
+    private static final float MENU_MAX_HEIGHT = 0.6f;
+    private static final int MENU_SCROLL_STEP = ROW * 2;
+    private static final int SCROLLBAR_SPACE = 6;
+    private static final int MENU_HEADER = ROW + 3;
+    private static final double MENU_SCROLL_SPEED = 18;
 
     private static final String[] HELP = {
             "Left drag: move  •  Drag the left or right edge: resize",
@@ -78,6 +83,9 @@ public class HudEditScreen extends Screen {
     private int menuX;
     private int menuY;
     private int menuWidth;
+    private int menuScrollTarget;
+    private double menuScroll;
+    private long menuScrollNanos;
 
     public HudEditScreen(Screen parent) {
         super(Component.literal("SSU HUD Editor"));
@@ -206,13 +214,23 @@ public class HudEditScreen extends Screen {
         updateLabels();
         menuTitle = title;
         menuItems = items;
+        menuScrollTarget = 0;
+        menuScroll = 0;
         int width = this.font.width(title);
         for (MenuItem item : items) {
             if (!item.isSeparator()) width = Math.max(width, this.font.width(item.label()));
         }
-        menuWidth = width + 12;
-        menuX = Mth.clamp((int) mouseX, 2, Math.max(2, this.width - menuWidth - 2));
-        menuY = Mth.clamp((int) mouseY, 2, Math.max(2, this.height - menuHeight() - 2));
+        menuWidth = width + 12 + SCROLLBAR_SPACE;
+        menuX = (int) mouseX;
+        menuY = (int) mouseY;
+        clampMenu();
+    }
+
+    private void clampMenu() {
+        menuX = Mth.clamp(menuX, 2, Math.max(2, this.width - menuWidth - 2));
+        menuY = Mth.clamp(menuY, 2, Math.max(2, this.height - menuHeight() - 2));
+        menuScrollTarget = Mth.clamp(menuScrollTarget, 0, maxMenuScroll());
+        menuScroll = Mth.clamp(menuScroll, 0, maxMenuScroll());
     }
 
     private void closeMenu() {
@@ -228,21 +246,46 @@ public class HudEditScreen extends Screen {
         return item.isSeparator() ? 5 : ROW;
     }
 
-    private int menuHeight() {
-        int height = ROW + 3;
+    private int contentHeight() {
+        int height = 0;
         for (MenuItem item : menuItems) height += itemHeight(item);
-        return height + 2;
+        return height;
+    }
+
+    private int visibleContentHeight() {
+        int max = Math.max(ROW, (int) (this.height * MENU_MAX_HEIGHT) - MENU_HEADER - 2);
+        return Math.min(contentHeight(), max);
+    }
+
+    private int maxMenuScroll() {
+        return Math.max(0, contentHeight() - visibleContentHeight());
+    }
+
+    private int menuHeight() {
+        return MENU_HEADER + visibleContentHeight() + 2;
     }
 
     private MenuItem menuItemAt(double mouseX, double mouseY) {
         if (mouseX < menuX || mouseX >= menuX + menuWidth) return null;
-        int y = menuY + ROW + 3;
+        int top = menuY + MENU_HEADER;
+        if (mouseY < top || mouseY >= top + visibleContentHeight()) return null;
+        double localY = mouseY - top + Math.round(menuScroll);
+        int y = 0;
         for (MenuItem item : menuItems) {
             int h = itemHeight(item);
-            if (mouseY >= y && mouseY < y + h) return item.isSeparator() ? null : item;
+            if (localY >= y && localY < y + h) return item.isSeparator() ? null : item;
             y += h;
         }
         return null;
+    }
+
+    private void animateMenuScroll() {
+        long now = System.nanoTime();
+        double dt = menuScrollNanos == 0 ? 0 : Math.min(0.1, (now - menuScrollNanos) / 1e9);
+        menuScrollNanos = now;
+        double diff = menuScrollTarget - menuScroll;
+        if (Math.abs(diff) < 0.5) menuScroll = menuScrollTarget;
+        else menuScroll += diff * (1 - Math.exp(-dt * MENU_SCROLL_SPEED));
     }
 
     private boolean overMenu(double mouseX, double mouseY) {
@@ -250,22 +293,41 @@ public class HudEditScreen extends Screen {
     }
 
     private void drawMenu(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int accent) {
+        animateMenuScroll();
         int height = menuHeight();
-        graphics.fill(menuX, menuY, menuX + menuWidth, menuY + height, PANEL_COLOR);
-        outlineRect(graphics, menuX, menuY, menuX + menuWidth, menuY + height, accent);
-        graphics.text(this.font, menuTitle, menuX + 6, menuY + 3, accent, true);
-        graphics.fill(menuX + 1, menuY + ROW + 1, menuX + menuWidth - 1, menuY + ROW + 2, 0x60FFFFFF);
-
+        int right = menuX + menuWidth;
         MenuItem hovered = menuItemAt(mouseX, mouseY);
-        int y = menuY + ROW + 3;
+        graphics.fill(menuX, menuY, right, menuY + height, PANEL_COLOR);
+        outlineRect(graphics, menuX, menuY, right, menuY + height, accent);
+        graphics.text(this.font, menuTitle, menuX + 6, menuY + 3, accent, true);
+        graphics.fill(menuX + 1, menuY + ROW + 1, right - 1, menuY + ROW + 2, 0x60FFFFFF);
+
+        int top = menuY + MENU_HEADER;
+        int visible = visibleContentHeight();
+        int maxScroll = maxMenuScroll();
+        int itemRight = maxScroll > 0 ? right - SCROLLBAR_SPACE : right;
+        graphics.enableScissor(menuX + 1, top, right - 1, top + visible);
+        int y = top - (int) Math.round(menuScroll);
         for (MenuItem item : menuItems) {
-            if (item.isSeparator()) {
-                graphics.fill(menuX + 4, y + 2, menuX + menuWidth - 4, y + 3, 0x30FFFFFF);
-            } else {
-                if (item == hovered && item.enabled()) graphics.fill(menuX + 1, y, menuX + menuWidth - 1, y + ROW, HOVER_COLOR);
-                graphics.text(this.font, item.label(), menuX + 6, y + 2, item.enabled() ? 0xFFFFFFFF : DISABLED_COLOR, true);
+            int h = itemHeight(item);
+            if (y + h > top && y < top + visible) {
+                if (item.isSeparator()) {
+                    graphics.fill(menuX + 4, y + 2, itemRight - 4, y + 3, 0x30FFFFFF);
+                } else {
+                    if (item == hovered && item.enabled()) graphics.fill(menuX + 1, y, itemRight - 1, y + ROW, HOVER_COLOR);
+                    graphics.text(this.font, item.label(), menuX + 6, y + 2, item.enabled() ? 0xFFFFFFFF : DISABLED_COLOR, true);
+                }
             }
-            y += itemHeight(item);
+            y += h;
+        }
+        graphics.disableScissor();
+
+        if (maxScroll > 0) {
+            int total = contentHeight();
+            int thumbHeight = Math.max(6, visible * visible / total);
+            int thumbY = top + (int) Math.round((visible - thumbHeight) * menuScroll / maxScroll);
+            graphics.fill(right - 4, top, right - 2, top + visible, 0x30FFFFFF);
+            graphics.fill(right - 4, thumbY, right - 2, thumbY + thumbHeight, 0xA0FFFFFF);
         }
     }
 
@@ -564,7 +626,12 @@ public class HudEditScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
-        if (menuOpen()) return true;
+        if (menuOpen()) {
+            if (overMenu(x, y) && scrollY != 0) {
+                menuScrollTarget = Mth.clamp(menuScrollTarget - (int) Math.signum(scrollY) * MENU_SCROLL_STEP, 0, maxMenuScroll());
+            }
+            return true;
+        }
         if (dropdownOpen) {
             if (overDropdown(x, y) && scrollY != 0) dropdownScroll = Math.clamp(dropdownScroll - (int) Math.signum(scrollY), 0, maxScroll());
             return true;

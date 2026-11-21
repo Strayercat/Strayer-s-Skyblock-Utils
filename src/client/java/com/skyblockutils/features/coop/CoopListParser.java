@@ -41,6 +41,9 @@ public class CoopListParser {
     private static long expectContentUntil = 0;
     private static int containerId = -1;
     private static long muteSoundsUntil = 0;
+    private static int closedId = -1;
+    private static long closedUntil = 0;
+    private static final long CLOSE_ECHO_MS = 3_000;
 
     public static void tick(Minecraft client) {
         long now = System.currentTimeMillis();
@@ -117,7 +120,8 @@ public class CoopListParser {
     }
 
     public static boolean isHiddenContainer(int id) {
-        return containerId != -1 && id == containerId;
+        if (containerId != -1 && id == containerId) return true;
+        return closedId != -1 && id == closedId && System.currentTimeMillis() < closedUntil;
     }
 
     public static boolean isBusy() {
@@ -133,6 +137,8 @@ public class CoopListParser {
         expectOpenUntil = 0;
         containerId = -1;
         muteSoundsUntil = 0;
+        closedId = -1;
+        closedUntil = 0;
         SSUIndicator.setCoopMembers(List.of());
     }
 
@@ -154,6 +160,8 @@ public class CoopListParser {
     private static void closeHidden(Minecraft client) {
         if (containerId == -1) return;
         if (client.getConnection() != null) client.getConnection().send(new ServerboundContainerClosePacket(containerId));
+        closedId = containerId;
+        closedUntil = System.currentTimeMillis() + CLOSE_ECHO_MS;
         containerId = -1;
         muteSoundsUntil = System.currentTimeMillis() + SOUND_GRACE_MS;
     }

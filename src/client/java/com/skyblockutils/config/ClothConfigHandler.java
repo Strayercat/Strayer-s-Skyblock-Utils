@@ -74,6 +74,21 @@ public class ClothConfigHandler {
                 })
                 .setSaveConsumer(v -> ModConfig.INSTANCE.notificationStyle = v).build());
 
+        general.addEntry(eb.startBooleanToggle(Component.literal("Open Wiki In Game"), ModConfig.INSTANCE.wikiInGame)
+                .setDefaultValue(true)
+                .setTooltip(Component.literal("Uses MCEF if installed, otherwise opens your browser"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.wikiInGame = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Component.literal("Preload Wiki Browser"), ModConfig.INSTANCE.wikiPreload)
+                .setDefaultValue(true)
+                .setTooltip(Component.literal("Starts the browser engine when you join SkyBlock so the wiki opens instantly (~150 MB RAM). Pages are still closed when you leave the wiki"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.wikiPreload = v).build());
+
+        general.addEntry(eb.startBooleanToggle(Component.literal("Wiki Tooltip Hint"), ModConfig.INSTANCE.wikiTooltipHint)
+                .setDefaultValue(true)
+                .setTooltip(Component.literal("Adds a line to SkyBlock item tooltips showing the Open Wiki key"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.wikiTooltipHint = v).build());
+
         general.addEntry(eb.startBooleanToggle(Component.literal("Party Glow"), ModConfig.INSTANCE.partyGlow)
                 .setDefaultValue(true).setTooltip(Component.literal("Whether or not party members should automatically glow"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.partyGlow = v).build());

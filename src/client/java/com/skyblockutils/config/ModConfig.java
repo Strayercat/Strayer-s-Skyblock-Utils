@@ -1,5 +1,6 @@
 package com.skyblockutils.config;
 
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
@@ -24,6 +25,9 @@ public class ModConfig {
     // General
     public ModStyle.ColorStyle colorStyle = ModStyle.ColorStyle.ORIGINAL;
     public ModStyle.NotificationStyle notificationStyle = ModStyle.NotificationStyle.ROUNDED;
+    public boolean wikiInGame = true;
+    public boolean wikiTooltipHint = true;
+    public boolean wikiPreload = true;
     public boolean chatFiltersEnabled = true;
     public boolean partyInviteNotifications = true;
     public boolean boopPartyInvites = true;
@@ -204,6 +208,9 @@ public class ModConfig {
 
             INSTANCE.colorStyle = loaded.colorStyle != null ? loaded.colorStyle : ModStyle.ColorStyle.ORIGINAL;
             INSTANCE.notificationStyle = loaded.notificationStyle != null ? loaded.notificationStyle : ModStyle.NotificationStyle.ROUNDED;
+            INSTANCE.wikiInGame = loaded.wikiInGame;
+            INSTANCE.wikiTooltipHint = loaded.wikiTooltipHint;
+            INSTANCE.wikiPreload = loaded.wikiPreload;
             INSTANCE.chatFiltersEnabled = loaded.chatFiltersEnabled;
             INSTANCE.partyInviteNotifications = loaded.partyInviteNotifications;
             INSTANCE.boopPartyInvites = loaded.boopPartyInvites;

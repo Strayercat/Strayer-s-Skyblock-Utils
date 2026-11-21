@@ -19,7 +19,6 @@ repositories {
     maven { url "https://maven.shedaniel.me/" }
     maven { url "https://maven.maxhenkel.de/repository/public" }
     maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
-    maven { url = "https://api.modrinth.com/maven" }
 
     maven {
         name = "TerraformersMC"
@@ -34,6 +33,11 @@ repositories {
     maven {
         name = "Hypixel"
         url = "https://repo.hypixel.net/repository/Hypixel/"
+    }
+
+    exclusiveContent {
+        forRepository { maven { url = "https://api.modrinth.com/maven" } }
+        filter { includeGroup "maven.modrinth" }
     }
 }
 
@@ -55,13 +59,14 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
     implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-    clientCompileOnly "maven.modrinth:skyblocker-liap:v6.10.4+26.2"
 
     api("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
     compileOnly "net.hypixel:mod-api:${project.hypixel_mod_api_version}"
+    include(implementation("maven.modrinth:mcef-modern:0.3.3+mc26.2.jcef146.0.10"))
+    compileOnly "me.friwi:jcef-api:jcef-d3de827+cef-146.0.10+g8219561+chromium-146.0.7680.179"
     include(implementation("maven.modrinth:hypixel-mod-api:${project.hypixel_mod_api_fabric_version}"))
 
     include(implementation("io.github.jaredmdobson:concentus:1.0.2"))

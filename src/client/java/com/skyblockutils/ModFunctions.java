@@ -20,6 +20,7 @@ import com.skyblockutils.mixin.client.PingDebugMonitorAccessor;
 import com.skyblockutils.mixin.client.PingDebugMonitorInvoker;
 import com.skyblockutils.utils.*;
 import net.minecraft.client.Minecraft;
+import com.skyblockutils.features.wiki.WikiLookup;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
@@ -96,6 +97,7 @@ public class ModFunctions {
         while (ModKeyBindings.CORLEONE_TIMER_KEY.consumeClick()) CorlTimer.toggleCorlTimer();
         while (ModKeyBindings.PUFF_TIMER_KEY.consumeClick()) PuffTracker.togglePuffTimer();
         SsuHud.setVisible(ModKeyBindings.HUD_KEY.isDown());
+        WikiLookup.tick(Minecraft.getInstance());
     }
 
     public static void handleNonSkyblockExclusiveKeybinds(Minecraft client) {
