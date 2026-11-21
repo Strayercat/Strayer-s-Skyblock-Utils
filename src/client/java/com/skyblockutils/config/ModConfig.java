@@ -38,6 +38,7 @@ public class ModConfig {
     public boolean partyGlow = true;
     public boolean screenshotHud = true;
     public boolean bestiaryHud = true;
+    public boolean slayerTrackerHud = true;
     public boolean cancelSwings = false;
 
     // Dungeons
@@ -69,6 +70,9 @@ public class ModConfig {
     public boolean hudPartyInfoInDungeons = false;
     public boolean hudIslandFunFact = true;
     public Map<String, HudLayoutEntry> hudLayouts = new HashMap<>();
+    public Map<String, Map<String, HudLayoutEntry>> hudLocationLayouts = new HashMap<>();
+    public Map<String, Map<String, Boolean>> hudVisibility = new HashMap<>();
+    public Map<String, com.skyblockutils.features.slayer.SlayerTracker.SlayerXp> slayerXp = new HashMap<>();
 
     // Mining
     public boolean displayGlaciteWaypoints = true;
@@ -237,6 +241,28 @@ public class ModConfig {
                     if (id != null && layout != null) INSTANCE.hudLayouts.put(id, layout.sanitize());
                 });
             }
+            INSTANCE.hudLocationLayouts = new HashMap<>();
+            if (loaded.hudLocationLayouts != null) {
+                loaded.hudLocationLayouts.forEach((location, layouts) -> {
+                    if (location == null || layouts == null) return;
+                    Map<String, HudLayoutEntry> copy = new HashMap<>();
+                    layouts.forEach((id, layout) -> {
+                        if (id != null && layout != null) copy.put(id, layout.sanitize());
+                    });
+                    if (!copy.isEmpty()) INSTANCE.hudLocationLayouts.put(location, copy);
+                });
+            }
+            INSTANCE.hudVisibility = new HashMap<>();
+            if (loaded.hudVisibility != null) {
+                loaded.hudVisibility.forEach((location, flags) -> {
+                    if (location == null || flags == null) return;
+                    Map<String, Boolean> copy = new HashMap<>();
+                    flags.forEach((id, visible) -> {
+                        if (id != null && visible != null) copy.put(id, visible);
+                    });
+                    if (!copy.isEmpty()) INSTANCE.hudVisibility.put(location, copy);
+                });
+            }
             INSTANCE.displayGlaciteWaypoints = loaded.displayGlaciteWaypoints;
             INSTANCE.glaciteWaypoints = loaded.glaciteWaypoints != null ? loaded.glaciteWaypoints : GlaciteWaypoints.BOTH;
             INSTANCE.powderChestNotification = loaded.powderChestNotification;
@@ -277,6 +303,8 @@ public class ModConfig {
             INSTANCE.voiceMuted = loaded.voiceMuted;
             INSTANCE.voiceDeafened = loaded.voiceDeafened;
             INSTANCE.bestiaryHud = loaded.bestiaryHud;
+            INSTANCE.slayerTrackerHud = loaded.slayerTrackerHud;
+            INSTANCE.slayerXp = loaded.slayerXp != null ? new HashMap<>(loaded.slayerXp) : new HashMap<>();
             INSTANCE.bestiaryHudHideInCatacombs = loaded.bestiaryHudHideInCatacombs;
             INSTANCE.bestiaryHudShowMaxed = loaded.bestiaryHudShowMaxed;
 

@@ -15,6 +15,7 @@ public final class HudContext {
     private static final float EDGE_EPSILON = 0.5f;
 
     public final GuiGraphicsExtractor graphics;
+    public final HudElement element;
     public final Minecraft mc;
     public final Font font;
     public final HudManager.Bounds bounds;
@@ -25,8 +26,9 @@ public final class HudContext {
     private final int screenWidth;
     private final int screenHeight;
 
-    public HudContext(GuiGraphicsExtractor graphics, HudManager.Bounds bounds, boolean preview) {
+    public HudContext(GuiGraphicsExtractor graphics, HudElement element, HudManager.Bounds bounds, boolean preview) {
         this.graphics = graphics;
+        this.element = element;
         this.mc = Minecraft.getInstance();
         this.font = mc.font;
         this.bounds = bounds;
@@ -65,8 +67,27 @@ public final class HudContext {
         return screenY(localY) >= screenHeight - EDGE_EPSILON;
     }
 
+    private HudManager.Attachment attachment(int x1, int y1, int x2, int y2) {
+        return HudManager.attachment(element, screenX(x1), screenY(y1), screenX(x2), screenY(y2), preview);
+    }
+
     public RoundedRect.Edges edges(int x1, int y1, int x2, int y2) {
-        return new RoundedRect.Edges(stuckLeft(x1), stuckTop(y1), stuckRight(x2), stuckBottom(y2));
+        return edges(x1, y1, x2, y2, attachment(x1, y1, x2, y2));
+    }
+
+    private RoundedRect.Edges edges(int x1, int y1, int x2, int y2, HudManager.Attachment a) {
+        return new RoundedRect.Edges(stuckLeft(x1) || a.hideLeft(), stuckTop(y1) || a.hideTop(),
+                stuckRight(x2) || a.hideRight(), stuckBottom(y2) || a.hideBottom());
+    }
+
+    private RoundedRect.Corners corners(int x1, int y1, int x2, int y2, HudManager.Attachment a) {
+        boolean left = stuckLeft(x1), top = stuckTop(y1), right = stuckRight(x2), bottom = stuckBottom(y2);
+        return new RoundedRect.Corners(
+                !(left || top || a.squareTopLeft()),
+                !(right || top || a.squareTopRight()),
+                !(left || bottom || a.squareBottomLeft()),
+                !(right || bottom || a.squareBottomRight())
+        );
     }
 
     public int[] inner(int x1, int y1, int x2, int y2) {
@@ -83,7 +104,8 @@ public final class HudContext {
     }
 
     public void panel(int x1, int y1, int x2, int y2, int radius, int background, int border) {
-        RoundedRect.panel(graphics, x1, y1, x2, y2, radius, background, border, edges(x1, y1, x2, y2));
+        HudManager.Attachment a = attachment(x1, y1, x2, y2);
+        RoundedRect.panel(graphics, x1, y1, x2, y2, radius, background, border, edges(x1, y1, x2, y2, a), corners(x1, y1, x2, y2, a));
     }
 
     public void overlay(Identifier texture, float x, float y, float size, int textureSize) {

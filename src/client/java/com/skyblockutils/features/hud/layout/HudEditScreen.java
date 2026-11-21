@@ -22,6 +22,9 @@ public class HudEditScreen extends Screen {
     private static final float FINE_SCALE_STEP = 0.01f;
     private static final int OUTLINE_IDLE = 0x80FFFFFF;
     private static final int GUIDE_COLOR = 0x60FFFFFF;
+    private static final int HIDDEN_OVERLAY = 0xB0000000;
+    private static final int DROPDOWN_WIDTH = 184;
+    private static final int DROPDOWN_ROW = 12;
 
     private final Screen parent;
 
@@ -35,10 +38,18 @@ public class HudEditScreen extends Screen {
 
     private boolean snappedCenterX;
     private boolean snappedCenterY;
+    private HudManager.Snap snapped;
+
+    private Button locationButton;
+    private Button resetButton;
+    private List<String> locationOptions = List.of();
+    private boolean dropdownOpen;
+    private int dropdownScroll;
 
     public HudEditScreen(Screen parent) {
         super(Component.literal("SSU HUD Editor"));
         this.parent = parent;
+        HudManager.setEditLocation(HudManager.currentLocation());
     }
 
     public static void handleRequest(Minecraft client) {
@@ -49,12 +60,89 @@ public class HudEditScreen extends Screen {
 
     @Override
     protected void init() {
+        locationOptions = HudLocations.options(HudManager.currentLocation());
+        dropdownOpen = false;
+
         int buttonWidth = 90;
         int y = this.height / 2 + 6;
-        this.addRenderableWidget(Button.builder(Component.literal("Reset All"), _ -> HudManager.resetAll())
+        locationButton = this.addRenderableWidget(Button.builder(Component.empty(), _ -> toggleDropdown())
+                .bounds(this.width / 2 - DROPDOWN_WIDTH / 2, this.height / 2 - 48, DROPDOWN_WIDTH, 20).build());
+        resetButton = this.addRenderableWidget(Button.builder(Component.empty(), _ -> HudManager.resetAll())
                 .bounds(this.width / 2 - buttonWidth - 2, y, buttonWidth, 20).build());
         this.addRenderableWidget(Button.builder(Component.literal("Done"), _ -> this.onClose())
                 .bounds(this.width / 2 + 2, y, buttonWidth, 20).build());
+        updateLabels();
+    }
+
+    private void updateLabels() {
+        String location = HudManager.editLocation();
+        locationButton.setMessage(Component.literal("Location: " + HudLocations.name(location) + (dropdownOpen ? " ▲" : " ▼")));
+        resetButton.setMessage(Component.literal(location.isEmpty() ? "Reset All" : "Reset Location"));
+    }
+
+    private void toggleDropdown() {
+        dropdownOpen = !dropdownOpen;
+        if (dropdownOpen) {
+            int index = locationOptions.indexOf(HudManager.editLocation());
+            dropdownScroll = Math.clamp(index - visibleRows() / 2, 0, maxScroll());
+        }
+        updateLabels();
+    }
+
+    private void selectLocation(String location) {
+        HudManager.setEditLocation(location);
+        dropdownOpen = false;
+        dragging = null;
+        resizing = null;
+        updateLabels();
+    }
+
+    private int dropdownTop() {
+        return locationButton.getY() + locationButton.getHeight();
+    }
+
+    private int visibleRows() {
+        int available = (this.height - dropdownTop() - 4) / DROPDOWN_ROW;
+        return Math.max(1, Math.min(locationOptions.size(), available));
+    }
+
+    private int maxScroll() {
+        return Math.max(0, locationOptions.size() - visibleRows());
+    }
+
+    private boolean overDropdown(double mouseX, double mouseY) {
+        int x = locationButton.getX();
+        int top = dropdownTop();
+        return mouseX >= x && mouseX < x + DROPDOWN_WIDTH && mouseY >= top && mouseY < top + visibleRows() * DROPDOWN_ROW;
+    }
+
+    private void drawDropdown(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int accent) {
+        int x = locationButton.getX();
+        int top = dropdownTop();
+        int rows = visibleRows();
+        graphics.fill(x, top, x + DROPDOWN_WIDTH, top + rows * DROPDOWN_ROW, 0xF0101010);
+        outlineRect(graphics, x, top, x + DROPDOWN_WIDTH, top + rows * DROPDOWN_ROW, accent);
+
+        for (int i = 0; i < rows; i++) {
+            int index = dropdownScroll + i;
+            if (index >= locationOptions.size()) break;
+            String option = locationOptions.get(index);
+            int y = top + i * DROPDOWN_ROW;
+            boolean hovered = mouseX >= x && mouseX < x + DROPDOWN_WIDTH && mouseY >= y && mouseY < y + DROPDOWN_ROW;
+            if (hovered) graphics.fill(x + 1, y, x + DROPDOWN_WIDTH - 1, y + DROPDOWN_ROW, 0x40FFFFFF);
+
+            boolean selected = option.equals(HudManager.editLocation());
+            boolean current = option.equals(HudManager.currentLocation()) && !option.isEmpty();
+            String label = HudLocations.name(option) + (current ? " §7(current)" : "");
+            graphics.text(this.font, label, x + 4, y + 2, selected ? accent : 0xFFFFFFFF, true);
+        }
+
+        if (maxScroll() > 0) {
+            int trackHeight = rows * DROPDOWN_ROW;
+            int thumbHeight = Math.max(6, trackHeight * rows / locationOptions.size());
+            int thumbY = top + (trackHeight - thumbHeight) * dropdownScroll / maxScroll();
+            graphics.fill(x + DROPDOWN_WIDTH - 3, thumbY, x + DROPDOWN_WIDTH - 1, thumbY + thumbHeight, 0xA0FFFFFF);
+        }
     }
 
     @Override
@@ -72,11 +160,14 @@ public class HudEditScreen extends Screen {
         if (dragging != null && snappedCenterY) graphics.fill(0, this.height / 2, this.width, this.height / 2 + 1, GUIDE_COLOR);
 
         int accent = 0xFF000000 | ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
-        HudElement hovered = active() != null ? active() : elementAt(mouseX, mouseY);
+        HudElement hovered = active() != null ? active() : dropdownOpen ? null : elementAt(mouseX, mouseY);
 
         for (HudElement element : HudManager.elements()) {
             HudManager.Bounds bounds = HudManager.draw(element, graphics, true);
-            boolean hot = element == hovered;
+            if (!HudManager.isVisible(element, HudManager.editLocation())) {
+                graphics.fill(Mth.floor(bounds.x()), Mth.floor(bounds.y()), Mth.ceil(bounds.right()), Mth.ceil(bounds.bottom()), HIDDEN_OVERLAY);
+            }
+            boolean hot = element == hovered || (snapped != null && element == snapped.parent());
             outline(graphics, bounds, hot ? accent : OUTLINE_IDLE);
             if (hot) drawHandles(graphics, bounds, accent);
         }
@@ -84,11 +175,12 @@ public class HudEditScreen extends Screen {
         if (hovered != null) drawLabel(graphics, hovered, HudManager.bounds(hovered, true));
 
         String help = "Drag to move • Scroll to scale (Shift: fine) • Drag sides to resize";
-        String help2 = "Double click: auto width • Right click: reset • Shift while dragging: no snap";
+        String help2 = "Double click: auto width • Right click: reset • Middle click: show/hide here • Shift: no snap/unstick";
         graphics.centeredText(this.font, help, this.width / 2, this.height / 2 - 22, 0xFFFFFFFF);
         graphics.centeredText(this.font, help2, this.width / 2, this.height / 2 - 11, 0xFFAAAAAA);
 
         super.extractRenderState(graphics, mouseX, mouseY, a);
+        if (dropdownOpen) drawDropdown(graphics, mouseX, mouseY, accent);
     }
 
     private HudElement active() {
@@ -96,10 +188,10 @@ public class HudEditScreen extends Screen {
     }
 
     private void outline(GuiGraphicsExtractor graphics, HudManager.Bounds b, int color) {
-        int x1 = Mth.floor(b.x());
-        int y1 = Mth.floor(b.y());
-        int x2 = Mth.ceil(b.right());
-        int y2 = Mth.ceil(b.bottom());
+        outlineRect(graphics, Mth.floor(b.x()), Mth.floor(b.y()), Mth.ceil(b.right()), Mth.ceil(b.bottom()), color);
+    }
+
+    private void outlineRect(GuiGraphicsExtractor graphics, int x1, int y1, int x2, int y2, int color) {
         graphics.fill(x1, y1, x2, y1 + 1, color);
         graphics.fill(x1, y2 - 1, x2, y2, color);
         graphics.fill(x1, y1, x1 + 1, y2, color);
@@ -117,10 +209,15 @@ public class HudEditScreen extends Screen {
 
     private void drawLabel(GuiGraphicsExtractor graphics, HudElement element, HudManager.Bounds b) {
         HudLayoutEntry layout = HudManager.layout(element);
+        String location = HudManager.editLocation();
+        boolean visible = HudManager.isVisible(element, location);
         String label = (element.isEnabled() ? "" : "§7") + element.name
                 + (element.isEnabled() ? "" : " (disabled)")
                 + " §7" + Math.round(b.scale() * 100) + "%"
-                + (layout.width > 0 ? " • " + layout.width + "px" : "");
+                + (layout.width > 0 ? " • " + layout.width + "px" : "")
+                + (!location.isEmpty() ? (HudManager.hasOverride(element, location) ? " • custom" : " • default") : "")
+                + (HudManager.parentOf(element) != null ? " • stuck to " + HudManager.parentOf(element).name : "")
+                + (visible ? "" : " • §chidden");
         int textWidth = this.font.width(label);
         int x = Mth.clamp(Mth.floor(b.x()), 2, Math.max(2, this.width - textWidth - 2));
         int y = b.bottom() + 12 <= this.height ? Mth.ceil(b.bottom()) + 2 : Mth.floor(b.y()) - 11;
@@ -140,6 +237,19 @@ public class HudEditScreen extends Screen {
 
     @Override
     public boolean mouseClicked(final @NotNull MouseButtonEvent event, final boolean doubleClick) {
+        if (dropdownOpen) {
+            if (overDropdown(event.x(), event.y())) {
+                int index = dropdownScroll + (int) ((event.y() - dropdownTop()) / DROPDOWN_ROW);
+                if (index >= 0 && index < locationOptions.size()) selectLocation(locationOptions.get(index));
+                return true;
+            }
+            if (!locationButton.isMouseOver(event.x(), event.y())) {
+                dropdownOpen = false;
+                updateLabels();
+                return true;
+            }
+        }
+
         if (super.mouseClicked(event, doubleClick)) return true;
 
         HudElement hit = elementAt(event.x(), event.y());
@@ -147,6 +257,11 @@ public class HudEditScreen extends Screen {
 
         if (event.button() == 1) {
             HudManager.reset(hit);
+            return true;
+        }
+
+        if (event.button() == 2) {
+            HudManager.toggleVisible(hit);
             return true;
         }
 
@@ -180,8 +295,24 @@ public class HudEditScreen extends Screen {
             HudManager.Bounds b = HudManager.bounds(dragging, true);
             boolean snap = !this.minecraft.hasShiftDown();
             HudLayoutEntry layout = HudManager.editable(dragging);
-            snappedCenterX = applyAxis(layout, true, (float) event.x() - grabOffsetX, b.scaledWidth(), this.width, snap);
-            snappedCenterY = applyAxis(layout, false, (float) event.y() - grabOffsetY, b.scaledHeight(), this.height, snap);
+            float x = (float) event.x() - grabOffsetX;
+            float y = (float) event.y() - grabOffsetY;
+
+            snapped = snap ? HudManager.findSnap(dragging, x, y, b.scaledWidth(), b.scaledHeight()) : null;
+            if (snapped != null) {
+                applyAxis(layout, true, snapped.x(), b.scaledWidth(), this.width, false);
+                applyAxis(layout, false, snapped.y(), b.scaledHeight(), this.height, false);
+                layout.attachTo = snapped.parent().id;
+                layout.attachSide = snapped.side();
+                layout.attachOffset = snapped.offset();
+                snappedCenterX = false;
+                snappedCenterY = false;
+                return true;
+            }
+
+            layout.detach();
+            snappedCenterX = applyAxis(layout, true, x, b.scaledWidth(), this.width, snap);
+            snappedCenterY = applyAxis(layout, false, y, b.scaledHeight(), this.height, snap);
             return true;
         }
 
@@ -195,6 +326,10 @@ public class HudEditScreen extends Screen {
             HudManager.Bounds resized = HudManager.bounds(resizing, true);
             float x = resizeFromLeft ? fixedEdge - resized.scaledWidth() : fixedEdge;
             applyAxis(layout, true, x, resized.scaledWidth(), this.width, false);
+            HudElement parent = HudManager.parentOf(resizing);
+            if (parent != null && (layout.attachSide == HudLayoutEntry.Side.ABOVE || layout.attachSide == HudLayoutEntry.Side.BELOW)) {
+                layout.attachOffset = x - HudManager.bounds(parent, true).x();
+            }
             return true;
         }
 
@@ -205,6 +340,7 @@ public class HudEditScreen extends Screen {
     public boolean mouseReleased(final @NotNull MouseButtonEvent event) {
         dragging = null;
         resizing = null;
+        snapped = null;
         snappedCenterX = false;
         snappedCenterY = false;
         return super.mouseReleased(event);
@@ -212,6 +348,11 @@ public class HudEditScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
+        if (dropdownOpen) {
+            if (overDropdown(x, y) && scrollY != 0) dropdownScroll = Math.clamp(dropdownScroll - (int) Math.signum(scrollY), 0, maxScroll());
+            return true;
+        }
+
         HudElement hit = active() != null ? active() : elementAt(x, y);
         if (hit == null || scrollY == 0) return false;
 

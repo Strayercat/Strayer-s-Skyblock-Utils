@@ -20,6 +20,7 @@ import com.skyblockutils.features.NpcFinder;
 import com.skyblockutils.features.dungeons.AutoRejoin;
 import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.slayer.CarryTracker;
+import com.skyblockutils.features.slayer.SlayerTracker;
 import com.skyblockutils.features.guild.GuildListParser;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.hypixel.HypixelLocation;
@@ -233,6 +234,13 @@ public class ModCommands {
                                         )
                                 )
                         )
+                )
+                .then(ClientCommands.literal("slayer")
+                        .then(ClientCommands.literal("reset").executes(context -> {
+                            SlayerTracker.reset();
+                            ModFunctions.sendSystemMessage("§aSlayer tracker session reset", false);
+                            return 1;
+                        }))
                 )
                 .then(ClientCommands.literal("hud").executes(context -> {
                     HudEditScreen.requested = true;

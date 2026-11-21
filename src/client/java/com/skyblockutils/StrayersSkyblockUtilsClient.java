@@ -28,6 +28,7 @@ import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.features.slayer.CarryTracker;
+import com.skyblockutils.features.slayer.SlayerTracker;
 import com.skyblockutils.features.textures.CustomBreakingAnimation;
 import com.skyblockutils.features.textures.F7VoidLava;
 import com.skyblockutils.features.textures.ObviousGemstones;
@@ -96,6 +97,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_hud"), (context, _) -> HudManager.render(SsuHud.ELEMENT, context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_carry_hud"), (context, _) -> HudManager.render(CarryTracker.ELEMENT, context));
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_slayer_tracker"), (context, _) -> HudManager.render(SlayerTracker.ELEMENT, context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_system_messages"), (context, _) -> SeparatedChatHud.render(context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_voice_chat"), (context, _) -> HudManager.render(VoiceHud.ELEMENT, context));
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "ssu_stash_hud"), (context, _) -> HudManager.render(StashHud.ELEMENT, context));
@@ -140,6 +142,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             CorlTimer.corlTimerTick(client);
             PuffTracker.tick(client);
             CarryTracker.tick(client);
+            SlayerTracker.tick();
             HeadRestorer.tick(client);
             ModFunctions.handleSkyblockExclusiveKeybinds(client);
             PartyListParser.handleOnJoinCommand();
@@ -236,6 +239,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         if (!isInSkyblock) return;
         DowntimeTracker.trackDowntime(cleanMessage);
         CarryTracker.handleMessage(cleanMessage);
+        SlayerTracker.handleMessage(cleanMessage);
         DungeonPartyCommands.handleDungeonPartyCommands(cleanMessage);
         AutoRejoin.autoRejoin(cleanMessage);
         ChatCommands.handleCommands(cleanMessage);

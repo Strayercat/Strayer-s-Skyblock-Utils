@@ -417,7 +417,7 @@ public class CarryTracker {
         @Override
         public boolean isActive() {
             if (!isHudShowing()) return true;
-            if (!SsuHud.ELEMENT.isEnabled() || SsuHud.ELEMENT.isActive()) return false;
+            if (!HudManager.isShowing(SsuHud.ELEMENT)) return false;
             return HudManager.bounds(SsuHud.ELEMENT, false).intersects(HudManager.bounds(this, false));
         }
 

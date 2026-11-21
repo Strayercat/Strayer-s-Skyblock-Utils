@@ -138,6 +138,10 @@ public class BestiaryHud {
     private static List<BestiaryEntity> previewMobs;
 
     private static String profileId;
+
+    public static String profileId() {
+        return profileId;
+    }
     private static boolean loaded = false;
     private static boolean loadQueued = false;
     private static boolean dirty = false;

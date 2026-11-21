@@ -53,8 +53,11 @@ public final class RoundedRect {
     }
 
     public static void panel(GuiGraphicsExtractor graphics, int x1, int y1, int x2, int y2, int radius, int background, int border, Edges edges) {
+        panel(graphics, x1, y1, x2, y2, radius, background, border, edges, edges.corners());
+    }
+
+    public static void panel(GuiGraphicsExtractor graphics, int x1, int y1, int x2, int y2, int radius, int background, int border, Edges edges, Corners corners) {
         if (x2 <= x1 || y2 <= y1) return;
-        Corners corners = edges.corners();
         if ((border >>> 24) == 0) {
             shapeRows(graphics, x1, y1, x2, y2, radius, background, corners, y1, y2);
             return;

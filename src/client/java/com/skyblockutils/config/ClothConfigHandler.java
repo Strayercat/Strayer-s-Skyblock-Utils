@@ -318,6 +318,10 @@ public class ClothConfigHandler {
                 .setDefaultValue(true).setTooltip(Component.literal("Show mobs whose bestiary is already maxed in the bestiary HUD"))
                 .setSaveConsumer(v -> ModConfig.INSTANCE.bestiaryHudShowMaxed = v).build());
 
+        overlays.add(eb.startBooleanToggle(Component.literal("Slayer Tracker HUD"), ModConfig.INSTANCE.slayerTrackerHud)
+                .setDefaultValue(true).setTooltip(Component.literal("Shows your current slayer, kills this session, last kill time and average kill time"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.slayerTrackerHud = v).build());
+
         hud.addEntry(overlays.build());
     }
 
