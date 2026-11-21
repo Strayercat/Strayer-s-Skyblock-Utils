@@ -1,7 +1,9 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.StrayersSkyblockUtilsClient;
-import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.hud.CustomSidebar;
+import com.skyblockutils.features.hud.SsuHud;
+import com.skyblockutils.features.hud.layout.HudManager;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.Hud;
@@ -14,7 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class HudMixin {
     @Inject(at = @At("HEAD"), method = "extractScoreboardSidebar", cancellable = true)
     private void hideSidebarMixin(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if ((ModConfig.INSTANCE.sideBarInHud || ModConfig.INSTANCE.customSidebar) && StrayersSkyblockUtilsClient.isInSkyblock)
-            ci.cancel();
+        if (!StrayersSkyblockUtilsClient.isInSkyblock) return;
+        String location = HudManager.currentLocation();
+        boolean customSidebar = CustomSidebar.ELEMENT.isEnabled() && HudManager.isVisible(CustomSidebar.ELEMENT, location);
+        boolean sidebarInHud = SsuHud.ELEMENT.isEnabled() && SsuHud.ELEMENT.show("sidebar");
+        if (customSidebar || sidebarInHud) ci.cancel();
     }
 }

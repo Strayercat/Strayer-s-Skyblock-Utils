@@ -138,13 +138,12 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             if (!locationKnown) return;
             if (!isInSkyblock) return;
             BestiaryHud.tick(client);
-            AutoFish.autoFish(client);
             CorlTimer.corlTimerTick(client);
             PuffTracker.tick(client);
             CarryTracker.tick(client);
             SlayerTracker.tick();
             HeadRestorer.tick(client);
-            ModFunctions.handleSkyblockExclusiveKeybinds(client);
+            ModFunctions.handleSkyblockExclusiveKeybinds();
             PartyListParser.handleOnJoinCommand();
             GuildListParser.tick();
             CoopListParser.tick(client);

@@ -1,5 +1,6 @@
 package com.skyblockutils;
 
+import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
@@ -77,7 +78,6 @@ public class ModFunctions {
     public static void serverChangeDataReset() {
         CorlTimer.resetCorlTimer();
         PuffTracker.reset();
-        AutoFish.resetAutoFish();
     }
 
     public static void calculatePing(Minecraft client, ClientPacketListener listener) {
@@ -92,9 +92,8 @@ public class ModFunctions {
         }
     }
 
-    public static void handleSkyblockExclusiveKeybinds(Minecraft client) {
+    public static void handleSkyblockExclusiveKeybinds() {
         while (ModKeyBindings.CORLEONE_TIMER_KEY.consumeClick()) CorlTimer.toggleCorlTimer();
-        while (ModKeyBindings.AUTOFISH_KEY.consumeClick()) AutoFish.toggleAutoFish(client);
         while (ModKeyBindings.PUFF_TIMER_KEY.consumeClick()) PuffTracker.togglePuffTimer();
         SsuHud.setVisible(ModKeyBindings.HUD_KEY.isDown());
     }
@@ -169,7 +168,7 @@ public class ModFunctions {
         Component prefix = fullName ? SSU.getFullName() : SSU.getName();
         Component full = Component.empty().append(prefix).append(message);
 
-        if (ModConfig.INSTANCE.separateMessage && StrayersSkyblockUtilsClient.isInSkyblock) {
+        if (SeparatedChatHud.separatingHere() && StrayersSkyblockUtilsClient.isInSkyblock) {
             SeparatedChat.addMessage(full);
         } else {
             Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(full);

@@ -81,6 +81,7 @@ public final class HudContext {
     }
 
     private RoundedRect.Corners corners(int x1, int y1, int x2, int y2, HudManager.Attachment a) {
+        if (element != null && HudManager.layout(element).squareCorners) return new RoundedRect.Corners(false, false, false, false);
         boolean left = stuckLeft(x1), top = stuckTop(y1), right = stuckRight(x2), bottom = stuckBottom(y2);
         return new RoundedRect.Corners(
                 !(left || top || a.squareTopLeft()),

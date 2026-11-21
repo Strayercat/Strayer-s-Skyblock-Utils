@@ -331,11 +331,11 @@ public class SlayerTracker {
     private static List<Component> lines(String slayer, boolean preview) {
         Stats s = shownStats(slayer, preview);
         List<Component> lines = new ArrayList<>();
-        lines.add(line("Kills: ", String.valueOf(s.kills)));
-        lines.add(line("Last Kill: ", formatDuration(s.lastMs)));
-        lines.add(line("Average: ", formatDuration(s.averageMs())));
+        if (ELEMENT.show("kills")) lines.add(line("Kills: ", String.valueOf(s.kills)));
+        if (ELEMENT.show("last")) lines.add(line("Last Kill: ", formatDuration(s.lastMs)));
+        if (ELEMENT.show("average")) lines.add(line("Average: ", formatDuration(s.averageMs())));
         addXpLines(lines, slayer, preview);
-        if (!preview && spawnAt != 0 && slayer.equals(currentSlayer)) {
+        if (ELEMENT.show("current") && !preview && spawnAt != 0 && slayer.equals(currentSlayer)) {
             lines.add(line("Current: ", formatDuration(System.currentTimeMillis() - spawnAt)));
         }
         return lines;
@@ -343,8 +343,8 @@ public class SlayerTracker {
 
     private static void addXpLines(List<Component> lines, String slayer, boolean preview) {
         if (preview && currentSlayer == null && lastSlayer == null) {
-            lines.add(line("XP: ", "540,622/1,000,000"));
-            lines.add(line("Level up in ", "919", " bosses"));
+            if (ELEMENT.show("xp")) lines.add(line("XP: ", "540,622/1,000,000"));
+            if (ELEMENT.show("levelup")) lines.add(line("Level up in ", "919", " bosses"));
             return;
         }
 
@@ -353,12 +353,12 @@ public class SlayerTracker {
         if (xp == null || !xp.known()) return;
 
         if (xp.maxed || xp.level >= type.milestones.length) {
-            lines.add(line("XP: ", "Maxed"));
+            if (ELEMENT.show("xp")) lines.add(line("XP: ", "Maxed"));
             return;
         }
 
         int next = type.milestones[xp.level];
-        lines.add(line("XP: ", number(Math.max(0, next - xp.xpRemaining)) + "/" + number(next)));
+        if (ELEMENT.show("xp")) lines.add(line("XP: ", number(Math.max(0, next - xp.xpRemaining)) + "/" + number(next)));
 
         String tier = tier(slayer);
         Integer perBoss = tier == null || xp.xpPerBoss == null ? null : xp.xpPerBoss.get(tier);
@@ -366,7 +366,7 @@ public class SlayerTracker {
             int index = tierIndex(tier);
             if (index >= 0 && index < type.xpPerTier.length) perBoss = type.xpPerTier[index];
         }
-        if (perBoss != null && perBoss > 0 && xp.xpRemaining > 0) {
+        if (ELEMENT.show("levelup") && perBoss != null && perBoss > 0 && xp.xpRemaining > 0) {
             lines.add(line("Level up in ", number((xp.xpRemaining + perBoss - 1) / perBoss), xp.xpRemaining <= perBoss ? " boss" : " bosses"));
         }
     }
@@ -383,6 +383,20 @@ public class SlayerTracker {
     }
 
     public static final HudElement ELEMENT = new HudElement("slayer_tracker", "Slayer Tracker") {
+
+        private final List<Option> options = List.of(
+                new Option("kills", "Kills", () -> true),
+                new Option("last", "Last kill time", () -> true),
+                new Option("average", "Average kill time", () -> true),
+                new Option("xp", "XP", () -> true),
+                new Option("levelup", "Level up estimate", () -> true),
+                new Option("current", "Current fight timer", () -> true)
+        );
+
+        @Override
+        public List<Option> options() {
+            return options;
+        }
         @Override
         public HudLayoutEntry defaultLayout() {
             return new HudLayoutEntry(HudLayoutEntry.Anchor.START, HudLayoutEntry.Anchor.START, 4, 40, 1f);

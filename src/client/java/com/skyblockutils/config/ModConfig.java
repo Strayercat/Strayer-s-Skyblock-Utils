@@ -39,6 +39,7 @@ public class ModConfig {
     public boolean screenshotHud = true;
     public boolean bestiaryHud = true;
     public boolean slayerTrackerHud = true;
+    public boolean carryTrackerHud = true;
     public boolean cancelSwings = false;
 
     // Dungeons
@@ -72,6 +73,7 @@ public class ModConfig {
     public Map<String, HudLayoutEntry> hudLayouts = new HashMap<>();
     public Map<String, Map<String, HudLayoutEntry>> hudLocationLayouts = new HashMap<>();
     public Map<String, Map<String, Boolean>> hudVisibility = new HashMap<>();
+    public Map<String, Boolean> hudGlobalOptions = new HashMap<>();
     public Map<String, com.skyblockutils.features.slayer.SlayerTracker.SlayerXp> slayerXp = new HashMap<>();
 
     // Mining
@@ -252,6 +254,7 @@ public class ModConfig {
                     if (!copy.isEmpty()) INSTANCE.hudLocationLayouts.put(location, copy);
                 });
             }
+            INSTANCE.hudGlobalOptions = loaded.hudGlobalOptions != null ? new HashMap<>(loaded.hudGlobalOptions) : new HashMap<>();
             INSTANCE.hudVisibility = new HashMap<>();
             if (loaded.hudVisibility != null) {
                 loaded.hudVisibility.forEach((location, flags) -> {
@@ -304,6 +307,7 @@ public class ModConfig {
             INSTANCE.voiceDeafened = loaded.voiceDeafened;
             INSTANCE.bestiaryHud = loaded.bestiaryHud;
             INSTANCE.slayerTrackerHud = loaded.slayerTrackerHud;
+            INSTANCE.carryTrackerHud = loaded.carryTrackerHud;
             INSTANCE.slayerXp = loaded.slayerXp != null ? new HashMap<>(loaded.slayerXp) : new HashMap<>();
             INSTANCE.bestiaryHudHideInCatacombs = loaded.bestiaryHudHideInCatacombs;
             INSTANCE.bestiaryHudShowMaxed = loaded.bestiaryHudShowMaxed;

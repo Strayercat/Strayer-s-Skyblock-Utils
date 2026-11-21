@@ -151,6 +151,16 @@ public class BestiaryHud {
     private static int ticks = 0;
 
     public static final HudElement ELEMENT = new HudElement("bestiary_hud", "Bestiary HUD") {
+
+        private final List<Option> options = List.of(
+                new Option("maxed", "Maxed mobs", () -> ModConfig.INSTANCE.bestiaryHudShowMaxed),
+                new Option("dungeons", "Show in dungeons", () -> !ModConfig.INSTANCE.bestiaryHudHideInCatacombs)
+        );
+
+        @Override
+        public List<Option> options() {
+            return options;
+        }
         @Override
         public HudLayoutEntry defaultLayout() {
             return new HudLayoutEntry(HudLayoutEntry.Anchor.START, HudLayoutEntry.Anchor.CENTER, 4, 0, 1f);
@@ -185,7 +195,7 @@ public class BestiaryHud {
         @Override
         public boolean isActive() {
             if (!StrayersSkyblockUtilsClient.isInSkyblock || shown(false).isEmpty()) return true;
-            return ModConfig.INSTANCE.bestiaryHudHideInCatacombs && ModFunctions.isInDungeons(Minecraft.getInstance());
+            return !show("dungeons") && ModFunctions.isInDungeons(Minecraft.getInstance());
         }
 
         @Override
@@ -331,14 +341,14 @@ public class BestiaryHud {
 
     private static List<BestiaryEntity> shown(boolean preview) {
         List<BestiaryEntity> list = new ArrayList<>(recent.keySet());
-        if (!ModConfig.INSTANCE.bestiaryHudShowMaxed) list.removeIf(BestiaryEntity::isMaxed);
+        if (!ELEMENT.show("maxed")) list.removeIf(BestiaryEntity::isMaxed);
         if (!list.isEmpty()) {
             Collections.reverse(list);
             return list;
         }
         if (!preview) return List.of();
         List<BestiaryEntity> mobs = new ArrayList<>(preview());
-        if (!ModConfig.INSTANCE.bestiaryHudShowMaxed) mobs.removeIf(BestiaryEntity::isMaxed);
+        if (!ELEMENT.show("maxed")) mobs.removeIf(BestiaryEntity::isMaxed);
         return mobs;
     }
 

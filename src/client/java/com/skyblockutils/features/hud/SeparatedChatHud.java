@@ -99,9 +99,17 @@ public class SeparatedChatHud {
         heldTicks = 0;
     }
 
+    public static boolean separatingHere() {
+        return ModConfig.INSTANCE.separateMessage && HudManager.isVisible(ELEMENT, HudManager.currentLocation());
+    }
+
+    private static boolean historyAvailable() {
+        return separatingHere() || (ModConfig.INSTANCE.separateMessage && ELEMENT.show("historyAnywhere"));
+    }
+
     private static boolean canPin() {
         return StrayersSkyblockUtilsClient.isInSkyblock
-                && ModConfig.INSTANCE.separateMessage
+                && historyAvailable()
                 && Minecraft.getInstance().gui.screen() == null;
     }
 
@@ -111,7 +119,7 @@ public class SeparatedChatHud {
 
     private static boolean isPeeking() {
         return StrayersSkyblockUtilsClient.isInSkyblock
-                && ModConfig.INSTANCE.separateMessage
+                && historyAvailable()
                 && !ignoreUntilRelease
                 && (ModKeyBindings.SYSTEM_CHAT_HISTORY_KEY.isDown() || heldTicks > 0)
                 && Minecraft.getInstance().gui.screen() == null;
@@ -186,6 +194,15 @@ public class SeparatedChatHud {
     }
 
     public static final HudElement ELEMENT = new HudElement("system_chat", "System Messages") {
+        private final List<Option> options = List.of(
+                Option.global("historyAnywhere", "Open history where this HUD is hidden", () -> true)
+        );
+
+        @Override
+        public List<Option> options() {
+            return options;
+        }
+
         @Override
         public HudLayoutEntry defaultLayout() {
             float scale = ChatLayout.chatScale();
@@ -237,6 +254,10 @@ public class SeparatedChatHud {
     };
 
     public static void render(GuiGraphicsExtractor graphics) {
+        if (!separatingHere() && isPeeking() && !HudManager.isEditing()) {
+            HudManager.draw(ELEMENT, graphics, false);
+            return;
+        }
         HudManager.render(ELEMENT, graphics);
     }
 

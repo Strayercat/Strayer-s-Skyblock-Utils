@@ -115,6 +115,11 @@ public final class HudManager {
         return ModConfig.INSTANCE.hudVisibility;
     }
 
+    private static Map<String, Boolean> globalOptions() {
+        if (ModConfig.INSTANCE.hudGlobalOptions == null) ModConfig.INSTANCE.hudGlobalOptions = new HashMap<>();
+        return ModConfig.INSTANCE.hudGlobalOptions;
+    }
+
     private static Map<String, HudLayoutEntry> store(String location) {
         if (location.isEmpty()) return defaults();
         return locationLayouts().computeIfAbsent(location, _ -> new HashMap<>());
@@ -156,10 +161,83 @@ public final class HudManager {
         return true;
     }
 
-    public static void toggleVisible(HudElement element) {
+    public static boolean optionEnabled(HudElement element, HudElement.Option option) {
+        if (!option.available().getAsBoolean()) return false;
+        if (option.global()) {
+            Boolean value = globalOptions().get(element.id + "." + option.key());
+            return value != null ? value : option.defaultValue().getAsBoolean();
+        }
+        Map<String, Boolean> options = layout(element).options;
+        Boolean value = options == null ? null : options.get(option.key());
+        return value != null ? value : option.defaultValue().getAsBoolean();
+    }
+
+    public static void toggleOption(HudElement element, HudElement.Option option) {
+        boolean enabled = optionEnabled(element, option);
+        if (option.global()) {
+            globalOptions().put(element.id + "." + option.key(), !enabled);
+            return;
+        }
+        HudLayoutEntry layout = editable(element);
+        if (layout.options == null) layout.options = new HashMap<>();
+        layout.options.put(option.key(), !enabled);
+    }
+
+    public static boolean isShownInEditor(HudElement element) {
+        return element.isEnabled() && isVisible(element, editLocation);
+    }
+
+    public static void setVisible(HudElement element, boolean visible) {
+        visibility().computeIfAbsent(activeLocation(), _ -> new HashMap<>()).put(element.id, visible);
+    }
+
+    private static HudLayoutEntry base(HudElement element) {
+        return activeLocation().isEmpty() ? element.defaultLayout().sanitize() : layout(element, HudLocations.DEFAULT);
+    }
+
+    public static void resetPosition(HudElement element) {
+        HudLayoutEntry base = base(element);
+        HudLayoutEntry layout = editable(element);
+        layout.anchorX = base.anchorX;
+        layout.anchorY = base.anchorY;
+        layout.offsetX = base.offsetX;
+        layout.offsetY = base.offsetY;
+        layout.attachTo = base.attachTo;
+        layout.attachSide = base.attachSide;
+        layout.attachOffset = base.attachOffset;
+    }
+
+    public static void resetSize(HudElement element) {
+        HudLayoutEntry base = base(element);
+        HudLayoutEntry layout = editable(element);
+        layout.scale = base.scale;
+        layout.width = base.width;
+    }
+
+    public static boolean isSizeDefault(HudElement element) {
+        HudLayoutEntry base = base(element);
+        HudLayoutEntry layout = layout(element);
+        return layout.scale == base.scale && layout.width == base.width;
+    }
+
+    public static void makeDefault(HudElement element) {
         String location = activeLocation();
-        boolean visible = isVisible(element, location);
-        visibility().computeIfAbsent(location, _ -> new HashMap<>()).put(element.id, !visible);
+        if (location.isEmpty()) return;
+        defaults().put(element.id, layout(element).copy());
+        Map<String, HudLayoutEntry> overrides = locationLayouts().get(location);
+        if (overrides != null) {
+            overrides.remove(element.id);
+            if (overrides.isEmpty()) locationLayouts().remove(location);
+        }
+    }
+
+    public static void useDefault(HudElement element) {
+        String location = activeLocation();
+        if (location.isEmpty()) return;
+        Map<String, HudLayoutEntry> overrides = locationLayouts().get(location);
+        if (overrides == null) return;
+        overrides.remove(element.id);
+        if (overrides.isEmpty()) locationLayouts().remove(location);
     }
 
     public static void reset(HudElement element) {
@@ -218,7 +296,7 @@ public final class HudManager {
     }
 
     public static boolean isPresent(HudElement element, boolean preview) {
-        if (preview && isEditing()) return isVisible(element, editLocation);
+        if (preview && isEditing()) return isShownInEditor(element);
         return isShowing(element);
     }
 

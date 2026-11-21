@@ -13,7 +13,7 @@ SSU started as a personal project: things I wanted in the game that other mods d
 - [Cloth Config API](https://modrinth.com/mod/cloth-config) : Required
 - [Mod Menu](https://modrinth.com/mod/modmenu) : Recommended
 
-Everything can be configured with `/ssu config` or through Mod Menu. The config is split into **General**, **HUD Settings**, **Chat**, **Per Skill**, **Events** and **Voice Chat** tabs.
+Everything can be configured with `/ssu config` or through Mod Menu. The config is split into **General**, **HUD Settings**, **Chat**, **Per Skill**, **Events** and **Voice Chat** tabs. HUD Settings only has the HUD editor, the cat and an on/off toggle for each HUD, everything else about a HUD is set in the HUD editor.
 
 ---
 
@@ -22,13 +22,29 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 <details>
 <summary><b>HUD Editor</b></summary>
 
-- Move, scale and resize every SSU HUD with `/ssu hud` or the **Edit HUD Layout** button in the config
+- Open it with `/ssu hud` or the **Edit HUDs** button in the config
+- **Per-location layouts**: pick a location (Hub, Crimson Isle, Dwarven Mines, Catacombs…) from the dropdown at the bottom, it opens on your current one
+    - Each location has its own position, size, scale, options and visibility for every HUD
+    - HUDs you haven't changed in a location use the **All Locations** layout
 - Drag a HUD to move it, it snaps to the screen edges and center (hold Shift to disable snapping)
 - Scroll over a HUD to scale it (Shift for fine steps), text and images scale with it
-- Drag a HUD's sides to change its width, text wraps to fit
-- Right click resets a HUD, double click resets its width
-- HUDs can't go off screen, corners touching a screen edge are square and every other corner is rounded
-- Works with the SSU HUD, custom sidebar, voice chat HUD, carry tracker and system messages HUD
+- Drag a HUD's sides to change its width, text wraps to fit, double click for auto width
+- **Stick HUDs together**: drag a HUD next to another one and it attaches to that side, aligned to its start, end or center
+    - Stuck HUDs follow the one they're attached to when it moves or changes size
+    - Corners that touch another HUD or a screen edge are square, every other corner is rounded
+- **Right click a HUD** for its options menu:
+    - Hide it in the current location
+    - HUD-specific options (for example the cat, ping or coordinates in the SSU HUD), per location
+    - Reset position, reset size, auto width, scale to 100%
+    - Center it horizontally or vertically, unstick it
+    - Square or rounded corners
+    - Use the All Locations layout, or make this location's layout the All Locations one
+- **Middle click a HUD** to hide it in the current location
+- **Right click empty space** to bring back the HUDs hidden in the current location
+- HUDs turned off in the config don't show in the editor
+- A short guide to every control is shown in the background of the editor
+- HUDs can't go off screen
+- Works with the SSU HUD, custom sidebar, slayer tracker, carry tracker, bestiary HUD, stash HUD, voice chat HUD and system messages HUD
 
 </details>
 
@@ -62,12 +78,20 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 <details>
 <summary><b>Slayer</b></summary>
 
-- Carry tracker with `/ssu carry <player> <amount> <price>`
-- Counts a carry every time the player's slayer boss dies
-- Track several carries at once, each with its own progress bar on the carry HUD
-- Prices accept `26k`, `1.2m`, `1,2m`, `1,200,000` and more
-- A title and notification tell you when it's time to collect the payment, with the total owed
-- `/ssu carry stop [player]` cancels a carry and shows how much is owed so far
+- **Slayer tracker HUD** showing your current slayer with its mob head
+    - Kills this session, last kill time and average kill time, tracked separately for each boss and tier
+    - Live timer while your boss is alive
+    - Slayer XP towards the next level, and how many bosses until you level up (worked out from the XP you actually gain, so XP buffs are included)
+    - Each line can be hidden per location in the HUD editor
+    - `/ssu slayer reset` clears the session stats
+- **Carry tracker** with `/ssu carry <player> <amount> <price>`
+    - Counts a carry every time the player's slayer boss dies
+    - Doesn't count it if the player died, left the server, or the boss timer ran out
+    - Track several carries at once, each with its own progress bar and the coins owed so far on the carry HUD
+    - Prices accept `26k`, `1.2m`, `1,2m`, `1,200,000` and more
+    - `/ssu carry adjust <player> add|remove [amount]` fixes a carry's count by hand
+    - A title and notification tell you when it's time to collect the payment, with the total owed
+    - `/ssu carry stop [player]` cancels a carry and shows how much is owed so far
 
 </details>
 
@@ -75,7 +99,7 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 <summary><b>Dungeons</b></summary>
 
 - Floor join commands from party chat (`!m7`, `!f3`…)
-- Floor auto-rejoin with `/ssu autorejoin <floor>`
+- Floor auto-rejoin with `/ssu autorejoin <floor>`, with an adjustable rejoin delay
 - Downtime tracker with `!dt [reason]`, reminds you when the run ends
 - Custom void lava texture in the F7 and M7 boss rooms (also removes the fire overlay)
 
@@ -87,6 +111,7 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 - Corleone timer, reminds you 1 minute after killing him
 - Umber and tungsten vein waypoints in the Glacite Tunnels
 - Powder chest and loot chest rewards shown as a notification instead of chat spam
+- Obvious gemstones: clearer gem textures for gemstone glass and panes (Opal on Crimson Isle, Crystal Hollows gems, Glacite Tunnels gems and every gem in mineshafts)
 
 </details>
 
@@ -95,6 +120,16 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 
 - Tree gift notifications
 - Phantom titles when a Phanflare, Phanpyre or Dreadwing spawns
+
+</details>
+
+<details>
+<summary><b>Bestiary</b></summary>
+
+- Bestiary HUD showing the last mobs you killed with their head, kill count and progress to the next milestone
+- Hides itself after 2 minutes without a kill
+- Progress is loaded from your SkyBlock profile and kept up to date as you kill mobs
+- Maxed mobs and showing it in dungeons can be toggled per location in the HUD editor
 
 </details>
 
@@ -111,11 +146,14 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 <details>
 <summary><b>Chat</b></summary>
 
+- SSU style chat: the chat window and chat input drawn with SSU's rounded corners and outline, other mods' chat changes are kept
 - Toggleable chat filters (work in progress), including stash reminders and stash pickup messages
 - Stat commands that answer in the same channel: `!tps`, `!ping`, `!fps`
 - Silly percentage commands in party, guild and co-op chat (`!sus`, `!furry` and more)
 - Fancy emotes (`o/` becomes `( ﾟ◡ﾟ)/` and more)
 - Separate HUDs for server messages and player messages
+    - Can be turned off in specific locations by hiding the system messages HUD there in the HUD editor
+    - Optionally still open the server chat history in those locations
 - Duplicate counter for system messages, repeated messages show `(x2)`, `(x3)`… with customizable text and color
 - Chat peek and server chat history, with search
 - Copy a system message by middle clicking it in the history, or with a keybind
@@ -135,8 +173,9 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 <details>
 <summary><b>HUD & Misc</b></summary>
 
-- Contextual HUD with time, ping, TPS, FPS, coordinates, dailies, party info and island fun facts
+- Contextual HUD with time, ping, TPS, FPS, coordinates, sidebar, dailies, party info and island fun facts, each toggleable per location
 - Custom sidebar
+- Stash HUD showing how much is in your item and material stash, and hides the stash reminders from chat
 - Customizable mod colors and notification style
 - Notifications and screenshot previews always show on top of everything, including chat and menus
 - Zoom
@@ -146,6 +185,8 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 - Daily task reminders
 - Spooky Festival chest titles and loot notifications
 - Auto Hoppity eggs
+- Custom block breaking animation
+- Option to remove the first person arm swing animation
 - Vanilla recipe book redirects to the SkyBlock recipe book
 
 </details>
@@ -159,7 +200,9 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 | `/ssu config` | Open the config screen |
 | `/ssu hud` | Open the HUD editor |
 | `/ssu carry <player> <amount> <price>` | Start tracking a slayer carry |
+| `/ssu carry adjust <player> add\|remove [amount]` | Add or remove completed carries by hand (default 1) |
 | `/ssu carry stop [player]` | Stop a carry (the player is required when carrying several) |
+| `/ssu slayer reset` | Reset the slayer tracker's session stats |
 | `/ssu autorejoin <floor\|off>` | Auto-rejoin a floor (`m1`–`m7`, `f1`–`f7`) |
 | `/ssu glowingplayers add <player>` | Make a player glow |
 | `/ssu glowingplayers remove <player>` | Remove a glowing player |
@@ -194,11 +237,12 @@ All keybinds can be changed in **Options → Controls → Strayer's Skyblock Uti
 
 ## Privacy
 
-SSU connects to its own server to find other SSU users and to set up voice chat.
+SSU connects to its own server to find other SSU users, to set up voice chat and for the bestiary HUD.
 
 - **Login:** your account is verified through Mojang's session server, the same check a normal server join does. Your access token is never sent to the SSU server.
 - **Finding SSU users:** only hashed player names from your tab list, party and guild are sent.
 - **Voice chat:** Audio goes directly between players and is encrypted, it never passes through the SSU server.
+- **Bestiary:** your SkyBlock profile ID is sent so the server can load your bestiary progress from the Hypixel API. The profile and the kills SSU counts are cached on the server so your progress carries over between sessions.
 
 ---
 

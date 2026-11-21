@@ -79,7 +79,7 @@ public class SeparatedChat {
 
     public static boolean handleMessage(Component message, boolean overlay) {
         if (overlay) return true;
-        if (!ModConfig.INSTANCE.separateMessage) return true;
+        if (!SeparatedChatHud.separatingHere()) return true;
         String cleanMessage = clean(message);
         if (!separates(cleanMessage)) return true;
         if (incomingRouted && rewriteKey(cleanMessage).equals(incomingKey)) return false;
@@ -89,7 +89,7 @@ public class SeparatedChat {
     }
 
     private static boolean separates(String cleanMessage) {
-        if (!ModConfig.INSTANCE.separateMessage) return false;
+        if (!SeparatedChatHud.separatingHere()) return false;
         if (isUserMessage(cleanMessage)) return false;
         return !cleanMessage.matches("You are now in the .* channel") && !cleanMessage.matches("Friend > .* (left|joined)\\.");
     }
@@ -127,7 +127,7 @@ public class SeparatedChat {
     }
 
     public static boolean replaceRewrite(Component message) {
-        if (!ModConfig.INSTANCE.separateMessage || (recent.isEmpty() && !incomingSeparates)) return false;
+        if (!SeparatedChatHud.separatingHere() || (recent.isEmpty() && !incomingSeparates)) return false;
         long now = System.currentTimeMillis();
         recent.removeIf(r -> now - r.at() > REWRITE_WINDOW_MS);
         String cleanMessage = clean(message);

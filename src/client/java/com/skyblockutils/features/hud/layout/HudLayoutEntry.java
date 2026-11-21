@@ -1,5 +1,8 @@
 package com.skyblockutils.features.hud.layout;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class HudLayoutEntry {
     public enum Anchor { START, CENTER, END }
 
@@ -14,6 +17,8 @@ public class HudLayoutEntry {
     public String attachTo = null;
     public Side attachSide = null;
     public float attachOffset = 0f;
+    public boolean squareCorners = false;
+    public Map<String, Boolean> options = null;
 
     public HudLayoutEntry(Anchor anchorX, Anchor anchorY, float offsetX, float offsetY, float scale) {
         this.anchorX = anchorX;
@@ -29,6 +34,8 @@ public class HudLayoutEntry {
         copy.attachTo = attachTo;
         copy.attachSide = attachSide;
         copy.attachOffset = attachOffset;
+        copy.squareCorners = squareCorners;
+        copy.options = options == null ? null : new HashMap<>(options);
         return copy;
     }
 

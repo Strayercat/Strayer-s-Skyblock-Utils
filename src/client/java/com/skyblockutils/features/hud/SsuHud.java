@@ -50,6 +50,26 @@ public class SsuHud {
     private static final int COLOR_TEXT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT);
 
     public static final HudElement ELEMENT = new HudElement("ssu_hud", "SSU HUD") {
+
+        private final List<Option> options = List.of(
+                new Option("time", "Current time", () -> ModConfig.INSTANCE.hudTime),
+                new Option("time12h", "12-hour time", () -> ELEMENT.show("time"), () -> ModConfig.INSTANCE.hudTime12hFormat),
+                new Option("ping", "Ping", () -> ModConfig.INSTANCE.hudPing),
+                new Option("tps", "Server TPS", () -> ModConfig.INSTANCE.hudTps),
+                new Option("fps", "FPS", () -> ModConfig.INSTANCE.hudFps),
+                new Option("coords", "Coordinates", () -> ModConfig.INSTANCE.hudCoords),
+                new Option("sidebar", "Sidebar", () -> ModConfig.INSTANCE.sideBarInHud),
+                new Option("dailies", "Daily tasks", () -> ModConfig.INSTANCE.hudDailies),
+                new Option("party", "Party info", () -> ModConfig.INSTANCE.hudPartyInfo),
+                new Option("partyDungeons", "Party info in dungeons", () -> ELEMENT.show("party"), () -> ModConfig.INSTANCE.hudPartyInfoInDungeons),
+                new Option("funfact", "Island fun fact", () -> ModConfig.INSTANCE.hudIslandFunFact),
+                new Option("cat", "Cat", () -> ModConfig.INSTANCE.cat && !CustomSidebar.ELEMENT.isEnabled(), () -> true)
+        );
+
+        @Override
+        public List<Option> options() {
+            return options;
+        }
         @Override
         public HudLayoutEntry defaultLayout() {
             return new HudLayoutEntry(HudLayoutEntry.Anchor.CENTER, HudLayoutEntry.Anchor.START, 0, 0, ModConfig.INSTANCE.hudScale / 100f);
@@ -161,7 +181,7 @@ public class SsuHud {
             }
         }
 
-        if (ModConfig.INSTANCE.customSidebar || !ModConfig.INSTANCE.cat) return;
+        if (!ELEMENT.show("cat")) return;
 
         float catSize = CAT_TEXTURE_SIZE * CAT_SCALE;
         ctx.overlay(CAT_IMAGE, ctx.width - 31 * CAT_SCALE, ctx.height / 2f - 175 * CAT_SCALE, catSize, CAT_TEXTURE_SIZE);
@@ -188,8 +208,8 @@ public class SsuHud {
 
         boolean anyGeneralInfo = false;
 
-        if (ModConfig.INSTANCE.hudTime) {
-            DateTimeFormatter fmt = ModConfig.INSTANCE.hudTime12hFormat
+        if (ELEMENT.show("time")) {
+            DateTimeFormatter fmt = ELEMENT.show("time12h")
                     ? DateTimeFormatter.ofPattern("h:mm a")
                     : DateTimeFormatter.ofPattern("H:mm");
             String time = LocalTime.now().format(fmt).toUpperCase().replaceAll("\\.", "");
@@ -197,31 +217,31 @@ public class SsuHud {
             anyGeneralInfo = true;
         }
 
-        if (ModConfig.INSTANCE.hudPing) {
+        if (ELEMENT.show("ping")) {
             lines.add(HudLine.of("Ping: " + ModFunctions.ping, COLOR_TEXT));
             anyGeneralInfo = true;
         }
 
-        if (ModConfig.INSTANCE.hudTps) {
+        if (ELEMENT.show("tps")) {
             lines.add(HudLine.of("Server tps: " + String.format("%.1f", ModFunctions.tps), COLOR_TEXT));
             anyGeneralInfo = true;
         }
 
-        if (ModConfig.INSTANCE.hudFps) {
+        if (ELEMENT.show("fps")) {
             lines.add(HudLine.of("Fps: " + client.getFps(), COLOR_TEXT));
             anyGeneralInfo = true;
         }
 
-        if (ModConfig.INSTANCE.hudCoords) {
+        if (ELEMENT.show("coords")) {
             lines.add(HudLine.rich(ModFunctions.getFormattedCoordinates()));
         }
 
-        if (ModConfig.INSTANCE.sideBarInHud) {
+        if (ELEMENT.show("sidebar")) {
             addSidebarSection(lines, anyGeneralInfo);
             anyGeneralInfo = true;
         }
 
-        if (ModConfig.INSTANCE.hudDailies) {
+        if (ELEMENT.show("dailies")) {
             if (!ModFunctions.isInDungeons(client)) {
                 if (anyGeneralInfo) addDivider(lines);
                 lines.add(HudLine.of("Daily Tasks: ", COLOR_TITLE));
@@ -231,9 +251,9 @@ public class SsuHud {
             }
         }
 
-        if (ModConfig.INSTANCE.hudPartyInfo) {
+        if (ELEMENT.show("party")) {
             boolean showParty = !ModFunctions.isInDungeons(client)
-                    || ModConfig.INSTANCE.hudPartyInfoInDungeons;
+                    || ELEMENT.show("partyDungeons");
             if (showParty) {
                 addPartySection(lines, anyGeneralInfo);
                 anyGeneralInfo = true;
@@ -245,7 +265,7 @@ public class SsuHud {
             return lines;
         }
 
-        if (location.equals("Your Island") && ModConfig.INSTANCE.hudIslandFunFact) {
+        if (location.equals("Your Island") && ELEMENT.show("funfact")) {
             if (!funFactHandled) funFact = FunFacts.funFacts.get((int) (Math.random() * FunFacts.funFacts.size()));
             if (anyGeneralInfo) addDivider(lines);
             lines.add(HudLine.of("Fun fact: " + funFact, COLOR_TEXT));

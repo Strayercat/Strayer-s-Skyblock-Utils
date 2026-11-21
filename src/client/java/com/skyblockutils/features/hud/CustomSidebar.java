@@ -32,6 +32,16 @@ public class CustomSidebar {
     private static final int CAT_TEXTURE_SIZE = 418;
 
     public static final HudElement ELEMENT = new HudElement("custom_sidebar", "Custom Sidebar") {
+
+        private final List<Option> options = List.of(
+                new Option("cat", "Cat", () -> ModConfig.INSTANCE.cat, () -> true),
+                new Option("coords", "Coordinates", () -> ModConfig.INSTANCE.sidebarCoords)
+        );
+
+        @Override
+        public List<Option> options() {
+            return options;
+        }
         @Override
         public HudLayoutEntry defaultLayout() {
             return new HudLayoutEntry(HudLayoutEntry.Anchor.END, HudLayoutEntry.Anchor.CENTER, 0, 0, 1f);
@@ -57,7 +67,7 @@ public class CustomSidebar {
 
         @Override
         public boolean isEnabled() {
-            return ModConfig.INSTANCE.customSidebar && !ModConfig.INSTANCE.sideBarInHud;
+            return ModConfig.INSTANCE.customSidebar;
         }
 
         @Override
@@ -87,7 +97,7 @@ public class CustomSidebar {
             lines.add(Component.literal("§fBits: §b10"));
         }
 
-        if (ModConfig.INSTANCE.sidebarCoords && Minecraft.getInstance().player != null) {
+        if (ELEMENT.show("coords") && Minecraft.getInstance().player != null) {
             lines.add(ModFunctions.getFormattedCoordinates());
         }
 
@@ -135,7 +145,7 @@ public class CustomSidebar {
             }
         }
 
-        if (!ModConfig.INSTANCE.cat) return;
+        if (!ELEMENT.show("cat")) return;
 
         float catSize = CAT_TEXTURE_SIZE * CAT_SCALE;
         ctx.overlay(CAT_IMAGE, ctx.width / 2f - catSize / 2f - 10, -catSize + 31 * CAT_SCALE, catSize, CAT_TEXTURE_SIZE);

@@ -15,12 +15,6 @@ public class ModKeyBindings {
             GLFW.GLFW_KEY_T,
             SSU_CATEGORY);
 
-    public static final KeyMapping AUTOFISH_KEY = new KeyMapping(
-            "key.ssu.autofish",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_R,
-            SSU_CATEGORY);
-
     public static final KeyMapping HUD_KEY = new KeyMapping(
             "key.ssu.hud",
             InputConstants.Type.KEYSYM,
@@ -82,7 +76,6 @@ public class ModKeyBindings {
 
     public static void init() {
         KeyMappingHelper.registerKeyMapping(CORLEONE_TIMER_KEY);
-        KeyMappingHelper.registerKeyMapping(AUTOFISH_KEY);
         KeyMappingHelper.registerKeyMapping(HUD_KEY);
         KeyMappingHelper.registerKeyMapping(PRINT_COORDINATES_KEY);
         KeyMappingHelper.registerKeyMapping(CHAT_PEEK_KEY);

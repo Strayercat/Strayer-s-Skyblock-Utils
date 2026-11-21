@@ -76,8 +76,8 @@ public class CarryTracker {
             this.price = price;
         }
 
-        Carry(String target, int amount, int completed) {
-            this(target, amount, BigDecimal.ZERO);
+        Carry(String target, int amount, int completed, BigDecimal price) {
+            this(target, amount, price);
             this.completed = completed;
             this.displayedProgress = completed / (float) amount;
         }
@@ -107,7 +107,7 @@ public class CarryTracker {
     }
 
     private static final Map<String, Carry> carries = new LinkedHashMap<>();
-    private static final List<Carry> SAMPLE = List.of(new Carry("Player", 5, 2), new Carry("Teammate", 3, 1));
+    private static final List<Carry> SAMPLE = List.of(new Carry("Player", 5, 2, BigDecimal.valueOf(26_000)), new Carry("Teammate", 3, 1, BigDecimal.valueOf(1_200_000)));
     private static ClientLevel lastLevel = null;
 
     private static String key(String username) {
@@ -382,6 +382,22 @@ public class CarryTracker {
     }
 
     public static final HudElement ELEMENT = new HudElement("carry_tracker", "Slayer Carry Tracker") {
+        private final List<Option> options = List.of(
+                new Option("bars", "Progress bars", () -> true),
+                new Option("coins", "Coins owed", () -> true),
+                new Option("dodge", "Hide behind SSU HUD", () -> true)
+        );
+
+        @Override
+        public List<Option> options() {
+            return options;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return ModConfig.INSTANCE.carryTrackerHud;
+        }
+
         @Override
         public HudLayoutEntry defaultLayout() {
             return new HudLayoutEntry(HudLayoutEntry.Anchor.CENTER, HudLayoutEntry.Anchor.START, 0, 0, 1f);
@@ -401,7 +417,10 @@ public class CarryTracker {
         public int autoWidth(boolean preview) {
             Minecraft mc = Minecraft.getInstance();
             int width = HUD_MIN_WIDTH;
-            for (Carry carry : shown(preview)) width = Math.max(width, mc.font.width(header(carry)) + HUD_PADDING * 2);
+            for (Carry carry : shown(preview)) {
+                width = Math.max(width, mc.font.width(header(carry)) + HUD_PADDING * 2);
+                if (show("coins")) width = Math.max(width, mc.font.width(coins(carry)) + HUD_PADDING * 2);
+            }
             return width;
         }
 
@@ -417,7 +436,7 @@ public class CarryTracker {
         @Override
         public boolean isActive() {
             if (!isHudShowing()) return true;
-            if (!HudManager.isShowing(SsuHud.ELEMENT)) return false;
+            if (!show("dodge") || !HudManager.isShowing(SsuHud.ELEMENT)) return false;
             return HudManager.bounds(SsuHud.ELEMENT, false).intersects(HudManager.bounds(this, false));
         }
 
@@ -434,7 +453,8 @@ public class CarryTracker {
 
     private static int carryHeight(Minecraft mc, Carry carry, int width) {
         int lines = Math.max(1, mc.font.split(header(carry), Math.max(1, width - HUD_PADDING * 2)).size());
-        return lines * (mc.font.lineHeight + 1) + BAR_GAP + BAR_HEIGHT;
+        if (ELEMENT.show("coins")) lines++;
+        return lines * (mc.font.lineHeight + 1) + (ELEMENT.show("bars") ? BAR_GAP + BAR_HEIGHT : 0);
     }
 
     private static Component header(Carry carry) {
@@ -444,6 +464,13 @@ public class CarryTracker {
                 .append(Component.literal(carry.target).withColor(text))
                 .append(Component.literal(" - ").withColor(ModStyle.COLOR_SUBTITLE))
                 .append(Component.literal(carry.completed + "/" + carry.amount).withColor(ModStyle.COLOR_TITLE));
+    }
+
+    private static Component coins(Carry carry) {
+        return Component.empty()
+                .append(Component.literal("Owed ").withColor(ModStyle.COLOR_SUBTITLE))
+                .append(Component.literal(formatCoins(carry.owed())).withColor(0xFFFFAA00))
+                .append(Component.literal(" / " + formatCoins(carry.total())).withColor(ModStyle.COLOR_SUBTITLE));
     }
 
     private static void renderHud(HudContext ctx) {
@@ -459,11 +486,22 @@ public class CarryTracker {
         int barX2 = ctx.width - HUD_PADDING;
         int barWidth = barX2 - barX1;
         int y = HUD_PADDING;
+        boolean bars = ELEMENT.show("bars");
+        boolean coins = ELEMENT.show("coins");
 
         for (Carry carry : shown(ctx.preview)) {
             for (FormattedCharSequence line : ctx.wrap(header(carry), ctx.width - HUD_PADDING * 2)) {
                 ctx.text(line, ctx.width / 2 - ctx.font.width(line) / 2, y, 0xFFFFFFFF, true);
                 y += lineStep;
+            }
+            if (coins) {
+                Component line = coins(carry);
+                ctx.text(line, ctx.width / 2 - ctx.font.width(line) / 2, y, 0xFFFFFFFF, true);
+                y += lineStep;
+            }
+            if (!bars) {
+                y += CARRY_GAP;
+                continue;
             }
 
             y += BAR_GAP;
