@@ -36,7 +36,7 @@ public class WaypointRenderer {
     }
 
     private static final Identifier WAYPOINT_TEXTURE =
-            Identifier.fromNamespaceAndPath("skyblockutils", "textures/waypoint.png");
+            SSU.id("textures/waypoint.png");
 
     static final RenderPipeline BADGE_TEXTURE_PIPELINE = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)

@@ -1,5 +1,5 @@
 {
-  "key.category.ssu.keybinds": "Strayer's Skyblock Utils",
+  "key.category.skyblockutils.keybinds": "Strayer's Skyblock Utils",
   "key.ssu.corlTimer": "Toggle Corleone Timer",
   "key.ssu.hud": "Show SSU HUD",
   "key.ssu.sendCoordinates": "Send coordinates in chat",
@@ -7,8 +7,7 @@
   "key.ssu.zoom": "Zoom",
   "key.ssu.puffTimer": "Puff Timer",
   "key.ssu.systemChatHistory": "Server Chat History",
-  "key.ssu.logHistory": "SSU Log History",
-  "key.ssu.openWiki": "SSU Open Wiki",
+  "key.ssu.openWiki": "Open Wiki",
   "key.ssu.voicePushToTalk": "Voice Chat Push To Talk",
   "key.ssu.voiceMute": "Voice Chat Mute",
   "key.ssu.voiceDeafen": "Voice Chat Deafen",

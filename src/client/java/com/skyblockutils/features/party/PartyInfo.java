@@ -17,7 +17,7 @@ public class PartyInfo {
 
     public static void handlePartyMessages(String message) {
         if (message.startsWith("You'll be partying with:")) {
-            PartyListParser.requestListDelayed();
+            PartyListParser.INSTANCE.requestListDelayed();
             return;
         }
 
@@ -28,7 +28,7 @@ public class PartyInfo {
                 message.contains("You have been kicked from the party by") ||
                 message.contains("The party was disbanded") ||
                 message.contains("You are not currently in a party")) {
-            PartyListParser.clear();
+            PartyListParser.INSTANCE.clear();
             return;
         }
 
@@ -41,7 +41,7 @@ public class PartyInfo {
                 message.contains("The party was transferred to") ||
                 message.contains("to Party Leader")) {
 
-            PartyListParser.requestListDelayed();
+            PartyListParser.INSTANCE.requestListDelayed();
         }
     }
 }

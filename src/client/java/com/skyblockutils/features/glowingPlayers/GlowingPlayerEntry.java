@@ -81,10 +81,6 @@ public class GlowingPlayerEntry extends AbstractConfigListEntry<GlowingPlayers.G
         }
     }
 
-    public List<Button> list() {
-        return List.of(editColorButton, removeButton);
-    }
-
     @Override
     public List<? extends NarratableEntry> narratables() {
         return List.of(editColorButton, removeButton);

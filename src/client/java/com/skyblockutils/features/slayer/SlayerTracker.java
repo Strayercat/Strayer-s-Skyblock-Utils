@@ -12,6 +12,7 @@ import com.skyblockutils.features.hud.layout.HudElement;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -283,7 +284,7 @@ public class SlayerTracker {
     }
 
     private static String clean(String line) {
-        return line.replaceAll("§.", "").replaceAll("[^\\p{L}\\p{N} '!:()/,.\\-]", "").trim();
+        return TextUtils.strip(line).replaceAll("[^\\p{L}\\p{N} '!:()/,.\\-]", "").trim();
     }
 
     private static String shownSlayer(boolean preview) {

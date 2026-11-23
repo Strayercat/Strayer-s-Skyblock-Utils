@@ -3,8 +3,15 @@ package com.skyblockutils.utils;
 import com.skyblockutils.config.ModConfig;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 
 public class SSU {
+    public static final String NAMESPACE = "skyblockutils";
+
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(NAMESPACE, path);
+    }
+
     public static Component getName() {
         return buildPrefix(false, false);
     }

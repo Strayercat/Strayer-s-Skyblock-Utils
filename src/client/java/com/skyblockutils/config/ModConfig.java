@@ -1,26 +1,28 @@
 package com.skyblockutils.config;
 
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.skyblockutils.features.DailyReminders;
-import com.skyblockutils.features.glowingPlayers.GlowingPlayers.GlowingPlayer;
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
+import com.skyblockutils.features.glowingPlayers.GlowingPlayers.GlowingPlayer;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
+import com.skyblockutils.features.slayer.SlayerTracker;
 import com.skyblockutils.utils.ModStyle;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.util.*;
 
 public class ModConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("SkyblockUtils.json");
-    public static final ModConfig INSTANCE = new ModConfig();
+    public static ModConfig INSTANCE = new ModConfig();
 
     // General
     public ModStyle.ColorStyle colorStyle = ModStyle.ColorStyle.ORIGINAL;
@@ -78,7 +80,7 @@ public class ModConfig {
     public Map<String, Map<String, HudLayoutEntry>> hudLocationLayouts = new HashMap<>();
     public Map<String, Map<String, Boolean>> hudVisibility = new HashMap<>();
     public Map<String, Boolean> hudGlobalOptions = new HashMap<>();
-    public Map<String, com.skyblockutils.features.slayer.SlayerTracker.SlayerXp> slayerXp = new HashMap<>();
+    public Map<String, SlayerTracker.SlayerXp> slayerXp = new HashMap<>();
 
     // Mining
     public boolean displayGlaciteWaypoints = true;
@@ -124,6 +126,12 @@ public class ModConfig {
     public boolean voiceHud = true;
     public boolean voiceMuted = false;
     public boolean voiceDeafened = false;
+
+    // Daily reminders
+    public boolean dailyReminders = true;
+    public Date lastReset = new Date(0);
+    public List<DailyReminders.ReminderType> disabledTypes = new ArrayList<>();
+    public List<DailyReminders.ReminderType> completedTypes = new ArrayList<>();
 
     // Enums
     public enum GlaciteWaypoints {
@@ -190,12 +198,6 @@ public class ModConfig {
         chatFilters.put(key, value);
     }
 
-    // Daily reminders
-    public boolean dailyReminders = true;
-    public Date lastReset = new Date(0);
-    public List<DailyReminders.ReminderType> disabledTypes = new ArrayList<>();
-    public List<DailyReminders.ReminderType> completedTypes = new ArrayList<>();
-
     public static void load() {
         if (!CONFIG_PATH.toFile().exists()) {
             save();
@@ -204,126 +206,58 @@ public class ModConfig {
 
         try (FileReader reader = new FileReader(CONFIG_PATH.toFile())) {
             ModConfig loaded = GSON.fromJson(reader, ModConfig.class);
-            if (loaded == null) return;
-
-            INSTANCE.colorStyle = loaded.colorStyle != null ? loaded.colorStyle : ModStyle.ColorStyle.ORIGINAL;
-            INSTANCE.notificationStyle = loaded.notificationStyle != null ? loaded.notificationStyle : ModStyle.NotificationStyle.ROUNDED;
-            INSTANCE.wikiInGame = loaded.wikiInGame;
-            INSTANCE.wikiTooltipHint = loaded.wikiTooltipHint;
-            INSTANCE.wikiPreload = loaded.wikiPreload;
-            INSTANCE.chatFiltersEnabled = loaded.chatFiltersEnabled;
-            INSTANCE.partyInviteNotifications = loaded.partyInviteNotifications;
-            INSTANCE.boopPartyInvites = loaded.boopPartyInvites;
-            INSTANCE.fancyEmotes = loaded.fancyEmotes;
-            INSTANCE.autoHoppityEggs = loaded.autoHoppityEggs;
-            INSTANCE.coordinatesSendLocation = loaded.coordinatesSendLocation;
-            INSTANCE.statCommands = loaded.statCommands;
-            INSTANCE.chatCommands = loaded.chatCommands;
-            INSTANCE.customSidebar = loaded.customSidebar;
-            INSTANCE.sidebarCoords = loaded.sidebarCoords;
-            INSTANCE.cat = loaded.cat;
-            INSTANCE.partyGlow = loaded.partyGlow;
-            INSTANCE.screenshotHud = loaded.screenshotHud;
-            INSTANCE.downtimeTracker = loaded.downtimeTracker;
-            INSTANCE.dungeonPartyCommands = loaded.dungeonPartyCommands;
-            INSTANCE.autoRejoinReminders = loaded.autoRejoinReminders;
-            INSTANCE.f7VoidLava = loaded.f7VoidLava;
-            INSTANCE.obviousGemstones = loaded.obviousGemstones;
-            INSTANCE.customBreakingAnimation = loaded.customBreakingAnimation;
-            INSTANCE.hudEnabled = loaded.hudEnabled;
-            INSTANCE.stashHud = loaded.stashHud;
-            INSTANCE.hudScale = loaded.hudScale;
-            INSTANCE.hudTime = loaded.hudTime;
-            INSTANCE.hudTime12hFormat = loaded.hudTime12hFormat;
-            INSTANCE.hudPing = loaded.hudPing;
-            INSTANCE.hudTps = loaded.hudTps;
-            INSTANCE.hudFps = loaded.hudFps;
-            INSTANCE.hudCoords = loaded.hudCoords;
-            INSTANCE.hudDailies = loaded.hudDailies;
-            INSTANCE.sideBarInHud = loaded.sideBarInHud;
-            INSTANCE.hudPartyInfo = loaded.hudPartyInfo;
-            INSTANCE.hudPartyInfoInDungeons = loaded.hudPartyInfoInDungeons;
-            INSTANCE.hudIslandFunFact = loaded.hudIslandFunFact;
-            INSTANCE.hudLayouts = new HashMap<>();
-            if (loaded.hudLayouts != null) {
-                loaded.hudLayouts.forEach((id, layout) -> {
-                    if (id != null && layout != null) INSTANCE.hudLayouts.put(id, layout.sanitize());
-                });
-            }
-            INSTANCE.hudLocationLayouts = new HashMap<>();
-            if (loaded.hudLocationLayouts != null) {
-                loaded.hudLocationLayouts.forEach((location, layouts) -> {
-                    if (location == null || layouts == null) return;
-                    Map<String, HudLayoutEntry> copy = new HashMap<>();
-                    layouts.forEach((id, layout) -> {
-                        if (id != null && layout != null) copy.put(id, layout.sanitize());
-                    });
-                    if (!copy.isEmpty()) INSTANCE.hudLocationLayouts.put(location, copy);
-                });
-            }
-            INSTANCE.hudGlobalOptions = loaded.hudGlobalOptions != null ? new HashMap<>(loaded.hudGlobalOptions) : new HashMap<>();
-            INSTANCE.hudVisibility = new HashMap<>();
-            if (loaded.hudVisibility != null) {
-                loaded.hudVisibility.forEach((location, flags) -> {
-                    if (location == null || flags == null) return;
-                    Map<String, Boolean> copy = new HashMap<>();
-                    flags.forEach((id, visible) -> {
-                        if (id != null && visible != null) copy.put(id, visible);
-                    });
-                    if (!copy.isEmpty()) INSTANCE.hudVisibility.put(location, copy);
-                });
-            }
-            INSTANCE.displayGlaciteWaypoints = loaded.displayGlaciteWaypoints;
-            INSTANCE.glaciteWaypoints = loaded.glaciteWaypoints != null ? loaded.glaciteWaypoints : GlaciteWaypoints.BOTH;
-            INSTANCE.powderChestNotification = loaded.powderChestNotification;
-            INSTANCE.powderChestNotificationTime = loaded.powderChestNotificationTime;
-            INSTANCE.treeGiftNotification = loaded.treeGiftNotification;
-            INSTANCE.treeGiftNotificationTime = loaded.treeGiftNotificationTime;
-            INSTANCE.phantomTitle = loaded.phantomTitle;
-            INSTANCE.glowingPlayers = loaded.glowingPlayers != null ? new ArrayList<>(loaded.glowingPlayers) : new ArrayList<>();
-            INSTANCE.dailyReminders = loaded.dailyReminders;
-            INSTANCE.separateMessage = loaded.separateMessage;
-            INSTANCE.ssuStyleChat = loaded.ssuStyleChat;
-            INSTANCE.ssuStyleChatInput = loaded.ssuStyleChatInput;
-            INSTANCE.systemDuplicateCounter = loaded.systemDuplicateCounter;
-            INSTANCE.systemDuplicateCounterText = loaded.systemDuplicateCounterText != null ? loaded.systemDuplicateCounterText : "&8(&7x&r$&8)";
-            INSTANCE.systemDuplicateCounterColor = loaded.systemDuplicateCounterColor;
-            INSTANCE.cancelSwings = loaded.cancelSwings;
-            INSTANCE.lastReset = loaded.lastReset != null ? loaded.lastReset : new Date(0);
-            INSTANCE.disabledTypes = loaded.disabledTypes != null ? loaded.disabledTypes : new ArrayList<>();
-            INSTANCE.completedTypes = loaded.completedTypes != null ? loaded.completedTypes : new ArrayList<>();
-
-            INSTANCE.spookyChestTitle = loaded.spookyChestTitle;
-            INSTANCE.spookyLootNotification = loaded.spookyLootNotification;
-            INSTANCE.spookyTrickJumpscare = loaded.spookyTrickJumpscare;
-            INSTANCE.voiceChatEnabled = loaded.voiceChatEnabled;
-            INSTANCE.voiceInParty = loaded.voiceInParty;
-            INSTANCE.voiceInCoop = loaded.voiceInCoop;
-            INSTANCE.voiceNoCoopInParty = loaded.voiceNoCoopInParty;
-            INSTANCE.voiceInputDevice = loaded.voiceInputDevice != null ? loaded.voiceInputDevice : "";
-            INSTANCE.voiceOutputDevice = loaded.voiceOutputDevice != null ? loaded.voiceOutputDevice : "";
-            INSTANCE.voiceInputVolume = Math.clamp(loaded.voiceInputVolume, 0, 500);
-            INSTANCE.voiceOutputVolume = Math.clamp(loaded.voiceOutputVolume, 0, 200);
-            INSTANCE.voiceActivation = loaded.voiceActivation != null ? loaded.voiceActivation : VoiceActivation.VOICE_ACTIVATION;
-            INSTANCE.voiceActivationLevel = Math.clamp(loaded.voiceActivationLevel, -90, 0);
-            INSTANCE.voiceSmartSensitivity = Math.clamp(loaded.voiceSmartSensitivity, 10, 95);
-            INSTANCE.voiceNoiseSuppression = loaded.voiceNoiseSuppression;
-            INSTANCE.voiceKeyboardSuppression = loaded.voiceKeyboardSuppression;
-            INSTANCE.voiceHud = loaded.voiceHud;
-            INSTANCE.voiceMuted = loaded.voiceMuted;
-            INSTANCE.voiceDeafened = loaded.voiceDeafened;
-            INSTANCE.bestiaryHud = loaded.bestiaryHud;
-            INSTANCE.slayerTrackerHud = loaded.slayerTrackerHud;
-            INSTANCE.carryTrackerHud = loaded.carryTrackerHud;
-            INSTANCE.slayerXp = loaded.slayerXp != null ? new HashMap<>(loaded.slayerXp) : new HashMap<>();
-            INSTANCE.bestiaryHudHideInCatacombs = loaded.bestiaryHudHideInCatacombs;
-            INSTANCE.bestiaryHudShowMaxed = loaded.bestiaryHudShowMaxed;
-
-            loaded.chatFilters.forEach(INSTANCE::setChatFilter);
-        } catch (IOException ignored) {
+            if (loaded != null) INSTANCE = loaded.sanitize();
+        } catch (IOException | RuntimeException ignored) {
         }
 
         save();
+    }
+
+    private ModConfig sanitize() {
+        ModConfig defaults = new ModConfig();
+        for (Field field : ModConfig.class.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) continue;
+            try {
+                if (field.get(this) == null) field.set(this, field.get(defaults));
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+
+        hudLayouts = sanitizeLayouts(hudLayouts);
+        Map<String, Map<String, HudLayoutEntry>> locationLayouts = new HashMap<>();
+        hudLocationLayouts.forEach((location, layouts) -> {
+            if (location == null || layouts == null) return;
+            Map<String, HudLayoutEntry> copy = sanitizeLayouts(layouts);
+            if (!copy.isEmpty()) locationLayouts.put(location, copy);
+        });
+        hudLocationLayouts = locationLayouts;
+
+        Map<String, Map<String, Boolean>> visibility = new HashMap<>();
+        hudVisibility.forEach((location, flags) -> {
+            if (location == null || flags == null) return;
+            Map<String, Boolean> copy = new HashMap<>();
+            flags.forEach((id, visible) -> {
+                if (id != null && visible != null) copy.put(id, visible);
+            });
+            if (!copy.isEmpty()) visibility.put(location, copy);
+        });
+        hudVisibility = visibility;
+
+        defaults.chatFilters.forEach(chatFilters::putIfAbsent);
+
+        voiceInputVolume = Math.clamp(voiceInputVolume, 0, 500);
+        voiceOutputVolume = Math.clamp(voiceOutputVolume, 0, 200);
+        voiceActivationLevel = Math.clamp(voiceActivationLevel, -90, 0);
+        voiceSmartSensitivity = Math.clamp(voiceSmartSensitivity, 10, 95);
+        return this;
+    }
+
+    private static Map<String, HudLayoutEntry> sanitizeLayouts(Map<String, HudLayoutEntry> layouts) {
+        Map<String, HudLayoutEntry> copy = new HashMap<>();
+        layouts.forEach((id, layout) -> {
+            if (id != null && layout != null) copy.put(id, layout.sanitize());
+        });
+        return copy;
     }
 
     public static void save() {

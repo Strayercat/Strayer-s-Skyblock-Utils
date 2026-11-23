@@ -14,7 +14,7 @@ public final class HypixelApi {
         HypixelModAPI.getInstance().createHandler(ClientboundHelloPacket.class, _ -> onMainThread(() -> {
             if (StrayersSkyblockUtilsClient.isOnHypixel) return;
             StrayersSkyblockUtilsClient.isOnHypixel = true;
-            ModFunctions.connectionEventDataReset("Join");
+            ModFunctions.onJoin();
         }));
         HypixelLocation.init();
     }

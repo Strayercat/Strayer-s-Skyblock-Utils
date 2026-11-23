@@ -1,8 +1,9 @@
 package com.skyblockutils.features.textures;
 
-import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.mixin.client.ModelManagerAccessor;
+import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
@@ -63,8 +64,8 @@ public final class ObviousGemstones {
             String name = name().toLowerCase(java.util.Locale.ROOT);
             this.glass = glass;
             this.pane = pane;
-            this.gemTexture = Identifier.fromNamespaceAndPath("skyblockutils", "block/" + name);
-            this.gemPaneTexture = Identifier.fromNamespaceAndPath("skyblockutils", "block/" + name + "_pane");
+            this.gemTexture = SSU.id("block/" + name);
+            this.gemPaneTexture = SSU.id("block/" + name + "_pane");
         }
     }
 
@@ -76,7 +77,7 @@ public final class ObviousGemstones {
     private static final Set<Gem> ALL = Collections.unmodifiableSet(EnumSet.allOf(Gem.class));
     private static final Set<Gem> NONE = Collections.unmodifiableSet(EnumSet.noneOf(Gem.class));
 
-    private static final Identifier OUTERMOST_PHASE = Identifier.fromNamespaceAndPath("skyblockutils", "obvious_gemstones");
+    private static final Identifier OUTERMOST_PHASE = SSU.id("obvious_gemstones");
     private static final int REBUILD_STEP = 3;
     private static final float EDGE_WIDTH = 2.5f / 16f;
 

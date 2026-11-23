@@ -572,6 +572,3 @@ public class ChatFilterDefinitions {
         }
     }
 }
-
-// WOAH! A Reindrake was summoned from the depths!
-// DEFEATED! A Reindrake was slain and dropped all its loot!

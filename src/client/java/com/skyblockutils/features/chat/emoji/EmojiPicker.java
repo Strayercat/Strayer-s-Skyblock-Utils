@@ -1,10 +1,11 @@
 package com.skyblockutils.features.chat.emoji;
 
-import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.SsuChatStyle;
 import com.skyblockutils.features.chat.emoji.EmojiRegistry.Emoji;
+import com.skyblockutils.utils.FuzzySearch;
 import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.SSU;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -21,8 +22,8 @@ public class EmojiPicker {
     public static final int BUTTON_SIZE = 10;
     public static final int INPUT_OFFSET = BUTTON_SIZE + 2;
 
-    private static final Identifier BUTTON = Identifier.fromNamespaceAndPath("skyblockutils", "emoji_button");
-    private static final Identifier BUTTON_HOVER = Identifier.fromNamespaceAndPath("skyblockutils", "emoji_button_hover");
+    private static final Identifier BUTTON = SSU.id("emoji_button");
+    private static final Identifier BUTTON_HOVER = SSU.id("emoji_button_hover");
 
     private static final int COLUMNS = 10;
     private static final int CELL = 14;
@@ -115,7 +116,7 @@ public class EmojiPicker {
         List<Emoji> all = new ArrayList<>(custom.size() + normal.size());
         all.addAll(custom);
         all.addAll(normal);
-        results = ModFunctions.fuzzySearchAny(query, all, Emoji::names);
+        results = FuzzySearch.searchAny(query, all, Emoji::names);
         addRows(results);
     }
 

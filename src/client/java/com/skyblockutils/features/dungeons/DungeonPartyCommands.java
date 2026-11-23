@@ -1,8 +1,8 @@
 package com.skyblockutils.features.dungeons;
 
+import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.utils.GuiBlocker;
-import com.skyblockutils.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;

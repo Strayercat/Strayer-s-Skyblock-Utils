@@ -2,7 +2,7 @@ package com.skyblockutils.features;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.utils.ModStyle;
-import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.SkyblockAreas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class PuffTracker {
-    public static boolean puffTrackerEnabled = false;
+    private static boolean puffTrackerEnabled = false;
     public static List<Integer> puffsAroundPlayer = new ArrayList<>();
 
     private static ScheduledFuture<?> currentScheduledAction;
@@ -25,7 +25,7 @@ public class PuffTracker {
             reset();
             ModFunctions.sendSystemMessage("§cPuff Timer toggled off", false);
         } else {
-            if (!ModFunctions.mapLocationToGeneralArea(SideBarUtils.location).equals("Rift")) {
+            if (!SkyblockAreas.current().equals("Rift")) {
                 ModFunctions.sendSystemMessage("§cYou must be in The Rift to use Puff Timer", false);
                 return;
             }

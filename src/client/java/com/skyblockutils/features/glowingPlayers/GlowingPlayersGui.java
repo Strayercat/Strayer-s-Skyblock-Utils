@@ -3,11 +3,11 @@ package com.skyblockutils.features.glowingPlayers;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayers.GlowingPlayer;
 import com.skyblockutils.utils.CustomEntry;
+import com.skyblockutils.utils.SSU;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.WeakHashMap;
 
 public class GlowingPlayersGui {
-    public static boolean configScreenRequested = false;
 
     private static final Map<Screen, List<GlowingPlayer>> snapshots = new WeakHashMap<>();
     private static List<GlowingPlayer> sessionStart = List.of();
@@ -29,7 +28,7 @@ public class GlowingPlayersGui {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(new ReturnScreen(parent))
                 .setTransparentBackground(false)
-                .setDefaultBackgroundTexture(Identifier.fromNamespaceAndPath("skyblockutils", "textures/gui/background.png"))
+                .setDefaultBackgroundTexture(SSU.id("textures/gui/background.png"))
                 .setTitle(Component.literal("Glowing Players Config"))
                 .setDoesConfirmSave(false)
                 .setSavingRunnable(() -> saving = true);
@@ -38,11 +37,6 @@ public class GlowingPlayersGui {
         Screen screen = builder.build();
         snapshots.put(screen, copy(ModConfig.INSTANCE.getGlowingPlayers()));
         return screen;
-    }
-
-    public static void handleConfigScreen(Minecraft client) {
-        if (configScreenRequested) client.setScreenAndShow(createConfigScreen(client.gui.screen()));
-        configScreenRequested = false;
     }
 
     public static void refreshScreen(Minecraft client) {

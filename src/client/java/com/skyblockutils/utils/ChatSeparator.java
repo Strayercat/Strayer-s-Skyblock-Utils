@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public class ChatSeparator {
     public static boolean is(Component message) {
-        String text = message.getString().replaceAll("§.", "").trim();
+        String text = TextUtils.clean(message);
         if (!text.isEmpty()) return text.length() >= 5 && text.chars().allMatch(c -> c == '-' || c == '▬');
 
         return message.visit((style, segment) ->

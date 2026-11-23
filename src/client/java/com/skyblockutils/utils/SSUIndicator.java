@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ public class SSUIndicator {
     private static final int PROTOCOL = 2;
     private static final HttpClient HTTP = HttpClient.newHttpClient();
 
-    public static final Identifier BADGE_BIG = Identifier.fromNamespaceAndPath("skyblockutils", "ssu_gem_big");
+    public static final Identifier BADGE_BIG = SSU.id("ssu_gem_big");
 
     private static final int SPECIAL_GLYPH_BASE = 0xE7B0;
     private static final int SPECIAL_GLYPH_FRAMES = 20;

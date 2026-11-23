@@ -1,8 +1,8 @@
 package com.skyblockutils.render;
 
+import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.PlayerSkin;
 
 import java.util.Map;
@@ -19,7 +19,7 @@ public final class CustomCapes {
     }
 
     private static ClientAsset.Texture cape(String name) {
-        return new ClientAsset.ResourceTexture(Identifier.fromNamespaceAndPath("skyblockutils", "entity/capes/" + name));
+        return new ClientAsset.ResourceTexture(SSU.id("entity/capes/" + name));
     }
 
     public static PlayerSkin apply(UUID uuid, String name, PlayerSkin skin) {

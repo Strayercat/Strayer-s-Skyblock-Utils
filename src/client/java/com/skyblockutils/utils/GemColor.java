@@ -28,7 +28,7 @@ public enum GemColor {
 
     GemColor(int id, String sprite, int glyph, int tint) {
         this.id = id;
-        this.sprite = Identifier.fromNamespaceAndPath("skyblockutils", sprite);
+        this.sprite = SSU.id(sprite);
         this.glyph = glyph;
         this.tint = tint;
     }

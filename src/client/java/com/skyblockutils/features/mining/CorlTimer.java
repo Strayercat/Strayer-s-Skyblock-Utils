@@ -1,8 +1,8 @@
 package com.skyblockutils.features.mining;
 
-import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.utils.ModStyle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -16,10 +16,10 @@ import java.util.concurrent.TimeUnit;
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class CorlTimer {
-    public static boolean corlTimerEnabled = false;
+    private static boolean corlTimerEnabled = false;
     public static BlockPos corlPos = null;
     public static UUID corlUUID = null;
-    public static boolean waitTime = false;
+    private static boolean waitTime = false;
 
     public static void corlTimerTick(net.minecraft.client.Minecraft client) {
         if (!corlTimerEnabled || client.level == null) return;

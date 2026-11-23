@@ -33,10 +33,6 @@ public class CustomEntry extends AbstractConfigListEntry<Object> {
         Alignment LEFT = new Left();
         Alignment RIGHT = new Right();
         Alignment CENTER = new Center();
-
-        static Alignment fixed(int x) {
-            return new Fixed(x);
-        }
     }
 
     public record EntryElement(ElementType type, Object widget, Alignment alignment, int margin, Component[] tooltip) {

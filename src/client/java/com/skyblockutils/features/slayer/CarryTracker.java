@@ -10,6 +10,7 @@ import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.features.hud.layout.HudManager;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.OnScreenNotification;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -248,7 +249,7 @@ public class CarryTracker {
             if (near != null && entity.position().distanceToSqr(near) > BOSS_SEARCH_RADIUS_SQ) continue;
             Component name = entity.getCustomName();
             if (name == null) continue;
-            String clean = name.getString().replaceAll("§.", "");
+            String clean = TextUtils.strip(name);
             if (bossPattern.matcher(clean).find()) return entity;
         }
         return null;
@@ -260,7 +261,7 @@ public class CarryTracker {
         for (PlayerInfo info : connection.getOnlinePlayers()) {
             if (info.getProfile().name().equalsIgnoreCase(carry.target)) return true;
             Component display = info.getTabListDisplayName();
-            if (display != null && carry.namePattern.matcher(display.getString().replaceAll("§.", "")).find()) return true;
+            if (display != null && carry.namePattern.matcher(TextUtils.strip(display)).find()) return true;
         }
         return false;
     }
@@ -272,7 +273,7 @@ public class CarryTracker {
         for (Entity entity : level.getEntities(null, area)) {
             Component name = entity.getCustomName();
             if (name == null) continue;
-            Matcher m = TIMER_PATTERN.matcher(name.getString().replaceAll("§.", "").trim());
+            Matcher m = TIMER_PATTERN.matcher(TextUtils.clean(name));
             if (!m.find()) continue;
             double distance = entity.distanceToSqr(boss);
             if (distance >= bestDistance) continue;

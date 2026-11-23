@@ -5,6 +5,7 @@ import com.skyblockutils.features.hud.layout.HudContext;
 import com.skyblockutils.features.hud.layout.HudElement;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.SSU;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
@@ -13,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VoiceHud {
-    private static final Identifier ICON_SPEAKING = Identifier.fromNamespaceAndPath("skyblockutils", "voice_speaking");
-    private static final Identifier ICON_MUTED = Identifier.fromNamespaceAndPath("skyblockutils", "voice_muted");
-    private static final Identifier ICON_DEAFENED = Identifier.fromNamespaceAndPath("skyblockutils", "voice_deafened");
+    private static final Identifier ICON_SPEAKING = SSU.id("voice_speaking");
+    private static final Identifier ICON_MUTED = SSU.id("voice_muted");
+    private static final Identifier ICON_DEAFENED = SSU.id("voice_deafened");
 
     private static final String TITLE = "Voice";
     private static final int MIN_WIDTH = 80;

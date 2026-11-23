@@ -1,8 +1,8 @@
 package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.ModKeyBindings;
-import com.skyblockutils.features.hud.ScreenshotManager;
 import com.skyblockutils.features.hud.MessageHud;
+import com.skyblockutils.features.hud.ScreenshotManager;
 import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.utils.ZoomState;
 import net.minecraft.client.Minecraft;

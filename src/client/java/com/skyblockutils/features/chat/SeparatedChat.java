@@ -3,6 +3,7 @@ package com.skyblockutils.features.chat;
 import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.hud.SeparatedChatHud;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class SeparatedChat {
             incomingSeparates = false;
             return;
         }
-        String cleanMessage = MessageFeed.clean(message);
+        String cleanMessage = TextUtils.clean(message);
         incomingKey = rewriteKey(cleanMessage);
         incomingSeparates = StrayersSkyblockUtilsClient.isInSkyblock && separates(cleanMessage);
     }
@@ -48,7 +49,7 @@ public class SeparatedChat {
     public static boolean handleMessage(Component message, boolean overlay) {
         if (overlay) return true;
         if (!SeparatedChatHud.separatingHere()) return true;
-        String cleanMessage = MessageFeed.clean(message);
+        String cleanMessage = TextUtils.clean(message);
         if (!separates(cleanMessage)) return true;
         if (incomingRouted && rewriteKey(cleanMessage).equals(incomingKey)) return false;
 
@@ -63,7 +64,7 @@ public class SeparatedChat {
     }
 
     public static void addMessage(Component message) {
-        add(message, MessageFeed.clean(message));
+        add(message, TextUtils.clean(message));
     }
 
     private static void add(Component message, String cleanMessage) {
@@ -79,7 +80,7 @@ public class SeparatedChat {
         if (!SeparatedChatHud.separatingHere() || (recent.isEmpty() && !incomingSeparates)) return false;
         long now = System.currentTimeMillis();
         recent.removeIf(r -> now - r.at() > REWRITE_WINDOW_MS);
-        String cleanMessage = MessageFeed.clean(message);
+        String cleanMessage = TextUtils.clean(message);
         String key = rewriteKey(cleanMessage);
         if (key.isEmpty()) return false;
 

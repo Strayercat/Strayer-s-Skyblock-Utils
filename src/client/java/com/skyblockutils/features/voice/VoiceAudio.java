@@ -2,11 +2,16 @@ package com.skyblockutils.features.voice;
 
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
-import net.minecraft.client.Minecraft;
 import io.github.jaredmdobson.concentus.OpusApplication;
 import io.github.jaredmdobson.concentus.OpusDecoder;
 import io.github.jaredmdobson.concentus.OpusEncoder;
+import net.minecraft.client.Minecraft;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -14,11 +19,6 @@ import javax.sound.sampled.Line;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 final class VoiceAudio {
     static final String DEFAULT_DEVICE = "Default";
@@ -271,7 +271,7 @@ final class VoiceAudio {
 
     private static double peakDb(short[] pcm) {
         int peak = 0;
-        for (short sample : pcm) peak = Math.max(peak, Math.abs((int) sample));
+        for (short sample : pcm) peak = Math.max(peak, Math.abs(sample));
         return peak == 0 ? -127 : 20 * Math.log10(peak / 32768.0);
     }
 

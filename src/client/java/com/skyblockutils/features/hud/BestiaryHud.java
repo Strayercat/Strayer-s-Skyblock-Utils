@@ -18,6 +18,7 @@ import com.skyblockutils.utils.ClipboardUtils;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SSUIndicator;
 import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.TextUtils;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -26,6 +27,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -38,7 +40,6 @@ import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.InteractionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -426,7 +427,7 @@ public class BestiaryHud {
 
     private static void readOpenBestiary(Minecraft client) {
         if (!loaded || !(client.gui.screen() instanceof AbstractContainerScreen<?> screen)) return;
-        String title = PAGE_PREFIX.matcher(clean(screen.getTitle().getString())).replaceFirst("");
+        String title = PAGE_PREFIX.matcher(TextUtils.clean(screen.getTitle().getString())).replaceFirst("");
         if (!title.startsWith("Bestiary")) return;
         int arrow = title.indexOf('➜');
         String islandName = arrow == -1 ? "" : title.substring(arrow + 1).trim();
@@ -439,7 +440,7 @@ public class BestiaryHud {
             int row = i / 9, col = i % 9;
             if (row == 0 || row == rows - 1 || col == 0 || col == 8) continue;
             ItemStack stack = menu.getSlot(i).getItem();
-            if (!stack.isEmpty()) correctEntry(islandName, clean(stack.getHoverName().getString()), lore(stack));
+            if (!stack.isEmpty()) correctEntry(islandName, TextUtils.clean(stack.getHoverName().getString()), lore(stack));
         }
     }
 
@@ -466,8 +467,6 @@ public class BestiaryHud {
         if (entity == null) entity = find(name, e -> e.islandName.equals(islandName));
         if (entity == null) return;
         if (entity.currentKills != kills) {
-            int diff = entity.currentKills - kills;
-            LogHud.addLog("§e[Bestiary] corrected " + entity.name + " " + entity.currentKills + " -> " + kills + " (" + (diff > 0 ? "counted " + diff + " too many" : "missed " + (-diff)) + ")");
             entity.currentKills = kills;
             dirty = true;
         }
@@ -571,18 +570,12 @@ public class BestiaryHud {
                 }
                 if (tag != null) break;
             }
-            if (tag == null) {
-                LogHud.addLog("§8[Bestiary] mount or rider without a name, " + entity.getType().getDescription().getString());
-                return;
-            }
+            if (tag == null) return;
         }
         if (tag == null) {
             String type = entity.getType().getDescription().getString();
             String mode = HypixelLocation.mode();
-            if (find(type, e -> e.island.equals(mode)) == null) {
-                LogHud.addLog("§8[Bestiary] death without a name, " + type);
-                return;
-            }
+            if (find(type, e -> e.island.equals(mode)) == null) return;
             tag = new Nametag(type, -1);
         }
         if (tag.standId() >= 0) {
@@ -627,7 +620,7 @@ public class BestiaryHud {
     private static void trackPurse(long now) {
         long purse = -1;
         for (String line : SideBarUtils.getSidebarLines()) {
-            Matcher m = PURSE.matcher(clean(line).replaceAll("[^\\x20-\\x7E]", ""));
+            Matcher m = PURSE.matcher(TextUtils.clean(line).replaceAll("[^\\x20-\\x7E]", ""));
             if (!m.find()) continue;
             purse = Long.parseLong(m.group(1).replace(",", ""));
             break;
@@ -683,7 +676,7 @@ public class BestiaryHud {
             if (scannedStands.contains(stand.getId())) continue;
             Component customName = stand.getCustomName();
             if (customName == null) continue;
-            String text = clean(customName.getString());
+            String text = TextUtils.clean(customName.getString());
             if (text.isEmpty()) continue;
             scannedStands.add(stand.getId());
             if (text.contains("❤") || !DAMAGE_INDICATOR.matcher(text).matches()) continue;
@@ -716,13 +709,9 @@ public class BestiaryHud {
 
             if (consumeCoinPickup(ding)) {
                 consumePassiveCoins(ding);
-                LogHud.addLog("§7[Bestiary] kill ding ignored, coin pickup");
                 continue;
             }
-            if (consumePassiveCoins(ding)) {
-                LogHud.addLog("§7[Bestiary] kill ding ignored, passive +" + PASSIVE_COIN_AMOUNT + " coins");
-                continue;
-            }
+            if (consumePassiveCoins(ding)) continue;
 
             PendingDeath best = null;
             Tier bestTier = Tier.NONE;
@@ -741,27 +730,16 @@ public class BestiaryHud {
             boolean splitPending = splitChild != null && splitRemaining > 0 && Math.abs(ding - splitAt) <= SPLIT_WINDOW_MS;
             if (splitPending && (best == null || bestTier == Tier.NONE)) {
                 splitRemaining--;
-                LogHud.addLog("§7[Bestiary] §f" + splitChild + " §7split" + (best != null ? " over " + best.name() : ""));
                 handleMobKill(splitChild);
                 continue;
             }
             if (best == null) {
                 String unseen = unseenFamily(ding);
-                if (unseen != null) {
-                    LogHud.addLog("§7[Bestiary] §f" + unseen + " §7unseen");
-                    handleMobKill(unseen);
-                } else {
-                    LogHud.addLog("§7[Bestiary] kill ding with no matching death");
-                }
+                if (unseen != null) handleMobKill(unseen);
                 continue;
             }
-            String pick = "";
-            if (bestTier == Tier.NONE && candidates > 1 && !sameName(ding)) {
-                best = closest(ding);
-                pick = " closest";
-            }
+            if (bestTier == Tier.NONE && candidates > 1 && !sameName(ding)) best = closest(ding);
             deaths.remove(best);
-            LogHud.addLog("§7[Bestiary] §f" + best.name() + " §7" + bestTier.name().toLowerCase(Locale.ROOT) + " " + Math.abs(best.at() - ding) + "ms" + (candidates > 1 ? " of " + candidates : "") + pick);
             handleMobKill(best.name());
             for (Split split : SPLITS) {
                 if (!split.parent().equals(best.name())) continue;
@@ -843,7 +821,7 @@ public class BestiaryHud {
             }
         }
         if (raw == null) return null;
-        String name = NAMETAG_LEVEL.matcher(clean(raw)).replaceFirst("");
+        String name = NAMETAG_LEVEL.matcher(TextUtils.clean(raw)).replaceFirst("");
         name = NAMETAG_HEALTH.matcher(name).replaceFirst("");
         name = NAMETAG_SYMBOLS.matcher(name).replaceAll("").replaceAll("\\s+", " ").trim();
         return name.isEmpty() ? null : new Nametag(name, closest.getId());
@@ -870,12 +848,8 @@ public class BestiaryHud {
         ItemLore lore = stack.get(DataComponents.LORE);
         if (lore == null) return List.of();
         List<String> lines = new ArrayList<>();
-        for (Component line : lore.lines()) lines.add(clean(line.getString()));
+        for (Component line : lore.lines()) lines.add(TextUtils.clean(line.getString()));
         return lines;
-    }
-
-    private static String clean(String text) {
-        return text.replaceAll("§.", "").trim();
     }
 
     private static int parseNumber(String text) {

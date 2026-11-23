@@ -1,6 +1,7 @@
 package com.skyblockutils.features.chat;
 
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -59,7 +60,7 @@ public class MessageFeed {
     }
 
     public Handle add(Component message) {
-        return add(message, clean(message));
+        return add(message, TextUtils.clean(message));
     }
 
     public Handle add(Component message, String cleanMessage) {
@@ -132,10 +133,6 @@ public class MessageFeed {
 
     public List<HistoryEntry> history() {
         return Collections.unmodifiableList(history);
-    }
-
-    public static String clean(Component message) {
-        return message.getString().replaceAll("§.", "").trim();
     }
 
     private static ChatLayout.ParsedMessage withCounter(ChatLayout.ParsedMessage base, int count) {

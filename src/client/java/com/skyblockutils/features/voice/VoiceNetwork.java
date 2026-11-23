@@ -1,7 +1,5 @@
 package com.skyblockutils.features.voice;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -11,6 +9,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 
 final class VoiceNetwork {
     static final byte REGISTER = 0x01;

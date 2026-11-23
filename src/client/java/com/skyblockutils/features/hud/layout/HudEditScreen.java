@@ -2,7 +2,6 @@ package com.skyblockutils.features.hud.layout;
 
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ModStyle;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -15,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HudEditScreen extends Screen {
-    public static boolean requested = false;
-
     private static final float SNAP_DISTANCE = 4f;
     private static final float EDGE_GRAB = 3f;
     private static final float SCALE_STEP = 0.05f;
@@ -91,12 +88,6 @@ public class HudEditScreen extends Screen {
         super(Component.literal("SSU HUD Editor"));
         this.parent = parent;
         HudManager.setEditLocation(HudManager.currentLocation());
-    }
-
-    public static void handleRequest(Minecraft client) {
-        if (!requested) return;
-        requested = false;
-        client.setScreenAndShow(new HudEditScreen(client.gui.screen()));
     }
 
     @Override

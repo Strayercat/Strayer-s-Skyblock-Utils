@@ -1,7 +1,7 @@
 package com.skyblockutils.features;
 
-import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

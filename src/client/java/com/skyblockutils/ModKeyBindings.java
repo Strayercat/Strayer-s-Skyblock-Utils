@@ -1,13 +1,13 @@
 package com.skyblockutils;
 
-import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
+import com.skyblockutils.utils.SSU;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.client.KeyMapping;
+import org.lwjgl.glfw.GLFW;
 
 public class ModKeyBindings {
-    public static final KeyMapping.Category SSU_CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("ssu", "keybinds"));
+    public static final KeyMapping.Category SSU_CATEGORY = KeyMapping.Category.register(SSU.id("keybinds"));
 
     public static final KeyMapping CORLEONE_TIMER_KEY = new KeyMapping(
             "key.ssu.corlTimer",
@@ -50,12 +50,6 @@ public class ModKeyBindings {
             GLFW.GLFW_KEY_H,
             SSU_CATEGORY);
 
-    public static final KeyMapping LOG_HISTORY_KEY = new KeyMapping(
-            "key.ssu.logHistory",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_J,
-            SSU_CATEGORY);
-
     public static final KeyMapping VOICE_PTT_KEY = new KeyMapping(
             "key.ssu.voicePushToTalk",
             InputConstants.Type.KEYSYM,
@@ -94,7 +88,6 @@ public class ModKeyBindings {
         KeyMappingHelper.registerKeyMapping(ZOOM_KEY);
         KeyMappingHelper.registerKeyMapping(PUFF_TIMER_KEY);
         KeyMappingHelper.registerKeyMapping(SYSTEM_CHAT_HISTORY_KEY);
-        KeyMappingHelper.registerKeyMapping(LOG_HISTORY_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_PTT_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_MUTE_KEY);
         KeyMappingHelper.registerKeyMapping(VOICE_DEAFEN_KEY);

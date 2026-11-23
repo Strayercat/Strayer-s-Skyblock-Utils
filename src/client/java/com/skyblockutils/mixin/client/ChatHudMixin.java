@@ -5,6 +5,7 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.ChatModifications;
 import com.skyblockutils.features.chat.SeparatedChat;
 import com.skyblockutils.features.chat.SsuChatGraphicsAccess;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -125,7 +126,7 @@ public class ChatHudMixin {
 
     @Unique
     private static void filterScreenshotMessage(Component message, CallbackInfo ci) {
-        String clean = message.getString().replaceAll("§.", "").trim();
+        String clean = TextUtils.clean(message);
         if (clean.startsWith("Saved screenshot as") && ModConfig.INSTANCE.screenshotHud) {
             ci.cancel();
         }

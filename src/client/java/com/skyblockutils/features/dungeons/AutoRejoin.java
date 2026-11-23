@@ -10,10 +10,27 @@ import java.util.concurrent.TimeUnit;
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class AutoRejoin {
-    public static boolean autoRejoinEnabled = false;
-    public static String currentFloor = "";
-    public static boolean partialParty = false;
+    private static boolean autoRejoinEnabled = false;
+    private static String currentFloor = "";
+    private static boolean partialParty = false;
 
+    public static boolean isEnabled() {
+        return autoRejoinEnabled;
+    }
+
+    public static String floor() {
+        return currentFloor;
+    }
+
+    public static void enable(String floor) {
+        autoRejoinEnabled = true;
+        currentFloor = floor;
+    }
+
+    public static void disable() {
+        autoRejoinEnabled = false;
+        currentFloor = "";
+    }
 
     public static void autoRejoin(String message) {
         if (!autoRejoinEnabled) return;

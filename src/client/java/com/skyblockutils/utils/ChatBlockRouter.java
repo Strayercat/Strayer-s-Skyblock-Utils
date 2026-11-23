@@ -22,11 +22,11 @@ public final class ChatBlockRouter {
 
     public record Block(Component header, List<Component> lines) {
         public String headerText() {
-            return clean(header);
+            return TextUtils.clean(header);
         }
 
         public List<String> texts() {
-            return lines.stream().map(ChatBlockRouter::clean).toList();
+            return lines.stream().map(TextUtils::clean).toList();
         }
 
         public List<String> allTexts() {
@@ -73,7 +73,7 @@ public final class ChatBlockRouter {
 
     public static boolean handle(Component message, BooleanSupplier hiddenByFilters) {
         long now = System.currentTimeMillis();
-        String text = clean(message);
+        String text = TextUtils.clean(message);
 
         if (text.contains("\n")) {
             flush();
@@ -159,14 +159,14 @@ public final class ChatBlockRouter {
     private static boolean handleInlineBlock(Component message) {
         List<Component> lines = new ArrayList<>();
         for (Component line : splitLines(message)) {
-            String lineText = clean(line);
+            String lineText = TextUtils.clean(line);
             if (ChatSeparator.is(line)) continue;
             if (lines.isEmpty() && lineText.isEmpty()) continue;
             lines.add(line);
         }
         if (lines.isEmpty()) return false;
 
-        Handler handler = find(clean(lines.getFirst()));
+        Handler handler = find(TextUtils.clean(lines.getFirst()));
         if (handler == null) return false;
 
         handler.accept(new Block(lines.getFirst(), List.copyOf(lines.subList(1, lines.size()))));
@@ -251,9 +251,5 @@ public final class ChatBlockRouter {
         MutableComponent joined = Component.empty();
         for (Component part : parts) joined.append(part);
         return joined;
-    }
-
-    public static String clean(Component message) {
-        return message.getString().replaceAll("§.", "").trim();
     }
 }

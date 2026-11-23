@@ -6,9 +6,10 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.hud.layout.HudContext;
 import com.skyblockutils.features.hud.layout.HudElement;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
+import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SideBarUtils;
-import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -20,7 +21,7 @@ import java.util.List;
 import static com.skyblockutils.utils.ModStyle.COLOR_BACKGROUND;
 
 public class CustomSidebar {
-    private static final Identifier CAT_IMAGE = Identifier.fromNamespaceAndPath("skyblockutils", "textures/hud/cat_sidebar.png");
+    private static final Identifier CAT_IMAGE = SSU.id("textures/hud/cat_sidebar.png");
     private static final String TITLE = "Skyblock";
     private static final int MIN_AUTO_WIDTH = 110;
     private static final int CORNER_RADIUS = 10;
@@ -84,8 +85,8 @@ public class CustomSidebar {
     private static List<Component> lines(boolean preview) {
         List<Component> lines = new ArrayList<>(SideBarUtils.getSidebarLines().stream()
                 .filter(line -> !line.replaceAll("(?i)§.", "").trim().isEmpty()
-                        && !line.replaceAll("§.", "").trim().matches("\\d{2}/\\d{2}/\\d{2} .*")
-                        && !line.replaceAll("§.", "").trim().matches("www.hypixel.net"))
+                        && !TextUtils.clean(line).matches("\\d{2}/\\d{2}/\\d{2} .*")
+                        && !TextUtils.clean(line).matches("www.hypixel.net"))
                 .map(line -> (Component) Component.literal(line))
                 .toList());
 

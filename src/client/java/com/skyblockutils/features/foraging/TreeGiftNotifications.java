@@ -1,11 +1,10 @@
 package com.skyblockutils.features.foraging;
 
-
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.utils.OnScreenNotification;
-import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.SkyblockAreas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -25,7 +24,7 @@ public class TreeGiftNotifications {
         @Override
         public boolean isActive() {
             if (!ModConfig.INSTANCE.treeGiftNotification) return false;
-            String area = ModFunctions.mapLocationToGeneralArea(SideBarUtils.location);
+            String area = SkyblockAreas.current();
             return "Galatea".equals(area) || "Torrhus Canyon".equals(area);
         }
 

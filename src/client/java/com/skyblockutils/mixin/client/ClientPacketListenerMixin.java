@@ -3,16 +3,15 @@ package com.skyblockutils.mixin.client;
 import com.skyblockutils.features.coop.CoopListParser;
 import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.render.HeadRestorer;
-import com.skyblockutils.utils.DamageLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
-import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
-import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
@@ -42,7 +41,6 @@ public abstract class ClientPacketListenerMixin {
         if (!Minecraft.getInstance().isSameThread()) return;
         String sound = packet.getSound().value().location().getPath();
         if (sound.equals("entity.experience_orb.pickup")) {
-            DamageLogger.onXpSound(packet.getPitch(), packet.getVolume());
             BestiaryHud.onXpSound(packet.getPitch());
         }
         if (!CoopListParser.shouldMuteSounds()) return;
@@ -73,7 +71,6 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleDamageEvent", at = @At("HEAD"))
     private void ssu$logDamage(ClientboundDamageEventPacket packet, CallbackInfo ci) {
         if (!Minecraft.getInstance().isSameThread()) return;
-        DamageLogger.onDamage(packet);
         BestiaryHud.onDamage(packet);
     }
 

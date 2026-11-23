@@ -5,6 +5,7 @@ import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.chat.emoji.EmojiRegistry;
 import com.skyblockutils.mixin.client.ChatComponentAccessor;
 import com.skyblockutils.utils.SSUIndicator;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.multiplayer.chat.GuiMessageSource;
@@ -59,7 +60,7 @@ public class ChatModifications {
     }
 
     public static Component withChatBadge(Component message) {
-        String text = message.getString().replaceAll("§.", "");
+        String text = TextUtils.strip(message);
         if (SSUIndicator.hasBadge(text)) return message;
 
         Matcher m = CHAT_SENDER.matcher(text);
@@ -101,7 +102,7 @@ public class ChatModifications {
     }
 
     private static String senderOf(Component message) {
-        String text = message.getString().replaceAll("§.", "");
+        String text = TextUtils.strip(message);
         if (SSUIndicator.hasBadge(text)) return null;
 
         Matcher m = CHAT_SENDER.matcher(text);

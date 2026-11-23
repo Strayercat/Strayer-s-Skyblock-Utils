@@ -1,8 +1,8 @@
 package com.skyblockutils.features.dungeons;
 
 import com.skyblockutils.ModFunctions;
-import com.skyblockutils.utils.OnScreenNotification;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.utils.OnScreenNotification;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 

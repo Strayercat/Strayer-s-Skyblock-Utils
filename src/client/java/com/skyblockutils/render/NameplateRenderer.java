@@ -3,6 +3,7 @@ package com.skyblockutils.render;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.skyblockutils.mixin.client.RenderTypeFeatureRendererInvoker;
 import com.skyblockutils.utils.GemColor;
+import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
@@ -10,7 +11,6 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 
@@ -66,7 +66,7 @@ public final class NameplateRenderer {
     }
 
     private static RenderType type(String texture) {
-        return RenderTypes.text(Identifier.fromNamespaceAndPath("skyblockutils", "textures/entity/" + texture + ".png"));
+        return RenderTypes.text(SSU.id("textures/entity/" + texture + ".png"));
     }
 
     public static Component mark(Component name, String playerName) {

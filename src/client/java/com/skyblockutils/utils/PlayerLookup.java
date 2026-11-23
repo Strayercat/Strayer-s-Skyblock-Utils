@@ -28,24 +28,8 @@ public class PlayerLookup {
                 .exceptionally(_ -> null);
     }
 
-    public static CompletableFuture<UUID> getUuidOffline(String username) {
-        return getProfile(username).thenApply(profile -> profile == null ? null : profile.uuid());
-    }
-
     public static CompletableFuture<String> getFormattedUsername(String username) {
         return getProfile(username).thenApply(profile -> profile == null ? null : profile.name());
-    }
-
-    public static CompletableFuture<String> getNameByUuid(UUID uuid) {
-        String url = "https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", "");
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
-
-        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(response -> {
-                    if (response.statusCode() != 200) return null;
-                    return JsonParser.parseString(response.body()).getAsJsonObject().get("name").getAsString();
-                })
-                .exceptionally(_ -> null);
     }
 
     public static UUID formatMojangUuid(String id) {

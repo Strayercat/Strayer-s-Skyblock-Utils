@@ -10,10 +10,11 @@ import com.skyblockutils.features.hud.layout.HudElement;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.features.party.PartyInfo;
 import com.skyblockutils.utils.FunFacts;
-import com.skyblockutils.utils.SSU;
-import com.skyblockutils.utils.SideBarUtils;
 import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SSUIndicator;
+import com.skyblockutils.utils.SideBarUtils;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -29,11 +30,11 @@ import java.util.List;
 import static com.skyblockutils.utils.ModStyle.*;
 
 public class SsuHud {
-    private static final Identifier CAT_IMAGE = Identifier.fromNamespaceAndPath("skyblockutils", "textures/hud/cat.png");
+    private static final Identifier CAT_IMAGE = SSU.id("textures/hud/cat.png");
 
     private static boolean isVisible = false;
     public static boolean showBossBar = true;
-    public static String funFact = null;
+    private static String funFact = null;
     public static boolean funFactHandled = false;
 
     private static final int BASE_HUD_WIDTH = 200;
@@ -286,8 +287,8 @@ public class SsuHud {
 
         List<String> scoreboardLines = SideBarUtils.getSidebarLines().stream()
                 .filter(line -> !line.replaceAll("(?i)§.", "").trim().isEmpty()
-                        && !line.replaceAll("§.", "").trim().matches("\\d{2}/\\d{2}/\\d{2} .*")
-                        && !line.replaceAll("§.", "").trim().matches("www.hypixel.net"))
+                        && !TextUtils.clean(line).matches("\\d{2}/\\d{2}/\\d{2} .*")
+                        && !TextUtils.clean(line).matches("www.hypixel.net"))
                 .map(String::trim)
                 .toList();
 
@@ -321,8 +322,8 @@ public class SsuHud {
         if (DowntimeTracker.downtimeRequested)
             lines.add(HudLine.of("Requested by: " + DowntimeTracker.requesterUsername, COLOR_TEXT));
 
-        lines.add(HudLine.of("Floor Auto-Rejoin: " + (AutoRejoin.autoRejoinEnabled ? "On" : "Off"), COLOR_TEXT));
-        if (AutoRejoin.autoRejoinEnabled)
-            lines.add(HudLine.of("Current floor: " + AutoRejoin.currentFloor, COLOR_TEXT));
+        lines.add(HudLine.of("Floor Auto-Rejoin: " + (AutoRejoin.isEnabled() ? "On" : "Off"), COLOR_TEXT));
+        if (AutoRejoin.isEnabled())
+            lines.add(HudLine.of("Current floor: " + AutoRejoin.floor(), COLOR_TEXT));
     }
 }

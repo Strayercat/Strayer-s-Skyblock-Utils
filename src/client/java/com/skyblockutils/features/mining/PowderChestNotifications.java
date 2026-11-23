@@ -1,9 +1,10 @@
 package com.skyblockutils.features.mining;
 
-import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.utils.ChatBlockRouter;
 import com.skyblockutils.utils.OnScreenNotification;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class PowderChestNotifications {
         public void accept(ChatBlockRouter.Block block) {
             List<Component> subtitle = block.lines().stream()
                     .filter(line -> {
-                        String text = ChatBlockRouter.clean(line);
+                        String text = TextUtils.clean(line);
                         return !text.isEmpty() && !text.equals("REWARDS");
                     })
                     .map(line -> OnScreenNotification.removeText(line, " Gemstone"))

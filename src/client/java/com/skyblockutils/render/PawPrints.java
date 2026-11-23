@@ -2,12 +2,12 @@ package com.skyblockutils.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.skyblockutils.utils.SSU;
 import com.skyblockutils.utils.SSUIndicator;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class PawPrints {
-    private static final RenderType TYPE = RenderTypes.text(Identifier.fromNamespaceAndPath("skyblockutils", "textures/entity/paw_print.png"));
+    private static final RenderType TYPE = RenderTypes.text(SSU.id("textures/entity/paw_print.png"));
 
     private static final int COLOR = 0xA855F7;
     private static final int LIGHT = 0xF000F0;

@@ -2,9 +2,9 @@ package com.skyblockutils.features.voice;
 
 import io.github.jaredmdobson.concentus.OpusDecoder;
 
-import javax.crypto.spec.SecretKeySpec;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.crypto.spec.SecretKeySpec;
 
 final class VoicePeer {
     enum State { IDLE, PUNCHING, CONNECTED, FAILED }

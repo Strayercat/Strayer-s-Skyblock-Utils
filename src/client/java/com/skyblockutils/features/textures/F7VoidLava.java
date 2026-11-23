@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
 import com.skyblockutils.mixin.client.ModelManagerAccessor;
+import com.skyblockutils.utils.SSU;
+import com.skyblockutils.utils.TextUtils;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry;
 import net.minecraft.client.Minecraft;
@@ -16,9 +18,9 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.AtlasManager;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Direction.Plane;
+import net.minecraft.core.Direction;
 import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
@@ -37,9 +39,9 @@ import java.util.Optional;
 
 public class F7VoidLava {
     private static final Identifier STILL_ID =
-            Identifier.fromNamespaceAndPath("skyblockutils", "block/void_lava_still");
+            SSU.id("block/void_lava_still");
     private static final Identifier FLOW_ID =
-            Identifier.fromNamespaceAndPath("skyblockutils", "block/void_lava_flow");
+            SSU.id("block/void_lava_flow");
 
     private static TextureAtlasSprite voidStillSprite;
     private static TextureAtlasSprite voidFlowSprite;
@@ -81,7 +83,7 @@ public class F7VoidLava {
     private static boolean shouldOverride() {
         Optional<String> bossBarTitle = ((BossHealthOverlayAccessor) Minecraft.getInstance().gui.hud.getBossOverlay())
                 .getEvents().values().stream().findFirst()
-                .map(bossBar -> bossBar.getName().getString().replaceAll("§.", ""));
+                .map(bossBar -> TextUtils.strip(bossBar.getName()));
 
         List<String> allowedTitles = List.of("Maxor", "Storm", "Goldor", "Necron");
 

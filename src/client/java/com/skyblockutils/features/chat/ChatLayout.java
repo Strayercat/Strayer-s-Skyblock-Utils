@@ -1,5 +1,6 @@
 package com.skyblockutils.features.chat;
 
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -62,7 +63,7 @@ public final class ChatLayout {
     }
 
     public static Component indented(Component component, int width) {
-        String plain = component.getString().replaceAll("§.", "");
+        String plain = TextUtils.strip(component);
         int spaces = 0;
         while (spaces < plain.length() && plain.charAt(spaces) == ' ') spaces++;
         if (spaces < MIN_CENTER_PADDING) return component;
@@ -155,12 +156,12 @@ public final class ChatLayout {
     private static ParsedLine classify(List<Segment> segments) {
         StringBuilder raw = new StringBuilder();
         for (Segment segment : segments) raw.append(segment.text());
-        String plain = raw.toString().replaceAll("§.", "");
+        String plain = TextUtils.strip(raw.toString());
         String trimmed = plain.trim();
 
         Segment first = null;
         for (Segment segment : segments) {
-            if (!segment.text().replaceAll("§.", "").isEmpty()) {
+            if (!TextUtils.strip(segment.text()).isEmpty()) {
                 first = segment;
                 break;
             }
@@ -239,7 +240,7 @@ public final class ChatLayout {
                 Segment segment = result.get(i);
                 String stripped = stripLeadingSpaces(segment.text());
                 result.set(i, new Segment(segment.style(), stripped));
-                if (!stripped.replaceAll("§.", "").isEmpty()) break;
+                if (!TextUtils.strip(stripped).isEmpty()) break;
             }
         }
 
@@ -248,7 +249,7 @@ public final class ChatLayout {
                 Segment segment = result.get(i);
                 String stripped = stripTrailingSpaces(segment.text());
                 result.set(i, new Segment(segment.style(), stripped));
-                if (!stripped.replaceAll("§.", "").isEmpty()) break;
+                if (!TextUtils.strip(stripped).isEmpty()) break;
             }
         }
 

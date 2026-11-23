@@ -1,143 +1,66 @@
 package com.skyblockutils.features.party;
 
-import com.skyblockutils.ModFunctions;
-import com.skyblockutils.utils.ChatBlockRouter;
+import com.skyblockutils.utils.ChatListScanner;
 import com.skyblockutils.utils.SSUIndicator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
-public class PartyListParser {
-    private static final long REFRESH_MS = 10 * 60_000;
-    private static final long MANUAL_WINDOW_MS = 3_000;
+public class PartyListParser extends ChatListScanner {
     private static final Pattern MANUAL_COMMAND = Pattern.compile("^((p|party) (list|l)|pl)\\b.*");
     private static final Pattern PARTY_LINE = Pattern.compile("^Party (Members \\(\\d+\\)|Leader:|Moderators:|Members:).*");
+    private static final Pattern RANK = Pattern.compile("\\[[^]]+] ");
 
-    public static boolean onJoinCommandHandled = false;
-    private static long lastRequest = 0;
-    private static long manualUntil = 0;
-    private static boolean sendingOwnCommand = false;
-    private static ClientLevel lastLevel;
-    private static boolean awaitingResponse = false;
-    private static boolean reportNext = false;
+    public static final PartyListParser INSTANCE = new PartyListParser();
 
-    private static final long EXPECT_MS = 5_000;
-    private static long expectingUntil = 0;
+    private ClientLevel lastLevel;
 
-    public static final ChatBlockRouter.Handler BLOCK_HANDLER = new ChatBlockRouter.Handler() {
-        @Override
-        public boolean isActive() {
-            long now = System.currentTimeMillis();
-            return now < expectingUntil && now >= manualUntil;
-        }
-
-        @Override
-        public boolean matches(String header) {
-            return isStartLine(header);
-        }
-
-        @Override
-        public void accept(ChatBlockRouter.Block block) {
-            expectingUntil = 0;
-            onListReceived(block.allTexts());
-        }
-    };
-
-    public static boolean isExpecting() {
-        return System.currentTimeMillis() < expectingUntil;
+    private PartyListParser() {
+        super("Party", "party list", MANUAL_COMMAND);
     }
 
-    public static void tickCapture() {
+    @Override
+    public void tickCapture() {
         ClientLevel level = Minecraft.getInstance().level;
         if (level != lastLevel) {
             lastLevel = level;
-            if (level != null) onJoinCommandHandled = false;
+            if (level != null) requested = false;
         }
-
-        if (awaitingResponse && !isExpecting()) {
-            awaitingResponse = false;
-            onJoinCommandHandled = false;
-            if (reportNext) {
-                reportNext = false;
-                ModFunctions.sendSystemMessage("§c[Dev] Party scan got no response", false);
-            }
-        }
+        super.tickCapture();
     }
 
-    public static void handleOnJoinCommand() {
-        if (isExpecting()) return;
-        if (onJoinCommandHandled && System.currentTimeMillis() - lastRequest < REFRESH_MS) return;
-        if (ModFunctions.isWorldLoaded()) return;
-
-        onJoinCommandHandled = true;
-        requestList();
+    @Override
+    protected void onTimeout() {
+        requested = false;
     }
 
-    public static void requestListDelayed() {
-        scheduler.schedule(() -> Minecraft.getInstance().execute(PartyListParser::requestList), 500, TimeUnit.MILLISECONDS);
+    public void requestListDelayed() {
+        scheduler.schedule(() -> Minecraft.getInstance().execute(this::requestList), 500, TimeUnit.MILLISECONDS);
     }
 
-    public static void requestList() {
-        if (Minecraft.getInstance().getConnection() == null) return;
-        lastRequest = System.currentTimeMillis();
-        awaitingResponse = true;
-        expectingUntil = lastRequest + EXPECT_MS;
-        sendingOwnCommand = true;
-        try {
-            Minecraft.getInstance().getConnection().sendCommand("party list");
-        } finally {
-            sendingOwnCommand = false;
-        }
-    }
-
-    public static void devScan() {
-        if (Minecraft.getInstance().getConnection() == null) return;
-        if (isExpecting()) {
-            ModFunctions.sendSystemMessage("§e[Dev] Party scan already in progress", false);
-            return;
-        }
-        reportNext = true;
-        ModFunctions.sendSystemMessage("§7[Dev] Scanning party...", false);
-        requestList();
-    }
-
-    public static void onCommandSent(String command) {
-        if (sendingOwnCommand) return;
-        if (!MANUAL_COMMAND.matcher(command.toLowerCase(Locale.ROOT).trim()).matches()) return;
-
-        manualUntil = System.currentTimeMillis() + MANUAL_WINDOW_MS;
-        awaitingResponse = false;
-        expectingUntil = 0;
+    @Override
+    protected boolean isStartLine(String text) {
+        return PARTY_LINE.matcher(text).matches() || isNotInParty(text);
     }
 
     private static boolean isNotInParty(String text) {
         return text.startsWith("You are not currently in a party") || text.startsWith("You are not in a party");
     }
 
-    private static boolean isStartLine(String text) {
-        return PARTY_LINE.matcher(text).matches() || isNotInParty(text);
+    @Override
+    protected String summary(List<String> lines) {
+        if (!PartyInfo.isInParty) return "not in a party";
+        return "leader " + PartyInfo.leader + ", " + PartyInfo.members.size() + " member(s): " + String.join(", ", PartyInfo.members);
     }
 
-    private static void onListReceived(List<String> lines) {
-        awaitingResponse = false;
-        parseLines(lines);
-        if (reportNext) {
-            reportNext = false;
-            if (!PartyInfo.isInParty) {
-                ModFunctions.sendSystemMessage("§a[Dev] Party scan: not in a party", false);
-            } else {
-                ModFunctions.sendSystemMessage("§a[Dev] Party scan: leader " + PartyInfo.leader + ", "
-                        + PartyInfo.members.size() + " member(s): " + String.join(", ", PartyInfo.members), false);
-            }
-        }
-    }
-
-    private static void parseLines(List<String> lines) {
+    @Override
+    protected void parse(List<String> lines) {
         PartyInfo.members.clear();
 
         if (lines.stream().noneMatch(line -> PARTY_LINE.matcher(line).matches())) {
@@ -147,18 +70,9 @@ public class PartyListParser {
 
         for (String line : lines) {
             line = line.trim();
-            if (line.isEmpty()) continue;
-
-            if (line.startsWith("Party Leader:")) {
-                PartyInfo.leader = extractName(line);
-            }
-
-            if (line.startsWith("Party Moderators:")) {
-                PartyInfo.members.addAll(extractMultipleNames(line));
-            }
-
-            if (line.startsWith("Party Members:")) {
-                PartyInfo.members.addAll(extractMultipleNames(line));
+            if (line.startsWith("Party Leader:")) PartyInfo.leader = names(line.replaceFirst("Party Leader: ", "")).stream().findFirst().orElse(null);
+            if (line.startsWith("Party Moderators:") || line.startsWith("Party Members:")) {
+                PartyInfo.members.addAll(names(line.replaceFirst("Party (Members|Moderators): ", "")));
             }
         }
 
@@ -170,31 +84,15 @@ public class PartyListParser {
         SSUIndicator.setPartyMembers(watched);
     }
 
-    private static String extractName(String line) {
-        String cleaned = line.replaceFirst("Party Leader: ", "");
-        cleaned = cleaned.replaceAll("\\[[^]]+] ", "");
-        cleaned = cleaned.replace("●", "").trim();
-        return cleaned;
-    }
-
-    private static List<String> extractMultipleNames(String line) {
-        String cleaned = line
-                .replaceFirst("Party (Members|Moderators): ", "")
-                .replaceAll("\\[[^]]+] ", "")
-                .replace("●", "");
-
-        String[] split = cleaned.split("\\s+");
-
+    private static List<String> names(String text) {
         List<String> names = new ArrayList<>();
-        for (String s : split) {
-            if (!s.isBlank()) {
-                names.add(s.trim());
-            }
+        for (String name : RANK.matcher(text).replaceAll("").replace("●", "").split("\\s+")) {
+            if (!name.isBlank()) names.add(name.trim());
         }
         return names;
     }
 
-    public static void clear() {
+    public void clear() {
         PartyInfo.isInParty = false;
         PartyInfo.leader = null;
         PartyInfo.members.clear();
@@ -202,11 +100,9 @@ public class PartyListParser {
         SSUIndicator.setPartyMembers(List.of());
     }
 
-    public static void reset() {
-        onJoinCommandHandled = false;
-        awaitingResponse = false;
-        reportNext = false;
-        expectingUntil = 0;
+    @Override
+    public void reset() {
+        super.reset();
         clear();
     }
 }

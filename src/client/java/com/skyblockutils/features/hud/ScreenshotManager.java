@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ClipboardUtils;
 import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.SSU;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -85,7 +86,7 @@ public class ScreenshotManager {
 
     private static void registerAndAdd(NativeImage image, String filename, Minecraft client) {
         int thumbHeight = (int) ((float) image.getHeight() / image.getWidth() * THUMBNAIL_WIDTH);
-        Identifier id = Identifier.fromNamespaceAndPath("strayers-skyblock-utils", "screenshot_" + counter++);
+        Identifier id = SSU.id("screenshot_" + counter++);
         client.getTextureManager().register(id, new DynamicTexture(() -> id.toString(), image));
         screenshots.add(new ScreenshotEntry(id, thumbHeight, System.currentTimeMillis(), 0L, State.VISIBLE, filename, 0L));
         currentY.add(0f);

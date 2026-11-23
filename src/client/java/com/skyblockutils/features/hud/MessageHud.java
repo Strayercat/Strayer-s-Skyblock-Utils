@@ -8,6 +8,7 @@ import com.skyblockutils.features.hud.layout.HudElement;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.features.hud.layout.HudManager;
 import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
@@ -409,7 +410,7 @@ public class MessageHud {
         List<String> parts = new ArrayList<>();
         for (ChatLayout.ParsedLine line : hovered.message().lines()) {
             if (line.type() == ChatLayout.LineType.SEPARATOR) continue;
-            String text = line.component().getString().replaceAll("§.", "").strip();
+            String text = TextUtils.strip(line.component()).strip();
             if (!text.isEmpty()) parts.add(text);
         }
         return parts.isEmpty() ? null : String.join("\n", parts);

@@ -1,32 +1,31 @@
 package com.skyblockutils.config;
 
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
+import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.hud.layout.HudEditScreen;
 import com.skyblockutils.features.voice.VoiceChat;
-import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.utils.CustomEntry;
 import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.SSU;
+import com.skyblockutils.utils.ScreenOpener;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 
 import java.util.function.Consumer;
 
 public class ClothConfigHandler {
     public static final String CONFIG_TITLE = "Strayer's Skyblock Utils (SSU) Config";
-    public static boolean configScreenRequested = false;
 
     public static Screen createConfigScreen(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTransparentBackground(false)
-                .setDefaultBackgroundTexture(Identifier.fromNamespaceAndPath("skyblockutils", "textures/gui/background.png"))
+                .setDefaultBackgroundTexture(SSU.id("textures/gui/background.png"))
                 .setTitle(Component.literal(CONFIG_TITLE))
                 .setSavingRunnable(ModConfig::save);
 
@@ -40,11 +39,6 @@ public class ClothConfigHandler {
         buildVoiceChatCategory(builder, eb);
 
         return builder.build();
-    }
-
-    public static void handleConfigScreen(Minecraft client) {
-        if (configScreenRequested) client.setScreenAndShow(createConfigScreen(client.gui.screen()));
-        configScreenRequested = false;
     }
 
     // General Settings
@@ -128,7 +122,7 @@ public class ClothConfigHandler {
 
         general.addEntry(new CustomEntry()
                 .addButton(Component.literal("Glowing Players GUI"), 120, CustomEntry.Alignment.LEFT, () ->
-                                GlowingPlayersGui.configScreenRequested = true
+                                ScreenOpener.openNextTick(GlowingPlayersGui::createConfigScreen)
                         , Component.literal("Open the glowing players config GUI")));
 
         general.addEntry(eb.startBooleanToggle(Component.literal("Ragebait button"), true)
@@ -221,7 +215,7 @@ public class ClothConfigHandler {
 
         hud.addEntry(new CustomEntry()
                 .addButton(Component.literal("Edit HUDs"), 120, CustomEntry.Alignment.LEFT, () ->
-                                HudEditScreen.requested = true
+                                ScreenOpener.openNextTick(HudEditScreen::new)
                         , Component.literal("Move, scale, hide and configure every SSU HUD, per location. Right click a HUD in the editor for its options")));
 
         hud.addEntry(eb.startBooleanToggle(Component.literal("Cat"), ModConfig.INSTANCE.cat)

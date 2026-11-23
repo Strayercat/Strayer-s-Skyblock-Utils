@@ -5,6 +5,7 @@ import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.TextUtils;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 
 public final class WikiLookup {
     private static final String SEARCH_URL = "https://hypixelskyblock.minecraft.wiki/index.php?search=";
+    private static final String HOME_URL = "https://hypixelskyblock.minecraft.wiki/";
     private static final Pattern STACK_COUNT = Pattern.compile("\\s+x\\d+$");
     private static final Pattern PET_LEVEL = Pattern.compile("^\\[Lvl \\d+]\\s*");
     private static final Pattern DECORATIONS = Pattern.compile("[✪➊➋➌➍➎⚚✿]");
@@ -59,7 +61,10 @@ public final class WikiLookup {
     }
 
     public static void open(ItemStack stack, Screen parent) {
-        if (stack == null || stack.isEmpty() || isMenuButton(stack)) return;
+        if (stack == null || stack.isEmpty() || isMenuButton(stack)) {
+            WikiBrowserScreen.open(HOME_URL, parent);
+        }
+
         String query = query(stack);
         if (query.isEmpty()) return;
 
@@ -93,7 +98,7 @@ public final class WikiLookup {
         ItemLore lore = stack.get(DataComponents.LORE);
         if (lore == null) return false;
         for (Component line : lore.lines()) {
-            if (line.getString().toLowerCase(Locale.ROOT).contains("click to view")) return true;
+            if (TextUtils.clean(line).toLowerCase(Locale.ROOT).startsWith("click to view")) return true;
         }
         return false;
     }
@@ -106,7 +111,7 @@ public final class WikiLookup {
     }
 
     private static String query(ItemStack stack) {
-        String name = originalName(stack).replaceAll("§.", "");
+        String name = TextUtils.strip(originalName(stack));
         name = DECORATIONS.matcher(name).replaceAll("");
         name = PET_LEVEL.matcher(name.trim()).replaceFirst("");
         name = STACK_COUNT.matcher(name).replaceFirst("");

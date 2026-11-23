@@ -3,6 +3,7 @@ package com.skyblockutils.features.coop;
 import com.skyblockutils.ModFunctions;
 import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.utils.SSUIndicator;
+import com.skyblockutils.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.component.DataComponents;
@@ -72,7 +73,7 @@ public class CoopListParser {
         if (expectOpenUntil != 0 || containerId != -1) return;
         if (client.player == null || client.player.containerMenu != client.player.inventoryMenu) return;
         if (client.getConnection() == null) return;
-        if (ModFunctions.isWorldLoaded()) return;
+        if (ModFunctions.isWorldNotReady()) return;
         if (!HypixelLocation.isSkyBlock()) return;
         if (ModFunctions.isInDungeons(client)) return;
 
@@ -96,7 +97,7 @@ public class CoopListParser {
             return false;
         }
         if (System.currentTimeMillis() > expectOpenUntil) return false;
-        if (!title.getString().replaceAll("§.", "").trim().startsWith("Profile:")) {
+        if (!TextUtils.clean(title).startsWith("Profile:")) {
             expectOpenUntil = 0;
             muteSoundsUntil = 0;
             return false;
@@ -172,7 +173,7 @@ public class CoopListParser {
 
         for (ItemStack stack : items) {
             if (stack.isEmpty() || !stack.is(Items.PLAYER_HEAD) || !hasStatusLine(stack)) continue;
-            String name = stack.getHoverName().getString().replaceAll("§.", "").trim();
+            String name = TextUtils.clean(stack.getHoverName());
             Matcher m = MEMBER.matcher(name);
             if (!m.matches()) continue;
             String member = m.group(1);
@@ -188,7 +189,7 @@ public class CoopListParser {
         ItemLore lore = stack.get(DataComponents.LORE);
         if (lore == null) return false;
         for (Component line : lore.lines()) {
-            if (line.getString().replaceAll("§.", "").trim().startsWith("Status:")) return true;
+            if (TextUtils.clean(line).startsWith("Status:")) return true;
         }
         return false;
     }
