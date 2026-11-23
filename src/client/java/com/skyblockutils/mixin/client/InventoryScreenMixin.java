@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -27,19 +26,14 @@ public abstract class InventoryScreenMixin extends AbstractRecipeBookScreen<@Not
         super(menu, recipeBookComponent, inventory, title);
     }
 
-    @Inject(method = "getRecipeBookButtonPosition", at = @At("HEAD"), cancellable = true)
-    private void ssu$markRecipeButton(CallbackInfoReturnable<ScreenPosition> cir) {
-        if (!InventoryButtons.active()) return;
-        cir.setReturnValue(new ScreenPosition(leftPos + InventoryButtons.VANILLA_RECIPE_X, topPos + InventoryButtons.VANILLA_RECIPE_Y));
-    }
-
     @Inject(method = "init", at = @At("TAIL"))
     private void ssu$removeRecipeButton(CallbackInfo ci) {
         if (!InventoryButtons.active()) return;
-        int x = leftPos + InventoryButtons.VANILLA_RECIPE_X;
-        int y = topPos + InventoryButtons.VANILLA_RECIPE_Y;
+        ScreenPosition position = getRecipeBookButtonPosition();
         for (GuiEventListener child : List.copyOf(children())) {
-            if (child instanceof ImageButton button && button.getX() == x && button.getY() == y) removeWidget(button);
+            if (child instanceof ImageButton button && button.getX() == position.x() && button.getY() == position.y()) {
+                removeWidget(button);
+            }
         }
     }
 

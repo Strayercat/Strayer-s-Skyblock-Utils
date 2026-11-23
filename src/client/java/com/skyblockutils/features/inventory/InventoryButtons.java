@@ -21,8 +21,6 @@ public final class InventoryButtons {
     public static final int AREA_H = 79;
     public static final int BUTTON_W = 18;
     public static final int BUTTON_H = 16;
-    public static final int VANILLA_RECIPE_X = AREA_X;
-    public static final int VANILLA_RECIPE_Y = AREA_Y;
 
     private static final int FIRST_X = 96;
     private static final int FIRST_Y = 5;
@@ -48,10 +46,7 @@ public final class InventoryButtons {
     private static boolean deferred;
     private static Identifier deferredTexture;
 
-    private record Entry(ItemStack icon, String tooltip, String command, boolean recipeBook) {
-        Entry(ItemStack icon, String tooltip, String command) {
-            this(icon, tooltip, command, false);
-        }
+    private record Entry(ItemStack icon, String tooltip, String command) {
     }
 
     private record Row(String label, List<Entry> entries) {
@@ -67,7 +62,12 @@ public final class InventoryButtons {
                     new Entry(new ItemStack(Items.LAVA_BUCKET), "Clear All Stashes", "clearstash")
             )),
             new Row("TODO", List.of(EMPTY, EMPTY, EMPTY, EMPTY)),
-            new Row("Utility", List.of(new Entry(ItemStack.EMPTY, "Recipe Book", "recipebook", true), EMPTY, EMPTY, EMPTY))
+            new Row("Utility", List.of(
+                    new Entry(new ItemStack(Items.KNOWLEDGE_BOOK), "Recipe Book", "recipebook"),
+                    EMPTY,
+                    EMPTY,
+                    EMPTY
+            ))
     );
 
     private InventoryButtons() {
@@ -118,7 +118,7 @@ public final class InventoryButtons {
         draw(graphics, deferredTexture, deferredLeft, deferredTop, mouseX, mouseY);
     }
 
-    private static void drawButton(GuiGraphicsExtractor graphics, int x, int y, boolean hovered, boolean keepBook) {
+    private static void drawButton(GuiGraphicsExtractor graphics, int x, int y, boolean hovered) {
         Identifier sprite = RecipeBookComponent.RECIPE_BUTTON_SPRITES.get(true, hovered);
         int halfW = BUTTON_W / 2;
         int halfH = BUTTON_H / 2;
@@ -126,7 +126,6 @@ public final class InventoryButtons {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, SPRITE_W, SPRITE_H, SPRITE_W - halfW, 0, x + halfW, y, halfW, halfH);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, SPRITE_W, SPRITE_H, 0, SPRITE_H - halfH, x, y + halfH, halfW, halfH);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, SPRITE_W, SPRITE_H, SPRITE_W - halfW, SPRITE_H - halfH, x + halfW, y + halfH, halfW, halfH);
-        if (keepBook) return;
         for (int fy = 2; fy < BUTTON_H - 2; fy += FACE_H) {
             int h = Math.min(FACE_H, BUTTON_H - 2 - fy);
             for (int fx = 2; fx < BUTTON_W - 2; fx += FACE_W) {
@@ -149,7 +148,7 @@ public final class InventoryButtons {
                 Entry entry = entries.get(i);
                 int x = left + buttonX(i);
                 int y = top + buttonY(row);
-                drawButton(graphics, x, y, entry == hovered, entry.recipeBook());
+                drawButton(graphics, x, y, entry == hovered);
                 if (entry.icon().isEmpty()) continue;
                 graphics.pose().pushMatrix();
                 graphics.pose().translate(x + 3, y + 2);
