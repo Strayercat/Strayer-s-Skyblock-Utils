@@ -48,7 +48,6 @@ public class SsuHud {
     private static final float CAT_SCALE = 1.0f / 6.0f;
     private static final int CAT_TEXTURE_SIZE = 418;
 
-    private static final int COLOR_TEXT = ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT);
 
     public static final HudElement ELEMENT = new HudElement("ssu_hud", "SSU HUD") {
 
@@ -192,14 +191,14 @@ public class SsuHud {
         List<HudLine> lines = new ArrayList<>();
         lines.add(HudLine.rich(SSU.getHudTitle()));
         lines.add(HudLine.divider());
-        if (ELEMENT.show("time")) lines.add(HudLine.of("Current time: " + (ELEMENT.show("time12h") ? "12:00 PM" : "12:00"), COLOR_TEXT));
-        if (ELEMENT.show("ping")) lines.add(HudLine.of("Ping: 42", COLOR_TEXT));
-        if (ELEMENT.show("tps")) lines.add(HudLine.of("Server tps: 20.0", COLOR_TEXT));
-        if (ELEMENT.show("fps")) lines.add(HudLine.of("Fps: 144", COLOR_TEXT));
+        if (ELEMENT.show("time")) lines.add(HudLine.of("Current time: " + (ELEMENT.show("time12h") ? "12:00 PM" : "12:00"), textColor()));
+        if (ELEMENT.show("ping")) lines.add(HudLine.of("Ping: 42", textColor()));
+        if (ELEMENT.show("tps")) lines.add(HudLine.of("Server tps: 20.0", textColor()));
+        if (ELEMENT.show("fps")) lines.add(HudLine.of("Fps: 144", textColor()));
         if (ELEMENT.show("party")) {
             lines.add(HudLine.divider());
             lines.add(HudLine.of("Party Info", COLOR_TITLE));
-            lines.add(HudLine.of("Not currently in a party", COLOR_TEXT));
+            lines.add(HudLine.of("Not currently in a party", textColor()));
         }
         return lines;
     }
@@ -216,22 +215,22 @@ public class SsuHud {
                     ? DateTimeFormatter.ofPattern("h:mm a")
                     : DateTimeFormatter.ofPattern("H:mm");
             String time = LocalTime.now().format(fmt).toUpperCase().replaceAll("\\.", "");
-            lines.add(HudLine.of("Current time: " + time, COLOR_TEXT));
+            lines.add(HudLine.of("Current time: " + time, textColor()));
             anyGeneralInfo = true;
         }
 
         if (ELEMENT.show("ping")) {
-            lines.add(HudLine.of("Ping: " + ModFunctions.ping, COLOR_TEXT));
+            lines.add(HudLine.of("Ping: " + ModFunctions.ping, textColor()));
             anyGeneralInfo = true;
         }
 
         if (ELEMENT.show("tps")) {
-            lines.add(HudLine.of("Server tps: " + String.format("%.1f", ModFunctions.tps), COLOR_TEXT));
+            lines.add(HudLine.of("Server tps: " + String.format("%.1f", ModFunctions.tps), textColor()));
             anyGeneralInfo = true;
         }
 
         if (ELEMENT.show("fps")) {
-            lines.add(HudLine.of("Fps: " + client.getFps(), COLOR_TEXT));
+            lines.add(HudLine.of("Fps: " + client.getFps(), textColor()));
             anyGeneralInfo = true;
         }
 
@@ -249,7 +248,7 @@ public class SsuHud {
                 if (anyGeneralInfo) addDivider(lines);
                 lines.add(HudLine.of("Daily Tasks: ", COLOR_TITLE));
                 for (DailyReminders.ReminderType type : DailyReminders.ReminderType.values()) {
-                    lines.add(HudLine.of(type + ": " + (ModConfig.INSTANCE.completedTypes.contains(type) ? "§aCompleted" : "§cIncomplete"), COLOR_TEXT));
+                    lines.add(HudLine.of(type + ": " + (ModConfig.INSTANCE.completedTypes.contains(type) ? "§aCompleted" : "§cIncomplete"), textColor()));
                 }
             }
         }
@@ -271,7 +270,7 @@ public class SsuHud {
         if (location.equals("Your Island") && ELEMENT.show("funfact")) {
             if (!funFactHandled) funFact = FunFacts.funFacts.get((int) (Math.random() * FunFacts.funFacts.size()));
             if (anyGeneralInfo) addDivider(lines);
-            lines.add(HudLine.of("Fun fact: " + funFact, COLOR_TEXT));
+            lines.add(HudLine.of("Fun fact: " + funFact, textColor()));
             funFactHandled = true;
         }
 
@@ -302,28 +301,32 @@ public class SsuHud {
         lines.add(HudLine.of("Party Info", COLOR_TITLE));
 
         if (!PartyInfo.isInParty) {
-            lines.add(HudLine.of("Not currently in a party", COLOR_TEXT));
+            lines.add(HudLine.of("Not currently in a party", textColor()));
             return;
         }
 
         lines.add(HudLine.of("Leader:", COLOR_SUBTITLE));
-        lines.add(HudLine.of(PartyInfo.leader == null ? "Loading..." : PartyInfo.leader, COLOR_TEXT));
+        lines.add(HudLine.of(PartyInfo.leader == null ? "Loading..." : PartyInfo.leader, textColor()));
         lines.add(HudLine.of("Members:", COLOR_SUBTITLE));
 
         String memberList = PartyInfo.members.toString().replace("[", "").replace("]", "");
-        lines.add(HudLine.of(memberList, COLOR_TEXT));
+        lines.add(HudLine.of(memberList, textColor()));
     }
 
     private static void addDungeonSection(List<HudLine> lines, boolean preceded) {
         if (preceded) addDivider(lines);
         lines.add(HudLine.of("Dungeon HUD", COLOR_TITLE));
-        lines.add(HudLine.of("Downtime requested: " + (DowntimeTracker.downtimeRequested ? "Yes" : "No"), COLOR_TEXT));
+        lines.add(HudLine.of("Downtime requested: " + (DowntimeTracker.downtimeRequested ? "Yes" : "No"), textColor()));
 
         if (DowntimeTracker.downtimeRequested)
-            lines.add(HudLine.of("Requested by: " + DowntimeTracker.requesterUsername, COLOR_TEXT));
+            lines.add(HudLine.of("Requested by: " + DowntimeTracker.requesterUsername, textColor()));
 
-        lines.add(HudLine.of("Floor Auto-Rejoin: " + (AutoRejoin.isEnabled() ? "On" : "Off"), COLOR_TEXT));
+        lines.add(HudLine.of("Floor Auto-Rejoin: " + (AutoRejoin.isEnabled() ? "On" : "Off"), textColor()));
         if (AutoRejoin.isEnabled())
-            lines.add(HudLine.of("Current floor: " + AutoRejoin.floor(), COLOR_TEXT));
+            lines.add(HudLine.of("Current floor: " + AutoRejoin.floor(), textColor()));
+    }
+
+    private static int textColor() {
+        return ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.TEXT);
     }
 }

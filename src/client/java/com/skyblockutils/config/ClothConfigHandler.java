@@ -53,7 +53,7 @@ public class ClothConfigHandler {
                     String name = style.name().charAt(0) + style.name().substring(1).toLowerCase();
                     return Component.literal(name).withColor(rgb);
                 })
-                .setSaveConsumer(v -> ModConfig.INSTANCE.colorStyle = v).requireRestart().build());
+                .setSaveConsumer(v -> ModConfig.INSTANCE.colorStyle = v).build());
 
         general.addEntry(eb.startEnumSelector(Component.literal("Notification Style"), ModStyle.NotificationStyle.class, ModConfig.INSTANCE.notificationStyle)
                 .setDefaultValue(ModStyle.NotificationStyle.ROUNDED)

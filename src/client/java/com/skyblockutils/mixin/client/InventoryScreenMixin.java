@@ -2,6 +2,8 @@ package com.skyblockutils.mixin.client;
 
 import com.skyblockutils.features.inventory.InventoryButtons;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -17,6 +19,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
+
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractRecipeBookScreen<@NotNull InventoryMenu> {
     protected InventoryScreenMixin(InventoryMenu menu, RecipeBookComponent<?> recipeBookComponent, Inventory inventory, Component title) {
@@ -24,9 +28,19 @@ public abstract class InventoryScreenMixin extends AbstractRecipeBookScreen<@Not
     }
 
     @Inject(method = "getRecipeBookButtonPosition", at = @At("HEAD"), cancellable = true)
-    private void ssu$moveRecipeButton(CallbackInfoReturnable<ScreenPosition> cir) {
+    private void ssu$markRecipeButton(CallbackInfoReturnable<ScreenPosition> cir) {
         if (!InventoryButtons.active()) return;
-        cir.setReturnValue(new ScreenPosition(leftPos + InventoryButtons.RECIPE_X, topPos + InventoryButtons.RECIPE_Y));
+        cir.setReturnValue(new ScreenPosition(leftPos + InventoryButtons.VANILLA_RECIPE_X, topPos + InventoryButtons.VANILLA_RECIPE_Y));
+    }
+
+    @Inject(method = "init", at = @At("TAIL"))
+    private void ssu$removeRecipeButton(CallbackInfo ci) {
+        if (!InventoryButtons.active()) return;
+        int x = leftPos + InventoryButtons.VANILLA_RECIPE_X;
+        int y = topPos + InventoryButtons.VANILLA_RECIPE_Y;
+        for (GuiEventListener child : List.copyOf(children())) {
+            if (child instanceof ImageButton button && button.getX() == x && button.getY() == y) removeWidget(button);
+        }
     }
 
     @Inject(method = "extractLabels", at = @At("HEAD"), cancellable = true)
