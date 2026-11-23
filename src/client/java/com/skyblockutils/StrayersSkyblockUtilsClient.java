@@ -60,6 +60,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
 
+import java.util.function.Supplier;
+
 public class StrayersSkyblockUtilsClient implements ClientModInitializer {
     public static boolean isInSkyblock = false;
     public static boolean isOnHypixel = false;
@@ -97,13 +99,13 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             ModFunctions.onLeave();
         });
 
-        registerHud("ssu_hud", SsuHud.ELEMENT);
-        registerHud("ssu_carry_hud", CarryTracker.ELEMENT);
-        registerHud("ssu_slayer_tracker", SlayerTracker.ELEMENT);
+        registerHud("ssu_hud", () -> SsuHud.ELEMENT);
+        registerHud("ssu_carry_hud", () -> CarryTracker.ELEMENT);
+        registerHud("ssu_slayer_tracker", () -> SlayerTracker.ELEMENT);
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, SSU.id("ssu_system_messages"), (context, _) -> SeparatedChatHud.render(context));
-        registerHud("ssu_voice_chat", VoiceHud.ELEMENT);
-        registerHud("ssu_stash_hud", StashHud.ELEMENT);
-        registerHud("ssu_bestiary_hud", BestiaryHud.ELEMENT);
+        registerHud("ssu_voice_chat", () -> VoiceHud.ELEMENT);
+        registerHud("ssu_stash_hud", () -> StashHud.ELEMENT);
+        registerHud("ssu_bestiary_hud", () -> BestiaryHud.ELEMENT);
         HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, SSU.id("ssu_custom_scoreboard"), (context, _) -> HudManager.render(CustomSidebar.ELEMENT, context));
 
         LevelRenderEvents.END_MAIN.register(context -> {
@@ -194,8 +196,8 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
         ClientChunkEvents.CHUNK_LOAD.register(HeadRestorer::onChunkLoad);
     }
 
-    private static void registerHud(String id, HudElement element) {
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, SSU.id(id), (context, _) -> HudManager.render(element, context));
+    private static void registerHud(String id, Supplier<HudElement> element) {
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, SSU.id(id), (context, _) -> HudManager.render(element.get(), context));
     }
 
     private static final class Filtered {

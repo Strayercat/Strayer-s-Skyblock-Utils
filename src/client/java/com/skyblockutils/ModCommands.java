@@ -169,7 +169,7 @@ public class ModCommands {
                 .suggests(suggest(ModCommands::onlinePlayers))
                 .executes(run(context -> GlowingPlayers.add(StringArgumentType.getString(context, "username"), 0xFFAA00, false, null)))
                 .then(ClientCommands.argument("color", StringArgumentType.string())
-                        .suggests(suggest(GlowingPlayers.MINECRAFT_COLORS::keySet))
+                        .suggests(suggest(() -> GlowingPlayers.MINECRAFT_COLORS.keySet()))
                         .executes(run(context -> {
                             String colorName = StringArgumentType.getString(context, "color").toUpperCase(Locale.ROOT);
                             int color = GlowingPlayers.MINECRAFT_COLORS.getOrDefault(colorName, 0xFFAA00);
