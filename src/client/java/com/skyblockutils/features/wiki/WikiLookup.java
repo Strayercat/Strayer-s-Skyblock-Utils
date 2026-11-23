@@ -62,14 +62,15 @@ public final class WikiLookup {
 
     public static void open(ItemStack stack, Screen parent) {
         if (stack == null || stack.isEmpty() || isMenuButton(stack)) {
-            WikiBrowserScreen.open(HOME_URL, parent);
+            openUrl(HOME_URL, parent);
+            return;
         }
 
         String query = query(stack);
-        if (query.isEmpty()) return;
+        openUrl(query.isEmpty() ? HOME_URL : SEARCH_URL + URLEncoder.encode(query, StandardCharsets.UTF_8), parent);
+    }
 
-        String url = SEARCH_URL + URLEncoder.encode(query, StandardCharsets.UTF_8);
-
+    private static void openUrl(String url, Screen parent) {
         if (ModConfig.INSTANCE.wikiInGame && FabricLoader.getInstance().isModLoaded(BROWSER_MOD)) {
             WikiBrowserScreen.open(url, parent);
         } else {
