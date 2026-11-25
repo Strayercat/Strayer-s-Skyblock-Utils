@@ -118,7 +118,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
             OnScreenNotification.tick();
             ObviousGemstones.tick(client);
             CustomBreakingAnimation.tick();
-            ScreenOpener.tick(client);
+            ScreenOpener.tick();
             ModFunctions.handleNonSkyblockExclusiveKeybinds(client);
             ScreenshotManager.tick();
             ChatBlockRouter.tick();
