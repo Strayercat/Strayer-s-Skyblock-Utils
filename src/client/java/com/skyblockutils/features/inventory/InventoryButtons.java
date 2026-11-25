@@ -10,15 +10,19 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ResolvableProfile;
 
 import java.util.List;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import static net.minecraft.ChatFormatting.*;
@@ -56,31 +60,54 @@ public final class InventoryButtons {
     private static boolean deferred;
     private static Identifier deferredTexture;
 
-    private record Entry(ItemStack item, Identifier sprite, String tooltip, String command,
+    private record Entry(Supplier<ItemStack> item, Identifier sprite, String tooltip, String command,
                          UnaryOperator<MutableComponent> style) {
         static Entry item(ItemStack item, String tooltip, String command, ChatFormatting... formats) {
-            return new Entry(item, null, tooltip, command, text -> text.withStyle(formats));
+            return new Entry(() -> item, null, tooltip, command, text -> text.withStyle(formats));
         }
 
         static Entry item(ItemStack item, String tooltip, String command, int color) {
-            return new Entry(item, null, tooltip, command, text -> text.withColor(color));
+            return new Entry(() -> item, null, tooltip, command, text -> text.withColor(color));
         }
 
         static Entry item(ItemStack item, String tooltip, String command, IntSupplier color) {
-            return new Entry(item, null, tooltip, command, text -> text.withColor(color.getAsInt()));
+            return new Entry(() -> item, null, tooltip, command, text -> text.withColor(color.getAsInt()));
+        }
+
+        static Entry playerHead(String tooltip, String command, ChatFormatting... formats) {
+            return new Entry(InventoryButtons::ownHead, null, tooltip, command, text -> text.withStyle(formats));
         }
 
         static Entry sprite(String path, String tooltip, String command, ChatFormatting... formats) {
-            return new Entry(ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withStyle(formats));
+            return new Entry(() -> ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withStyle(formats));
         }
 
         static Entry sprite(String path, String tooltip, String command, int color) {
-            return new Entry(ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withColor(color));
+            return new Entry(() -> ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withColor(color));
         }
 
         static Entry sprite(String path, String tooltip, String command, IntSupplier color) {
-            return new Entry(ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withColor(color.getAsInt()));
+            return new Entry(() -> ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withColor(color.getAsInt()));
         }
+    }
+
+    private static ItemStack ownHead;
+
+    private static ItemStack ownHead() {
+        Minecraft client = Minecraft.getInstance();
+        if (ownHead != null) return ownHead;
+        if (client.player == null || client.getConnection() == null) return new ItemStack(Items.PLAYER_HEAD);
+
+        PlayerInfo info = client.getConnection().getPlayerInfo(client.player.getUUID());
+        if (info == null) return new ItemStack(Items.PLAYER_HEAD);
+
+        ownHead = new ItemStack(Items.PLAYER_HEAD);
+        ownHead.set(DataComponents.PROFILE, ResolvableProfile.createResolved(info.getProfile()));
+        return ownHead;
+    }
+
+    public static void resetHead() {
+        ownHead = null;
     }
 
     private record Row(String label, List<Entry> entries) {
@@ -97,7 +124,7 @@ public final class InventoryButtons {
                     Entry.item(new ItemStack(Items.KNOWLEDGE_BOOK), "Recipe Book", "recipebook", GREEN),
                     Entry.sprite("inventory/bestiary", "Bestiary", "be"),
                     Entry.item(new ItemStack(Items.CLOCK), "Calendar", "calendar", YELLOW),
-                    Entry.item(new ItemStack(Items.PLAYER_HEAD), "Stats", "stats", AQUA)
+                    Entry.playerHead("Stats", "stats", AQUA)
             )),
             new Row("SSU", List.of(
                     Entry.sprite("inventory/wiki", "Wiki", "ssu wiki", ModStyle.titleEnd()),
@@ -177,11 +204,12 @@ public final class InventoryButtons {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, entry.sprite(), x + 3, y + 2, ICON_SIZE, ICON_SIZE);
             return;
         }
-        if (entry.item().isEmpty()) return;
+        ItemStack item = entry.item().get();
+        if (item.isEmpty()) return;
         graphics.pose().pushMatrix();
         graphics.pose().translate(x + 3, y + 2);
         graphics.pose().scale(ICON_SCALE, ICON_SCALE);
-        graphics.fakeItem(entry.item(), 0, 0);
+        graphics.fakeItem(item, 0, 0);
         graphics.pose().popMatrix();
     }
 

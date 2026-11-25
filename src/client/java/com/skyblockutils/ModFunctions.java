@@ -14,6 +14,7 @@ import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.features.hud.SeparatedChatHud;
 import com.skyblockutils.features.hud.SsuHud;
 import com.skyblockutils.features.hud.StashHud;
+import com.skyblockutils.features.inventory.InventoryButtons;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.features.wiki.WikiLookup;
@@ -62,6 +63,7 @@ public class ModFunctions {
         CoopListParser.reset();
         BestiaryHud.reset();
         StashHud.reset();
+        InventoryButtons.resetHead();
         resetSession();
     }
 
