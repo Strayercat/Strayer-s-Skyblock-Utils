@@ -6,19 +6,26 @@ import net.minecraft.client.gui.screens.Screen;
 import java.util.function.UnaryOperator;
 
 public final class ScreenOpener {
-    private static UnaryOperator<Screen> pending;
+    private static Runnable pending;
 
     private ScreenOpener() {
     }
 
     public static void openNextTick(UnaryOperator<Screen> factory) {
-        pending = factory;
+        runNextTick(() -> {
+            Minecraft client = Minecraft.getInstance();
+            client.setScreenAndShow(factory.apply(client.gui.screen()));
+        });
     }
 
-    public static void tick(Minecraft client) {
+    public static void runNextTick(Runnable action) {
+        pending = action;
+    }
+
+    public static void tick() {
         if (pending == null) return;
-        UnaryOperator<Screen> factory = pending;
+        Runnable action = pending;
         pending = null;
-        client.setScreenAndShow(factory.apply(client.gui.screen()));
+        action.run();
     }
 }

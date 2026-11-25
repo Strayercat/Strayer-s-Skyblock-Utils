@@ -45,10 +45,6 @@ public class ModFunctions {
 
     private static long lastPingMeasure = 0;
 
-    public static int mainColor() {
-        return ModStyle.getColor(ModConfig.INSTANCE.colorStyle, ModStyle.ColorType.MAIN);
-    }
-
     public static void onJoin() {
         GuiBlocker.shouldHideScreen = false;
         UpdateChecker.init(Minecraft.getInstance());
@@ -124,7 +120,7 @@ public class ModFunctions {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null) return Component.empty();
 
-        int color = mainColor();
+        int color = ModStyle.main();
         return Component.empty()
                 .append(Component.literal("X: ").withColor(color)).append(String.valueOf((int) client.player.getX()))
                 .append(Component.literal(" Y: ").withColor(color)).append(String.valueOf((int) client.player.getY()))

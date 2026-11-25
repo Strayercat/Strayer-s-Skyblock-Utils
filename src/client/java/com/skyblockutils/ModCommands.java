@@ -28,16 +28,14 @@ import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.features.slayer.CarryTracker;
 import com.skyblockutils.features.slayer.SlayerTracker;
+import com.skyblockutils.features.wiki.WikiLookup;
 import com.skyblockutils.hypixel.HypixelLocation;
-import com.skyblockutils.utils.FuzzySearch;
-import com.skyblockutils.utils.MarkCoordinates;
-import com.skyblockutils.utils.OnScreenNotification;
-import com.skyblockutils.utils.ScreenOpener;
-import com.skyblockutils.utils.SideBarUtils;
-import com.skyblockutils.utils.SkyblockAreas;
+import com.skyblockutils.utils.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
 
@@ -71,6 +69,7 @@ public class ModCommands {
                 .then(glowingPlayers())
                 .then(dev())
                 .then(npcFinder())
+                .then(wiki())
                 .then(ClientCommands.literal("partyinvites").executes(run(ModCommands::showPartyInvites)))
                 .then(disableReminder()));
 
@@ -227,7 +226,15 @@ public class ModCommands {
                             client.gui.hud.getChat().addClientSystemMessage(Component.literal("Coordinates cleared"));
                         }))))
                 .then(ClientCommands.literal("title").executes(run(() ->
-                        ModFunctions.showTitle(client, Component.literal("TEST TITLE").withColor(ModFunctions.mainColor()), 20, true))));
+                        ModFunctions.showTitle(client, Component.literal("TEST TITLE").withColor(ModStyle.main()), 20, true))));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> wiki() {
+        return ClientCommands.literal("wiki").executes(run(() -> {
+            Screen current = Minecraft.getInstance().gui.screen();
+            Screen parent = current instanceof ChatScreen ? null : current;
+            ScreenOpener.runNextTick(() -> WikiLookup.open(null, parent));
+        }));
     }
 
     private static LiteralArgumentBuilder<FabricClientCommandSource> npcFinder() {

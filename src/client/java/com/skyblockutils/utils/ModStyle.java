@@ -1,5 +1,7 @@
 package com.skyblockutils.utils;
 
+import com.skyblockutils.config.ModConfig;
+
 public class ModStyle {
     public static final int COLOR_TITLE = 0xFFFFFFFF;
     public static final int COLOR_SUBTITLE = 0xFFAAAAAA;
@@ -39,8 +41,8 @@ public class ModStyle {
                     case SCREENSHOT -> 0xFF652000;
                 };
                 case CANDY -> switch (type) {
-                    case TITLE_START -> 0xFF69B4;
-                    case TITLE_END -> 0xFF1493;
+                    case TITLE_START -> 0xFF1493;
+                    case TITLE_END -> 0xFF69B4;
                     case MAIN -> 0xFFFF69B4;
                     case TEXT -> 0xFFFFD1DC;
                     case WAYPOINT -> 0xFF69B5;
@@ -62,8 +64,35 @@ public class ModStyle {
         LEGACY, ROUNDED
     }
 
-
     public static int getColor(ColorStyle style, ColorType type) {
         return style.getColor(type);
+    }
+
+    public static int current(ColorType type) {
+        return ModConfig.INSTANCE.colorStyle.getColor(type);
+    }
+
+    public static int titleStart() {
+        return current(ColorType.TITLE_START);
+    }
+
+    public static int titleEnd() {
+        return current(ColorType.TITLE_END);
+    }
+
+    public static int main() {
+        return current(ColorType.MAIN);
+    }
+
+    public static int text() {
+        return current(ColorType.TEXT);
+    }
+
+    public static int waypoint() {
+        return current(ColorType.WAYPOINT);
+    }
+
+    public static int screenshot() {
+        return current(ColorType.SCREENSHOT);
     }
 }

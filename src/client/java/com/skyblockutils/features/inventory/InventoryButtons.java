@@ -1,6 +1,10 @@
 package com.skyblockutils.features.inventory;
 
 import com.skyblockutils.StrayersSkyblockUtilsClient;
+import com.skyblockutils.utils.ModStyle;
+import com.skyblockutils.utils.SSU;
+import net.minecraft.ChatFormatting;
+import net.minecraft.ChatFormatting.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -8,11 +12,16 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
+import java.util.function.IntSupplier;
+import java.util.function.UnaryOperator;
+
+import static net.minecraft.ChatFormatting.*;
 
 public final class InventoryButtons {
     public static final int AREA_X = 96;
@@ -29,6 +38,7 @@ public final class InventoryButtons {
     private static final int LABEL_COLOR = -12566464;
     private static final float LABEL_SCALE = 0.75f;
     private static final float ICON_SCALE = 0.75f;
+    private static final int ICON_SIZE = 12;
     private static final int STRIP_U = 96;
     private static final int STRIP_V = 4;
     private static final int STRIP_H = 12;
@@ -46,27 +56,54 @@ public final class InventoryButtons {
     private static boolean deferred;
     private static Identifier deferredTexture;
 
-    private record Entry(ItemStack icon, String tooltip, String command) {
+    private record Entry(ItemStack item, Identifier sprite, String tooltip, String command,
+                         UnaryOperator<MutableComponent> style) {
+        static Entry item(ItemStack item, String tooltip, String command, ChatFormatting... formats) {
+            return new Entry(item, null, tooltip, command, text -> text.withStyle(formats));
+        }
+
+        static Entry item(ItemStack item, String tooltip, String command, int color) {
+            return new Entry(item, null, tooltip, command, text -> text.withColor(color));
+        }
+
+        static Entry item(ItemStack item, String tooltip, String command, IntSupplier color) {
+            return new Entry(item, null, tooltip, command, text -> text.withColor(color.getAsInt()));
+        }
+
+        static Entry sprite(String path, String tooltip, String command, ChatFormatting... formats) {
+            return new Entry(ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withStyle(formats));
+        }
+
+        static Entry sprite(String path, String tooltip, String command, int color) {
+            return new Entry(ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withColor(color));
+        }
+
+        static Entry sprite(String path, String tooltip, String command, IntSupplier color) {
+            return new Entry(ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withColor(color.getAsInt()));
+        }
     }
 
     private record Row(String label, List<Entry> entries) {
     }
 
-    private static final Entry EMPTY = new Entry(ItemStack.EMPTY, null, null);
-
     private static final List<Row> ROWS = List.of(
             new Row("Stashes", List.of(
-                    new Entry(new ItemStack(Items.BUNDLE), "Open Material Stash", "viewstash material"),
-                    new Entry(new ItemStack(Items.ITEM_FRAME), "Open Item Stash", "viewstash item"),
-                    new Entry(new ItemStack(Items.HOPPER), "Pickup All Stashes", "pickupstash"),
-                    new Entry(new ItemStack(Items.LAVA_BUCKET), "Clear All Stashes", "clearstash")
+                    Entry.item(new ItemStack(Items.BUNDLE), "Open Material Stash", "viewstash material"),
+                    Entry.item(new ItemStack(Items.ITEM_FRAME), "Open Item Stash", "viewstash item"),
+                    Entry.item(new ItemStack(Items.HOPPER), "Pickup All Stashes", "pickupstash", GREEN),
+                    Entry.item(new ItemStack(Items.LAVA_BUCKET), "Clear All Stashes", "clearstash", RED)
             )),
-            new Row("TODO", List.of(EMPTY, EMPTY, EMPTY, EMPTY)),
             new Row("Utility", List.of(
-                    new Entry(new ItemStack(Items.KNOWLEDGE_BOOK), "Recipe Book", "recipebook"),
-                    EMPTY,
-                    EMPTY,
-                    EMPTY
+                    Entry.item(new ItemStack(Items.KNOWLEDGE_BOOK), "Recipe Book", "recipebook", GREEN),
+                    Entry.sprite("inventory/bestiary", "Bestiary", "be"),
+                    Entry.item(new ItemStack(Items.CLOCK), "Calendar", "calendar", YELLOW),
+                    Entry.item(new ItemStack(Items.PLAYER_HEAD), "Stats", "stats", AQUA)
+            )),
+            new Row("SSU", List.of(
+                    Entry.sprite("inventory/wiki", "Wiki", "ssu wiki", ModStyle.titleEnd()),
+                    Entry.sprite("inventory/glowing_player", "Glowing Players", "ssu glowingplayers gui", ModStyle.titleEnd()),
+                    Entry.sprite("inventory/hud", "SSU HUD", "ssu hud", ModStyle.titleEnd()),
+                    Entry.sprite("inventory/config", "SSU Config", "ssu config", ModStyle.titleEnd())
             ))
     );
 
@@ -135,6 +172,19 @@ public final class InventoryButtons {
         }
     }
 
+    private static void drawIcon(GuiGraphicsExtractor graphics, Entry entry, int x, int y) {
+        if (entry.sprite() != null) {
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, entry.sprite(), x + 3, y + 2, ICON_SIZE, ICON_SIZE);
+            return;
+        }
+        if (entry.item().isEmpty()) return;
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x + 3, y + 2);
+        graphics.pose().scale(ICON_SCALE, ICON_SCALE);
+        graphics.fakeItem(entry.item(), 0, 0);
+        graphics.pose().popMatrix();
+    }
+
     private static void draw(GuiGraphicsExtractor graphics, Identifier inventoryTexture, int left, int top, int mouseX, int mouseY) {
         for (int y = 0; y < AREA_H; y += STRIP_H) {
             int h = Math.min(STRIP_H, AREA_H - y);
@@ -149,12 +199,7 @@ public final class InventoryButtons {
                 int x = left + buttonX(i);
                 int y = top + buttonY(row);
                 drawButton(graphics, x, y, entry == hovered);
-                if (entry.icon().isEmpty()) continue;
-                graphics.pose().pushMatrix();
-                graphics.pose().translate(x + 3, y + 2);
-                graphics.pose().scale(ICON_SCALE, ICON_SCALE);
-                graphics.fakeItem(entry.icon(), 0, 0);
-                graphics.pose().popMatrix();
+                drawIcon(graphics, entry, x, y);
             }
         }
     }
@@ -171,7 +216,7 @@ public final class InventoryButtons {
     public static void extractTooltip(GuiGraphicsExtractor graphics, Font font, int left, int top, int mouseX, int mouseY) {
         Entry entry = entryAt(left, top, mouseX, mouseY);
         if (entry == null || entry.tooltip() == null) return;
-        graphics.setTooltipForNextFrame(font, Component.literal(entry.tooltip()), mouseX, mouseY);
+        graphics.setTooltipForNextFrame(font, entry.style().apply(Component.literal(entry.tooltip())), mouseX, mouseY);
     }
 
     public static boolean click(AbstractContainerScreen<?> screen, int left, int top, double mouseX, double mouseY) {

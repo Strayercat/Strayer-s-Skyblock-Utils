@@ -106,7 +106,7 @@ public class NpcFinder {
             if (i > 0) message.append(Component.literal("\n"));
 
             message.append(Component.literal("    - ").withStyle(ChatFormatting.GRAY))
-                    .append(Component.literal(match.location()).setStyle(Style.EMPTY.withColor(ModFunctions.mainColor())))
+                    .append(Component.literal(match.location()).setStyle(Style.EMPTY.withColor(ModStyle.main())))
                     .append(match.coordinates.getX() == 20000
                             ? Component.literal(": Location varies").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)
                             : Component.literal(": " + match.coordinates().getX() + " " +
