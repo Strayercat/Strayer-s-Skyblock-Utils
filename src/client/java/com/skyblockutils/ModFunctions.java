@@ -17,6 +17,7 @@ import com.skyblockutils.features.hud.StashHud;
 import com.skyblockutils.features.inventory.InventoryButtons;
 import com.skyblockutils.features.mining.CorlTimer;
 import com.skyblockutils.features.party.PartyListParser;
+import com.skyblockutils.features.browser.InGameBrowser;
 import com.skyblockutils.features.wiki.WikiLookup;
 import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.mixin.client.BossHealthOverlayAccessor;
@@ -98,6 +99,7 @@ public class ModFunctions {
         while (ModKeyBindings.PUFF_TIMER_KEY.consumeClick()) PuffTracker.togglePuffTimer();
         SsuHud.setVisible(ModKeyBindings.HUD_KEY.isDown());
         WikiLookup.tick(Minecraft.getInstance());
+        InGameBrowser.tick();
     }
 
     public static void handleNonSkyblockExclusiveKeybinds(Minecraft client) {

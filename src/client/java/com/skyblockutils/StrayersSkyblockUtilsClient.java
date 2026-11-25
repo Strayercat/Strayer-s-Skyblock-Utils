@@ -1,5 +1,6 @@
 package com.skyblockutils;
 
+import com.skyblockutils.features.inventory.ButtonLayout;
 import com.skyblockutils.config.ModConfig;
 import com.skyblockutils.features.*;
 import com.skyblockutils.features.AboutScreen;
@@ -81,6 +82,7 @@ public class StrayersSkyblockUtilsClient implements ClientModInitializer {
                 TreeGiftNotifications.BLOCK_HANDLER
         );
         ModConfig.load();
+        ButtonLayout.load();
         HypixelApi.init();
         GuiBlocker.init();
         BestiaryHud.register();

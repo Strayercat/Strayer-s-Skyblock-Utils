@@ -37,17 +37,14 @@ public abstract class InventoryScreenMixin extends AbstractRecipeBookScreen<@Not
         }
     }
 
-    @Inject(method = "extractLabels", at = @At("HEAD"), cancellable = true)
-    private void ssu$labels(GuiGraphicsExtractor graphics, int xm, int ym, CallbackInfo ci) {
-        if (!InventoryButtons.active()) return;
-        InventoryButtons.extractLabels(graphics, font);
-        ci.cancel();
+    @Inject(method = "extractBackground", at = @At("TAIL"))
+    private void ssu$hideOffhand(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
+        if (InventoryButtons.active()) InventoryButtons.coverOffhand(graphics, leftPos, topPos);
     }
 
-    @Inject(method = "extractBackground", at = @At("TAIL"))
-    private void ssu$background(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
-        if (!InventoryButtons.active()) return;
-        InventoryButtons.extractBackground(this, graphics, INVENTORY_LOCATION, leftPos, topPos, mouseX, mouseY);
+    @Inject(method = "extractLabels", at = @At("HEAD"), cancellable = true)
+    private void ssu$labels(GuiGraphicsExtractor graphics, int xm, int ym, CallbackInfo ci) {
+        if (InventoryButtons.active()) ci.cancel();
     }
 
     @Inject(method = "extractRenderState*", at = @At("TAIL"))

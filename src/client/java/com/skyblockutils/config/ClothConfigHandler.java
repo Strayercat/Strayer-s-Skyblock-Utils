@@ -3,6 +3,7 @@ package com.skyblockutils.config;
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
 import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.hud.layout.HudEditScreen;
+import com.skyblockutils.features.inventory.ButtonEditScreen;
 import com.skyblockutils.features.voice.VoiceChat;
 import com.skyblockutils.utils.CustomEntry;
 import com.skyblockutils.utils.ModStyle;
@@ -68,15 +69,15 @@ public class ClothConfigHandler {
                 })
                 .setSaveConsumer(v -> ModConfig.INSTANCE.notificationStyle = v).build());
 
-        general.addEntry(eb.startBooleanToggle(Component.literal("Open Wiki In Game"), ModConfig.INSTANCE.wikiInGame)
+        general.addEntry(eb.startBooleanToggle(Component.literal("Use In-Game Browser"), ModConfig.INSTANCE.browserInGame)
                 .setDefaultValue(true)
-                .setTooltip(Component.literal("Uses MCEF if installed, otherwise opens your browser"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.wikiInGame = v).build());
+                .setTooltip(Component.literal("Opens the wiki and SkyCrypt inside the game. Turn off to use your normal browser instead"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.browserInGame = v).build());
 
-        general.addEntry(eb.startBooleanToggle(Component.literal("Preload Wiki Browser"), ModConfig.INSTANCE.wikiPreload)
+        general.addEntry(eb.startBooleanToggle(Component.literal("Preload In-Game Browser"), ModConfig.INSTANCE.browserPreload)
                 .setDefaultValue(true)
-                .setTooltip(Component.literal("Starts the browser engine when you join SkyBlock so the wiki opens instantly (~150 MB RAM). Pages are still closed when you leave the wiki"))
-                .setSaveConsumer(v -> ModConfig.INSTANCE.wikiPreload = v).build());
+                .setTooltip(Component.literal("Starts the browser engine when you join SkyBlock so pages open instantly (~150 MB RAM). Pages are still closed when you leave them"))
+                .setSaveConsumer(v -> ModConfig.INSTANCE.browserPreload = v).build());
 
         general.addEntry(eb.startBooleanToggle(Component.literal("Wiki Tooltip Hint"), ModConfig.INSTANCE.wikiTooltipHint)
                 .setDefaultValue(true)
@@ -231,6 +232,12 @@ public class ClothConfigHandler {
         hud.addEntry(hudToggle(eb, "Voice HUD", ModConfig.INSTANCE.voiceHud, true, "Who is connected and talking in voice chat", v -> ModConfig.INSTANCE.voiceHud = v));
         hud.addEntry(hudToggle(eb, "System Messages HUD", ModConfig.INSTANCE.separateMessage, false, "Moves server sent messages out of chat into their own HUD", v -> ModConfig.INSTANCE.separateMessage = v));
         hud.addEntry(hudToggle(eb, "Screenshot HUD", ModConfig.INSTANCE.screenshotHud, true, "Use SSU's screenshot preview", v -> ModConfig.INSTANCE.screenshotHud = v));
+
+        hud.addEntry(hudToggle(eb, "Inventory Buttons", ModConfig.INSTANCE.inventoryButtons, true, "Replace the crafting grid, offhand slot and recipe book with customizable command buttons", v -> ModConfig.INSTANCE.inventoryButtons = v));
+        hud.addEntry(new CustomEntry()
+                .addButton(Component.literal("Edit Buttons"), 120, CustomEntry.Alignment.LEFT, () ->
+                                ScreenOpener.openNextTick(ButtonEditScreen::new)
+                        , Component.literal("Change the inventory buttons' icons, names, actions and per-location sets")));
     }
 
     private static AbstractConfigListEntry<Boolean> hudToggle(ConfigEntryBuilder eb, String name, boolean value, boolean defaultValue, String tooltip, Consumer<Boolean> save) {

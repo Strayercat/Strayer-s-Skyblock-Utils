@@ -24,18 +24,18 @@ import com.skyblockutils.features.glowingPlayers.GlowingPlayersGui;
 import com.skyblockutils.features.guild.GuildListParser;
 import com.skyblockutils.features.hud.BestiaryHud;
 import com.skyblockutils.features.hud.layout.HudEditScreen;
+import com.skyblockutils.features.inventory.ButtonEditScreen;
 import com.skyblockutils.features.party.PartyInviteNotifications;
 import com.skyblockutils.features.party.PartyListParser;
 import com.skyblockutils.features.slayer.CarryTracker;
 import com.skyblockutils.features.slayer.SlayerTracker;
+import com.skyblockutils.features.browser.InGameBrowser;
 import com.skyblockutils.features.wiki.WikiLookup;
 import com.skyblockutils.hypixel.HypixelLocation;
 import com.skyblockutils.utils.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
 
@@ -54,6 +54,7 @@ import java.util.function.Supplier;
 public class ModCommands {
     private static final List<String> FLOORS = List.of("off", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "f1", "f2", "f3", "f4", "f5", "f6", "f7");
     private static final String USERNAME = "^[A-Za-z0-9_]{1,16}$";
+    private static final String SKYCRYPT_URL = "https://sky.shiiyu.moe/stats/";
 
     private ModCommands() {
     }
@@ -66,10 +67,12 @@ public class ModCommands {
                 .then(slayer())
                 .then(ClientCommands.literal("hud").executes(run(() -> ScreenOpener.openNextTick(HudEditScreen::new))))
                 .then(ClientCommands.literal("config").executes(run(() -> ScreenOpener.openNextTick(ClothConfigHandler::createConfigScreen))))
+                .then(ClientCommands.literal("buttons").executes(run(() -> ScreenOpener.openNextTick(ButtonEditScreen::new))))
                 .then(glowingPlayers())
                 .then(dev())
                 .then(npcFinder())
                 .then(wiki())
+                .then(skycrypt())
                 .then(ClientCommands.literal("partyinvites").executes(run(ModCommands::showPartyInvites)))
                 .then(disableReminder()));
 
@@ -230,11 +233,27 @@ public class ModCommands {
     }
 
     private static LiteralArgumentBuilder<FabricClientCommandSource> wiki() {
-        return ClientCommands.literal("wiki").executes(run(() -> {
-            Screen current = Minecraft.getInstance().gui.screen();
-            Screen parent = current instanceof ChatScreen ? null : current;
-            ScreenOpener.runNextTick(() -> WikiLookup.open(null, parent));
-        }));
+        return ClientCommands.literal("wiki").executes(run(WikiLookup::openHomeFromCommand));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> skycrypt() {
+        return ClientCommands.literal("skycrypt")
+                .executes(run(() -> openSkyCrypt(Minecraft.getInstance().getUser().getName())))
+                .then(ClientCommands.argument("username", StringArgumentType.word())
+                        .suggests(suggest(ModCommands::onlinePlayers))
+                        .executes(context -> {
+                            String username = StringArgumentType.getString(context, "username");
+                            if (!username.matches(USERNAME)) {
+                                ModFunctions.sendSystemMessage("§cInvalid username: " + username, false);
+                                return 0;
+                            }
+                            openSkyCrypt(username);
+                            return 1;
+                        }));
+    }
+
+    public static void openSkyCrypt(String username) {
+        InGameBrowser.openFromCommand(SKYCRYPT_URL + username);
     }
 
     private static LiteralArgumentBuilder<FabricClientCommandSource> npcFinder() {

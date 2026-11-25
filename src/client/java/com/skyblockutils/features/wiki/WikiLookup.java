@@ -1,25 +1,22 @@
 package com.skyblockutils.features.wiki;
 
-import com.skyblockutils.ModFunctions;
 import com.skyblockutils.ModKeyBindings;
 import com.skyblockutils.StrayersSkyblockUtilsClient;
 import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.browser.InGameBrowser;
 import com.skyblockutils.utils.ModStyle;
 import com.skyblockutils.utils.TextUtils;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -31,9 +28,6 @@ public final class WikiLookup {
     private static final Pattern STACK_COUNT = Pattern.compile("\\s+x\\d+$");
     private static final Pattern PET_LEVEL = Pattern.compile("^\\[Lvl \\d+]\\s*");
     private static final Pattern DECORATIONS = Pattern.compile("[✪➊➋➌➍➎⚚✿]");
-    private static final String BROWSER_MOD = "mcef-modern";
-
-    private static boolean preloaded;
 
     private WikiLookup() {
     }
@@ -51,10 +45,6 @@ public final class WikiLookup {
     }
 
     public static void tick(Minecraft client) {
-        if (!preloaded && ModConfig.INSTANCE.wikiInGame && ModConfig.INSTANCE.wikiPreload && FabricLoader.getInstance().isModLoaded(BROWSER_MOD)) {
-            preloaded = true;
-            WikiBrowserScreen.preload();
-        }
         while (ModKeyBindings.WIKI_KEY.consumeClick()) {
             if (client.player != null && client.gui.screen() == null) open(client.player.getMainHandItem(), null);
         }
@@ -62,28 +52,16 @@ public final class WikiLookup {
 
     public static void open(ItemStack stack, Screen parent) {
         if (stack == null || stack.isEmpty() || isMenuButton(stack)) {
-            openUrl(HOME_URL, parent);
+            InGameBrowser.open(HOME_URL, parent);
             return;
         }
 
         String query = query(stack);
-        openUrl(query.isEmpty() ? HOME_URL : SEARCH_URL + URLEncoder.encode(query, StandardCharsets.UTF_8), parent);
+        InGameBrowser.open(query.isEmpty() ? HOME_URL : SEARCH_URL + URLEncoder.encode(query, StandardCharsets.UTF_8), parent);
     }
 
-    private static void openUrl(String url, Screen parent) {
-        if (ModConfig.INSTANCE.wikiInGame && FabricLoader.getInstance().isModLoaded(BROWSER_MOD)) {
-            WikiBrowserScreen.open(url, parent);
-        } else {
-            openExternal(url);
-        }
-    }
-
-    public static void openExternal(String url) {
-        try {
-            Util.getPlatform().openUri(URI.create(url));
-        } catch (Exception e) {
-            ModFunctions.sendSystemMessage("§cCouldn't open the wiki: " + e.getMessage(), false);
-        }
+    public static void openHomeFromCommand() {
+        InGameBrowser.openFromCommand(HOME_URL);
     }
 
     private static String skyblockId(ItemStack stack) {

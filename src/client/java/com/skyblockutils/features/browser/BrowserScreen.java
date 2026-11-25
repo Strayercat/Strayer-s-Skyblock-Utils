@@ -1,4 +1,4 @@
-package com.skyblockutils.features.wiki;
+package com.skyblockutils.features.browser;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
 import org.lwjgl.glfw.GLFW;
 
-public class WikiBrowserScreen extends Screen {
+public class BrowserScreen extends Screen {
     private static final String HINT = "Esc: close  •  Ctrl+O: open in your browser  •  Ctrl+Scroll / Ctrl+-/=/0: zoom";
     private static final double ZOOM_STEP = 0.5;
     private static final double MIN_ZOOM = -4;
@@ -34,18 +34,16 @@ public class WikiBrowserScreen extends Screen {
     private MCEFBrowser browser;
     private MCEFApi.Initialization initialization;
 
-    private WikiBrowserScreen(String url, Screen parent) {
-        super(Component.literal("Wiki"));
+    BrowserScreen(String url, Screen parent) {
+        super(Component.literal("Browser"));
         this.url = url;
         this.parent = parent;
     }
 
-    static void preload() {
-        MCEFApi.initialize();
-    }
-
-    static void open(String url, Screen parent) {
-        Minecraft.getInstance().gui.setScreen(new WikiBrowserScreen(url, parent));
+    private String currentUrl() {
+        if (browser == null) return url;
+        String current = browser.getCefBrowser().getURL();
+        return current == null || current.isBlank() ? url : current;
     }
 
     private double pixelScale() {
@@ -178,7 +176,7 @@ public class WikiBrowserScreen extends Screen {
         if (event.hasControlDownWithQuirk()) {
             switch (event.key()) {
                 case GLFW.GLFW_KEY_O -> {
-                    WikiLookup.openExternal(url);
+                    InGameBrowser.openExternal(currentUrl());
                     return true;
                 }
                 case GLFW.GLFW_KEY_EQUAL, GLFW.GLFW_KEY_KP_ADD -> {

@@ -1,31 +1,24 @@
 package com.skyblockutils.features.inventory;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.skyblockutils.StrayersSkyblockUtilsClient;
-import com.skyblockutils.utils.ModStyle;
-import com.skyblockutils.utils.SSU;
-import net.minecraft.ChatFormatting;
-import net.minecraft.ChatFormatting.*;
+import com.skyblockutils.config.ModConfig;
+import com.skyblockutils.features.hud.layout.HudManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.server.packs.resources.Resource;
 
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
-
-import static net.minecraft.ChatFormatting.*;
+import java.util.Map;
+import java.util.Optional;
 
 public final class InventoryButtons {
     public static final int AREA_X = 96;
@@ -34,18 +27,24 @@ public final class InventoryButtons {
     public static final int AREA_H = 79;
     public static final int BUTTON_W = 18;
     public static final int BUTTON_H = 16;
+    public static final int ROW_SPACING = 26;
+    public static final int BUTTON_SPACING = 19;
+    public static final int LABEL_H = 8;
+    public static final int GRID_W = BUTTON_W + (ButtonLayout.COLUMNS - 1) * BUTTON_SPACING;
+    public static final int GRID_H = (ButtonLayout.ROWS - 1) * ROW_SPACING + LABEL_H + BUTTON_H;
 
     private static final int FIRST_X = 96;
     private static final int FIRST_Y = 5;
-    private static final int ROW_SPACING = 26;
-    private static final int BUTTON_SPACING = 19;
     private static final int LABEL_COLOR = -12566464;
     private static final float LABEL_SCALE = 0.75f;
-    private static final float ICON_SCALE = 0.75f;
     private static final int ICON_SIZE = 12;
-    private static final int STRIP_U = 96;
-    private static final int STRIP_V = 4;
-    private static final int STRIP_H = 12;
+    private static final int OFFHAND_X = 76;
+    private static final int OFFHAND_Y = 61;
+    private static final int OFFHAND_SIZE = 18;
+    private static final int FALLBACK_BACKGROUND = 0xFFC6C6C6;
+    private static final int[][] BACKGROUND_SAMPLES = {
+            {86, 20}, {86, 45}, {86, 70}, {90, 10}, {160, 10}, {160, 70}, {110, 70}, {140, 70}
+    };
 
     private static final int SPRITE_W = 20;
     private static final int SPRITE_H = 18;
@@ -53,136 +52,84 @@ public final class InventoryButtons {
     private static final int FACE_V = 2;
     private static final int FACE_W = 6;
     private static final int FACE_H = 2;
-    private static final String SKYBLOCKER_SCREEN = "de.hysky.skyblocker.skyblock.item.SkyblockInventoryScreen";
+    private static final Identifier INVENTORY_TEXTURE = Identifier.withDefaultNamespace("textures/gui/container/inventory.png");
 
-    private static int deferredLeft;
-    private static int deferredTop;
-    private static boolean deferred;
-    private static Identifier deferredTexture;
+    private static Identifier sampledTexture;
+    private static int sampledGeneration = -1;
+    private static int background = FALLBACK_BACKGROUND;
 
-    private record Entry(Supplier<ItemStack> item, Identifier sprite, String tooltip, String command,
-                         UnaryOperator<MutableComponent> style) {
-        static Entry item(ItemStack item, String tooltip, String command, ChatFormatting... formats) {
-            return new Entry(() -> item, null, tooltip, command, text -> text.withStyle(formats));
-        }
-
-        static Entry item(ItemStack item, String tooltip, String command, int color) {
-            return new Entry(() -> item, null, tooltip, command, text -> text.withColor(color));
-        }
-
-        static Entry item(ItemStack item, String tooltip, String command, IntSupplier color) {
-            return new Entry(() -> item, null, tooltip, command, text -> text.withColor(color.getAsInt()));
-        }
-
-        static Entry playerHead(String tooltip, String command, ChatFormatting... formats) {
-            return new Entry(InventoryButtons::ownHead, null, tooltip, command, text -> text.withStyle(formats));
-        }
-
-        static Entry sprite(String path, String tooltip, String command, ChatFormatting... formats) {
-            return new Entry(() -> ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withStyle(formats));
-        }
-
-        static Entry sprite(String path, String tooltip, String command, int color) {
-            return new Entry(() -> ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withColor(color));
-        }
-
-        static Entry sprite(String path, String tooltip, String command, IntSupplier color) {
-            return new Entry(() -> ItemStack.EMPTY, SSU.id(path), tooltip, command, text -> text.withColor(color.getAsInt()));
+    public record Hit(int row, int column) {
+        public boolean isLabel() {
+            return column < 0;
         }
     }
-
-    private static ItemStack ownHead;
-
-    private static ItemStack ownHead() {
-        Minecraft client = Minecraft.getInstance();
-        if (ownHead != null) return ownHead;
-        if (client.player == null || client.getConnection() == null) return new ItemStack(Items.PLAYER_HEAD);
-
-        PlayerInfo info = client.getConnection().getPlayerInfo(client.player.getUUID());
-        if (info == null) return new ItemStack(Items.PLAYER_HEAD);
-
-        ownHead = new ItemStack(Items.PLAYER_HEAD);
-        ownHead.set(DataComponents.PROFILE, ResolvableProfile.createResolved(info.getProfile()));
-        return ownHead;
-    }
-
-    public static void resetHead() {
-        ownHead = null;
-    }
-
-    private record Row(String label, List<Entry> entries) {
-    }
-
-    private static final List<Row> ROWS = List.of(
-            new Row("Stashes", List.of(
-                    Entry.item(new ItemStack(Items.BUNDLE), "Open Material Stash", "viewstash material"),
-                    Entry.item(new ItemStack(Items.ITEM_FRAME), "Open Item Stash", "viewstash item"),
-                    Entry.item(new ItemStack(Items.HOPPER), "Pickup All Stashes", "pickupstash", GREEN),
-                    Entry.item(new ItemStack(Items.LAVA_BUCKET), "Clear All Stashes", "clearstash", RED)
-            )),
-            new Row("Utility", List.of(
-                    Entry.item(new ItemStack(Items.KNOWLEDGE_BOOK), "Recipe Book", "recipebook", GREEN),
-                    Entry.sprite("inventory/bestiary", "Bestiary", "be"),
-                    Entry.item(new ItemStack(Items.CLOCK), "Calendar", "calendar", YELLOW),
-                    Entry.playerHead("Stats", "stats", AQUA)
-            )),
-            new Row("SSU", List.of(
-                    Entry.sprite("inventory/wiki", "Wiki", "ssu wiki", ModStyle.titleEnd()),
-                    Entry.sprite("inventory/glowing_player", "Glowing Players", "ssu glowingplayers gui", ModStyle.titleEnd()),
-                    Entry.sprite("inventory/hud", "SSU HUD", "ssu hud", ModStyle.titleEnd()),
-                    Entry.sprite("inventory/config", "SSU Config", "ssu config", ModStyle.titleEnd())
-            ))
-    );
 
     private InventoryButtons() {
     }
 
     public static boolean active() {
-        return StrayersSkyblockUtilsClient.isInSkyblock;
+        return StrayersSkyblockUtilsClient.isInSkyblock && ModConfig.INSTANCE.inventoryButtons;
     }
 
-    private static int rowY(int row) {
-        return FIRST_Y + row * ROW_SPACING;
+    public static void resetHead() {
+        ButtonIcons.resetHead();
     }
 
-    private static int buttonX(int index) {
-        return FIRST_X + index * BUTTON_SPACING;
+    public static ButtonLayout.ButtonSet currentSet() {
+        return ButtonLayout.INSTANCE.set(HudManager.currentLocation());
     }
 
-    private static int buttonY(int row) {
-        return rowY(row) + 8;
+    public static int rowY(int row) {
+        return row * ROW_SPACING;
     }
 
-    private static Entry entryAt(int left, int top, double mouseX, double mouseY) {
-        for (int row = 0; row < ROWS.size(); row++) {
-            List<Entry> entries = ROWS.get(row).entries();
-            for (int i = 0; i < entries.size(); i++) {
-                int x = left + buttonX(i);
-                int y = top + buttonY(row);
-                if (mouseX >= x && mouseX < x + BUTTON_W && mouseY >= y && mouseY < y + BUTTON_H) return entries.get(i);
+    public static int buttonX(int column) {
+        return column * BUTTON_SPACING;
+    }
+
+    public static int buttonY(int row) {
+        return rowY(row) + LABEL_H;
+    }
+
+    public static Hit hitAt(double x, double y) {
+        for (int row = 0; row < ButtonLayout.ROWS; row++) {
+            if (y >= rowY(row) && y < rowY(row) + LABEL_H && x >= 0 && x < GRID_W) return new Hit(row, -1);
+            for (int column = 0; column < ButtonLayout.COLUMNS; column++) {
+                int bx = buttonX(column);
+                int by = buttonY(row);
+                if (x >= bx && x < bx + BUTTON_W && y >= by && y < by + BUTTON_H) return new Hit(row, column);
             }
         }
         return null;
     }
 
-    public static void extractBackground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor graphics, Identifier inventoryTexture, int left, int top, int mouseX, int mouseY) {
-        if (screen.getClass().getName().equals(SKYBLOCKER_SCREEN)) {
-            deferred = true;
-            deferredLeft = left;
-            deferredTop = top;
-            deferredTexture = inventoryTexture;
-            return;
-        }
-        draw(graphics, inventoryTexture, left, top, mouseX, mouseY);
+    private static ButtonLayout.Button buttonAt(int left, int top, double mouseX, double mouseY) {
+        Hit hit = hitAt(mouseX - left - FIRST_X, mouseY - top - FIRST_Y);
+        return hit == null || hit.isLabel() ? null : currentSet().button(hit.row(), hit.column());
     }
 
-    public static void extractDeferred(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        if (!deferred) return;
-        deferred = false;
-        draw(graphics, deferredTexture, deferredLeft, deferredTop, mouseX, mouseY);
+    public static void extractPanel(GuiGraphicsExtractor graphics, Font font, int left, int top, int mouseX, int mouseY) {
+        draw(graphics, left, top, mouseX, mouseY);
+        drawLabels(graphics, font, currentSet(), left + FIRST_X, top + FIRST_Y);
     }
 
-    private static void drawButton(GuiGraphicsExtractor graphics, int x, int y, boolean hovered) {
+    public static void coverOffhand(GuiGraphicsExtractor graphics, int left, int top) {
+        graphics.fill(left + OFFHAND_X, top + OFFHAND_Y, left + OFFHAND_X + OFFHAND_SIZE, top + OFFHAND_Y + OFFHAND_SIZE, backgroundColor(INVENTORY_TEXTURE));
+    }
+
+    public static boolean coversMostly(int left, int top, int x, int y, int w, int h) {
+        if (w <= 0 || h <= 0) return false;
+        return mostlyInside(left + AREA_X, top + AREA_Y, AREA_W, AREA_H, x, y, w, h)
+                || mostlyInside(left + OFFHAND_X, top + OFFHAND_Y, OFFHAND_SIZE, OFFHAND_SIZE, x, y, w, h);
+    }
+
+    private static boolean mostlyInside(int zoneX, int zoneY, int zoneW, int zoneH, int x, int y, int w, int h) {
+        int ix = Math.max(0, Math.min(x + w, zoneX + zoneW) - Math.max(x, zoneX));
+        int iy = Math.max(0, Math.min(y + h, zoneY + zoneH) - Math.max(y, zoneY));
+        return (long) ix * iy * 2 >= (long) w * h;
+    }
+
+    public static void drawButton(GuiGraphicsExtractor graphics, int x, int y, boolean hovered) {
         Identifier sprite = RecipeBookComponent.RECIPE_BUTTON_SPRITES.get(true, hovered);
         int halfW = BUTTON_W / 2;
         int halfH = BUTTON_H / 2;
@@ -199,64 +146,86 @@ public final class InventoryButtons {
         }
     }
 
-    private static void drawIcon(GuiGraphicsExtractor graphics, Entry entry, int x, int y) {
-        if (entry.sprite() != null) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, entry.sprite(), x + 3, y + 2, ICON_SIZE, ICON_SIZE);
-            return;
+    public static void drawCell(GuiGraphicsExtractor graphics, Font font, ButtonLayout.Button button, int x, int y, boolean hovered) {
+        drawButton(graphics, x, y, hovered);
+        ButtonIcons.draw(graphics, font, ButtonIcons.icon(button.icon), x + 3, y + 2, ICON_SIZE);
+    }
+
+    public static void drawGrid(GuiGraphicsExtractor graphics, Font font, ButtonLayout.ButtonSet set, int x, int y, Hit hovered) {
+        for (int row = 0; row < ButtonLayout.ROWS; row++) {
+            for (int column = 0; column < ButtonLayout.COLUMNS; column++) {
+                boolean hot = hovered != null && hovered.row() == row && hovered.column() == column;
+                drawCell(graphics, font, set.button(row, column), x + buttonX(column), y + buttonY(row), hot);
+            }
         }
-        ItemStack item = entry.item().get();
-        if (item.isEmpty()) return;
+        drawLabels(graphics, font, set, x, y);
+    }
+
+    public static void drawLabels(GuiGraphicsExtractor graphics, Font font, ButtonLayout.ButtonSet set, int x, int y) {
         graphics.pose().pushMatrix();
-        graphics.pose().translate(x + 3, y + 2);
-        graphics.pose().scale(ICON_SCALE, ICON_SCALE);
-        graphics.fakeItem(item, 0, 0);
+        graphics.pose().translate(x + 1, y);
+        graphics.pose().scale(LABEL_SCALE, LABEL_SCALE);
+        for (int row = 0; row < ButtonLayout.ROWS; row++) {
+            graphics.text(font, ButtonText.parse(set.row(row).label), 0, Math.round(rowY(row) / LABEL_SCALE), LABEL_COLOR, false);
+        }
         graphics.pose().popMatrix();
     }
 
-    private static void draw(GuiGraphicsExtractor graphics, Identifier inventoryTexture, int left, int top, int mouseX, int mouseY) {
-        for (int y = 0; y < AREA_H; y += STRIP_H) {
-            int h = Math.min(STRIP_H, AREA_H - y);
-            graphics.blit(RenderPipelines.GUI_TEXTURED, inventoryTexture, left + AREA_X, top + AREA_Y + y, STRIP_U, STRIP_V, AREA_W, h, 256, 256);
-        }
+    private static void draw(GuiGraphicsExtractor graphics, int left, int top, int mouseX, int mouseY) {
+        graphics.fill(left + AREA_X, top + AREA_Y, left + AREA_X + AREA_W, top + AREA_Y + AREA_H, backgroundColor(InventoryButtons.INVENTORY_TEXTURE));
 
-        Entry hovered = entryAt(left, top, mouseX, mouseY);
-        for (int row = 0; row < ROWS.size(); row++) {
-            List<Entry> entries = ROWS.get(row).entries();
-            for (int i = 0; i < entries.size(); i++) {
-                Entry entry = entries.get(i);
-                int x = left + buttonX(i);
-                int y = top + buttonY(row);
-                drawButton(graphics, x, y, entry == hovered);
-                drawIcon(graphics, entry, x, y);
+        Font font = Minecraft.getInstance().font;
+        Hit hovered = hitAt(mouseX - left - FIRST_X, mouseY - top - FIRST_Y);
+        ButtonLayout.ButtonSet set = currentSet();
+        for (int row = 0; row < ButtonLayout.ROWS; row++) {
+            for (int column = 0; column < ButtonLayout.COLUMNS; column++) {
+                boolean hot = hovered != null && hovered.row() == row && hovered.column() == column;
+                drawCell(graphics, font, set.button(row, column), left + FIRST_X + buttonX(column), top + FIRST_Y + buttonY(row), hot);
             }
         }
     }
 
-    public static void extractLabels(GuiGraphicsExtractor graphics, Font font) {
-        graphics.pose().pushMatrix();
-        graphics.pose().scale(LABEL_SCALE, LABEL_SCALE);
-        for (int row = 0; row < ROWS.size(); row++) {
-            graphics.text(font, ROWS.get(row).label(), Math.round((FIRST_X + 1) / LABEL_SCALE), Math.round(rowY(row) / LABEL_SCALE), LABEL_COLOR, false);
+    private static int backgroundColor(Identifier texture) {
+        ButtonIcons.checkReload();
+        if (texture.equals(sampledTexture) && sampledGeneration == ButtonIcons.generation()) return background;
+        sampledTexture = texture;
+        sampledGeneration = ButtonIcons.generation();
+        background = sample(texture);
+        return background;
+    }
+
+    private static int sample(Identifier texture) {
+        Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(texture);
+        if (resource.isEmpty()) return FALLBACK_BACKGROUND;
+        try (InputStream stream = resource.get().open(); NativeImage image = NativeImage.read(stream)) {
+            int factor = Math.max(1, image.getWidth() / 256);
+            Map<Integer, Integer> counts = new HashMap<>();
+            for (int[] point : BACKGROUND_SAMPLES) {
+                int x = point[0] * factor;
+                int y = point[1] * factor;
+                if (x >= image.getWidth() || y >= image.getHeight()) continue;
+                int color = image.getPixel(x, y);
+                if ((color >>> 24) < 0xF0) continue;
+                counts.merge(color, 1, Integer::sum);
+            }
+            return counts.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(FALLBACK_BACKGROUND);
+        } catch (Exception e) {
+            return FALLBACK_BACKGROUND;
         }
-        graphics.pose().popMatrix();
     }
 
     public static void extractTooltip(GuiGraphicsExtractor graphics, Font font, int left, int top, int mouseX, int mouseY) {
-        Entry entry = entryAt(left, top, mouseX, mouseY);
-        if (entry == null || entry.tooltip() == null) return;
-        graphics.setTooltipForNextFrame(font, entry.style().apply(Component.literal(entry.tooltip())), mouseX, mouseY);
+        ButtonLayout.Button button = buttonAt(left, top, mouseX, mouseY);
+        if (button == null) return;
+        List<Component> lines = button.tooltip();
+        if (!lines.isEmpty()) graphics.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY);
     }
 
     public static boolean click(AbstractContainerScreen<?> screen, int left, int top, double mouseX, double mouseY) {
-        Entry entry = entryAt(left, top, mouseX, mouseY);
-        if (entry == null) return false;
-        if (entry.command() != null) {
-            Minecraft client = Minecraft.getInstance();
-            if (client.getConnection() != null) {
-                screen.clearFocus();
-                client.getConnection().sendCommand(entry.command());
-            }
-        }
+        ButtonLayout.Button button = buttonAt(left, top, mouseX, mouseY);
+        if (button == null) return false;
+        Minecraft client = Minecraft.getInstance();
+        button.actionFor(client.hasShiftDown(), client.hasControlDown()).run(screen);
         return true;
     }
 }

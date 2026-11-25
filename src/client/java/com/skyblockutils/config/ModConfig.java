@@ -2,6 +2,10 @@ package com.skyblockutils.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.annotations.SerializedName;
 import com.skyblockutils.features.DailyReminders;
 import com.skyblockutils.features.chat.ChatFilterDefinitions;
@@ -9,27 +13,29 @@ import com.skyblockutils.features.glowingPlayers.GlowingPlayers.GlowingPlayer;
 import com.skyblockutils.features.hud.layout.HudLayoutEntry;
 import com.skyblockutils.features.slayer.SlayerTracker;
 import com.skyblockutils.utils.ModStyle;
-import net.fabricmc.loader.api.FabricLoader;
-
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 public class ModConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("SkyblockUtils.json");
+    private static final String CHAT_FILTERS_KEY = "chatFilters";
     public static ModConfig INSTANCE = new ModConfig();
 
     // General
     public ModStyle.ColorStyle colorStyle = ModStyle.ColorStyle.ORIGINAL;
     public ModStyle.NotificationStyle notificationStyle = ModStyle.NotificationStyle.ROUNDED;
-    public boolean wikiInGame = true;
+    @SerializedName(value = "browserInGame", alternate = "wikiInGame")
+    public boolean browserInGame = true;
     public boolean wikiTooltipHint = true;
-    public boolean wikiPreload = true;
+    @SerializedName(value = "browserPreload", alternate = "wikiPreload")
+    public boolean browserPreload = true;
     public boolean chatFiltersEnabled = true;
     public boolean partyInviteNotifications = true;
     public boolean boopPartyInvites = true;
@@ -61,6 +67,7 @@ public class ModConfig {
 
     // HUD
     public boolean hudEnabled = true;
+    public boolean inventoryButtons = true;
     public boolean stashHud = false;
     public boolean bestiaryHudHideInCatacombs = true;
     public boolean bestiaryHudShowMaxed = true;
@@ -100,7 +107,7 @@ public class ModConfig {
     public boolean systemDuplicateCounter = true;
     public String systemDuplicateCounterText = "&8(&7x&r$&8)";
     public int systemDuplicateCounterColor = 0xFFFF55;
-    private final Map<String, Boolean> chatFilters = new HashMap<>();
+    private final transient Map<String, Boolean> chatFilters = new HashMap<>();
     private List<GlowingPlayer> glowingPlayers = new ArrayList<>();
 
     // Events
@@ -199,18 +206,54 @@ public class ModConfig {
     }
 
     public static void load() {
-        if (!CONFIG_PATH.toFile().exists()) {
-            save();
-            return;
+        ConfigPaths.ensureDirectories();
+        if (Files.exists(ConfigPaths.LEGACY_CONFIG)) migrateLegacy();
+
+        if (Files.exists(ConfigPaths.CONFIG)) {
+            try (Reader reader = Files.newBufferedReader(ConfigPaths.CONFIG)) {
+                ModConfig loaded = GSON.fromJson(reader, ModConfig.class);
+                if (loaded != null) INSTANCE = loaded;
+            } catch (IOException | RuntimeException ignored) {
+            }
         }
 
-        try (FileReader reader = new FileReader(CONFIG_PATH.toFile())) {
-            ModConfig loaded = GSON.fromJson(reader, ModConfig.class);
-            if (loaded != null) INSTANCE = loaded.sanitize();
+        if (Files.exists(ConfigPaths.CHAT_FILTERS)) {
+            try (Reader reader = Files.newBufferedReader(ConfigPaths.CHAT_FILTERS)) {
+                Map<String, Boolean> filters = GSON.fromJson(reader, new TypeToken<Map<String, Boolean>>() {}.getType());
+                if (filters != null) filters.forEach((key, value) -> {
+                    if (key != null && value != null) INSTANCE.chatFilters.put(key, value);
+                });
+            } catch (IOException | RuntimeException ignored) {
+            }
+        }
+
+        INSTANCE.sanitize();
+        save();
+    }
+
+    private static void migrateLegacy() {
+        try {
+            Files.createDirectories(ConfigPaths.BACKUP);
+            Files.copy(ConfigPaths.LEGACY_CONFIG, ConfigPaths.BACKUP.resolve(ConfigPaths.LEGACY_CONFIG.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+
+            JsonObject root;
+            try (Reader reader = Files.newBufferedReader(ConfigPaths.LEGACY_CONFIG)) {
+                root = JsonParser.parseReader(reader).getAsJsonObject();
+            }
+
+            JsonElement filters = root.remove(CHAT_FILTERS_KEY);
+            if (filters != null && !Files.exists(ConfigPaths.CHAT_FILTERS)) write(ConfigPaths.CHAT_FILTERS, filters);
+            if (!Files.exists(ConfigPaths.CONFIG)) write(ConfigPaths.CONFIG, root);
+
+            Files.delete(ConfigPaths.LEGACY_CONFIG);
         } catch (IOException | RuntimeException ignored) {
         }
+    }
 
-        save();
+    private static void write(Path path, Object value) throws IOException {
+        try (Writer writer = Files.newBufferedWriter(path)) {
+            GSON.toJson(value, writer);
+        }
     }
 
     private ModConfig sanitize() {
@@ -261,9 +304,11 @@ public class ModConfig {
     }
 
     public static void save() {
-        try (FileWriter writer = new FileWriter(CONFIG_PATH.toFile())) {
-            GSON.toJson(INSTANCE, writer);
-        } catch (IOException ignored) {
+        ConfigPaths.ensureDirectories();
+        try {
+            write(ConfigPaths.CONFIG, INSTANCE);
+            write(ConfigPaths.CHAT_FILTERS, new TreeMap<>(INSTANCE.chatFilters));
+        } catch (IOException | RuntimeException ignored) {
         }
     }
 }
