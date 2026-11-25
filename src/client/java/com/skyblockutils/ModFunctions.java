@@ -164,7 +164,7 @@ public class ModFunctions {
         Minecraft client = Minecraft.getInstance();
         LocalPlayer player = client.player;
         ClientLevel level = client.level;
-        if (player == null || level == null || client.getConnection() == null || !SideBarUtils.isReady()) return true;
+        if (player == null || level == null || client.getConnection() == null || SideBarUtils.isNotReady()) return true;
         return !level.getChunkSource().hasChunk(SectionPos.blockToSectionCoord(player.getBlockX()), SectionPos.blockToSectionCoord(player.getBlockZ()));
     }
 

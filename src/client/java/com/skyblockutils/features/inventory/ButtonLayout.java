@@ -174,8 +174,8 @@ public final class ButtonLayout {
         return location != null && !location.isEmpty() && locations.containsKey(location);
     }
 
-    public ButtonSet createOwnSet(String location) {
-        return locations.computeIfAbsent(location, _ -> defaults.copy());
+    public void createOwnSet(String location) {
+        locations.computeIfAbsent(location, _ -> defaults.copy());
     }
 
     public void removeOwnSet(String location) {
@@ -317,11 +317,10 @@ public final class ButtonLayout {
         return read(saved.path());
     }
 
-    public static boolean deleteSaved(Saved saved) {
+    public static void deleteSaved(Saved saved) {
         try {
-            return Files.deleteIfExists(saved.path());
-        } catch (IOException e) {
-            return false;
+            Files.deleteIfExists(saved.path());
+        } catch (IOException _) {
         }
     }
 
@@ -334,10 +333,6 @@ public final class ButtonLayout {
         } catch (IOException e) {
             return false;
         }
-    }
-
-    public int locationCount() {
-        return locations.size();
     }
 
     public String describeLocations() {

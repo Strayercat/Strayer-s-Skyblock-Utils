@@ -136,7 +136,7 @@ public class SlayerTracker {
 
     public static void tick() {
         List<String> lines = SideBarUtils.getSidebarLines();
-        if (lines.isEmpty() || !SideBarUtils.isReady()) return;
+        if (lines.isEmpty() || SideBarUtils.isNotReady()) return;
 
         String slayer = null;
         String status = "";

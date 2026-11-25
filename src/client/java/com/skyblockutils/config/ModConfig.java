@@ -256,7 +256,7 @@ public class ModConfig {
         }
     }
 
-    private ModConfig sanitize() {
+    private void sanitize() {
         ModConfig defaults = new ModConfig();
         for (Field field : ModConfig.class.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) continue;
@@ -292,7 +292,6 @@ public class ModConfig {
         voiceOutputVolume = Math.clamp(voiceOutputVolume, 0, 200);
         voiceActivationLevel = Math.clamp(voiceActivationLevel, -90, 0);
         voiceSmartSensitivity = Math.clamp(voiceSmartSensitivity, 10, 95);
-        return this;
     }
 
     private static Map<String, HudLayoutEntry> sanitizeLayouts(Map<String, HudLayoutEntry> layouts) {

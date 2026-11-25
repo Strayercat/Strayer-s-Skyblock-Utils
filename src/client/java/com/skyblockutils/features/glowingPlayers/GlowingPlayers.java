@@ -12,8 +12,8 @@ import java.util.UUID;
 
 public class GlowingPlayers {
     public static class GlowingPlayer {
-        public String username;
-        public UUID uuid;
+        public final String username;
+        public final UUID uuid;
         public int color;
 
         public GlowingPlayer(String username, UUID uuid, int color) {

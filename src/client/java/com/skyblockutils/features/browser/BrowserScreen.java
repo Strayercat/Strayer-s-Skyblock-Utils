@@ -87,14 +87,7 @@ public class BrowserScreen extends Screen {
     @Override
     public void extractRenderState(final @NotNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
         if (browser == null) {
-            String stage = initialization == null ? "Starting" : switch (initialization.getStage()) {
-                case DOWNLOADING -> "Downloading the browser (first time only)";
-                case EXTRACTING -> "Extracting the browser";
-                case INSTALL -> "Installing the browser";
-                default -> "Starting the browser";
-            };
-            float percentage = initialization == null ? -1 : initialization.getPercentage();
-            String text = stage + (percentage >= 0 ? " " + Math.round(percentage) + "%" : "...");
+            String text = getString();
             graphics.centeredText(font, text, width / 2, height / 2 - 4, 0xFFFFFFFF);
             graphics.centeredText(font, HINT, width / 2, height / 2 + 10, 0xFFAAAAAA);
             return;
@@ -113,6 +106,17 @@ public class BrowserScreen extends Screen {
             ));
         }
         graphics.requestCursor(browser.getCursorType());
+    }
+
+    private @NotNull String getString() {
+        String stage = initialization == null ? "Starting" : switch (initialization.getStage()) {
+            case DOWNLOADING -> "Downloading the browser (first time only)";
+            case EXTRACTING -> "Extracting the browser";
+            case INSTALL -> "Installing the browser";
+            default -> "Starting the browser";
+        };
+        float percentage = initialization == null ? -1 : initialization.getPercentage();
+        return stage + (percentage >= 0 ? " " + Math.round(percentage) + "%" : "...");
     }
 
     @Override

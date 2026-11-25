@@ -26,8 +26,8 @@ public class SideBarUtils {
     private static boolean sidebarCleared = false;
     private static boolean ready = false;
 
-    public static boolean isReady() {
-        return ready;
+    public static boolean isNotReady() {
+        return !ready;
     }
 
     public static void tick() {

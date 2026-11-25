@@ -128,10 +128,10 @@ public final class PopupMenu {
     }
 
     public void scroll(double amount) {
-        scroll = Math.clamp(scroll - (int) Math.signum(amount) * ROW, 0, maxScroll());
+        scroll = Math.clamp(scroll - (long) (int) Math.signum(amount) * ROW, 0, maxScroll());
     }
 
     public void scrollTo(int index) {
-        scroll = Math.clamp(index * ROW - (height - header()) / 2, 0, maxScroll());
+        scroll = Math.clamp((long) index * ROW - (height - header()) / 2, 0, maxScroll());
     }
 }

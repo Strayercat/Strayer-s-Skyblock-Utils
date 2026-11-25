@@ -3,7 +3,7 @@ package com.skyblockutils.utils;
 import java.util.List;
 
 public class FunFacts {
-    public static List<String> funFacts = List.of(
+    public static final List<String> funFacts = List.of(
             "Honey never spoils. Archaeologists have found edible honey in ancient Egyptian tombs.",
             "Bananas are berries, but strawberries are not.",
             "Octopuses have three hearts and blue blood.",

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import static com.skyblockutils.utils.Scheduler.scheduler;
 
 public class GuiBlocker {
-    public static String[] titles = {"undersized party!", "creating instance....", "need party leader!"};
+    public static final String[] titles = {"undersized party!", "creating instance....", "need party leader!"};
     public static boolean shouldHideScreen = false;
 
     public static void init() {
