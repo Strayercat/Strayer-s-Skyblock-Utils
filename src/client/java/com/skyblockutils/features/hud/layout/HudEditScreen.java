@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 public class HudEditScreen extends Screen {
     private static final float SNAP_DISTANCE = 4f;
@@ -35,6 +37,8 @@ public class HudEditScreen extends Screen {
     private static final int SCROLLBAR_SPACE = 6;
     private static final int MENU_HEADER = ROW + 3;
     private static final double MENU_SCROLL_SPEED = 18;
+    private static final int SLIDER_ROW = 22;
+    private static final int SLIDER_MIN_WIDTH = 120;
 
     private static final String[] HELP = {
             "Left drag: move  •  Drag the left or right edge: resize",
@@ -45,13 +49,28 @@ public class HudEditScreen extends Screen {
             "Each location has its own layout. HUDs you haven't changed there use All Locations."
     };
 
-    private record MenuItem(String label, Runnable action, boolean enabled) {
+    private record Slider(DoubleSupplier getter, DoubleConsumer setter) {
+    }
+
+    private record MenuItem(String label, Runnable action, boolean enabled, Slider slider) {
+        MenuItem(String label, Runnable action, boolean enabled) {
+            this(label, action, enabled, null);
+        }
+
         static MenuItem separator() {
             return new MenuItem(null, null, false);
         }
 
+        static MenuItem slider(String label, DoubleSupplier getter, DoubleConsumer setter) {
+            return new MenuItem(label, null, true, new Slider(getter, setter));
+        }
+
         boolean isSeparator() {
             return label == null;
+        }
+
+        boolean isSlider() {
+            return slider != null;
         }
     }
 
@@ -83,6 +102,7 @@ public class HudEditScreen extends Screen {
     private int menuScrollTarget;
     private double menuScroll;
     private long menuScrollNanos;
+    private MenuItem draggingSlider;
 
     public HudEditScreen(Screen parent) {
         super(Component.literal("SSU HUD Editor"));
@@ -209,7 +229,8 @@ public class HudEditScreen extends Screen {
         menuScroll = 0;
         int width = this.font.width(title);
         for (MenuItem item : items) {
-            if (!item.isSeparator()) width = Math.max(width, this.font.width(item.label()));
+            if (item.isSlider()) width = Math.max(width, Math.max(SLIDER_MIN_WIDTH, this.font.width(item.label() + " 100%") + 8));
+            else if (!item.isSeparator()) width = Math.max(width, this.font.width(item.label()));
         }
         menuWidth = width + 12 + SCROLLBAR_SPACE;
         menuX = (int) mouseX;
@@ -227,6 +248,7 @@ public class HudEditScreen extends Screen {
     private void closeMenu() {
         menuItems = null;
         menuTitle = null;
+        draggingSlider = null;
     }
 
     private boolean menuOpen() {
@@ -234,7 +256,21 @@ public class HudEditScreen extends Screen {
     }
 
     private int itemHeight(MenuItem item) {
+        if (item.isSlider()) return SLIDER_ROW;
         return item.isSeparator() ? 5 : ROW;
+    }
+
+    private int sliderLeft() {
+        return menuX + 6;
+    }
+
+    private int sliderRight() {
+        return (maxMenuScroll() > 0 ? menuX + menuWidth - SCROLLBAR_SPACE : menuX + menuWidth) - 6;
+    }
+
+    private void setSlider(MenuItem item, double mouseX) {
+        double t = (mouseX - sliderLeft()) / Math.max(1, sliderRight() - sliderLeft());
+        item.slider().setter().accept(Math.round(Mth.clamp(t, 0, 1) * 100) / 100.0);
     }
 
     private int contentHeight() {
@@ -304,6 +340,8 @@ public class HudEditScreen extends Screen {
             if (y + h > top && y < top + visible) {
                 if (item.isSeparator()) {
                     graphics.fill(menuX + 4, y + 2, itemRight - 4, y + 3, 0x30FFFFFF);
+                } else if (item.isSlider()) {
+                    drawSlider(graphics, item, y, itemRight, accent);
                 } else {
                     if (item == hovered && item.enabled()) graphics.fill(menuX + 1, y, itemRight - 1, y + ROW, HOVER_COLOR);
                     graphics.text(this.font, item.label(), menuX + 6, y + 2, item.enabled() ? 0xFFFFFFFF : DISABLED_COLOR, true);
@@ -320,6 +358,20 @@ public class HudEditScreen extends Screen {
             graphics.fill(right - 4, top, right - 2, top + visible, 0x30FFFFFF);
             graphics.fill(right - 4, thumbY, right - 2, thumbY + thumbHeight, 0xA0FFFFFF);
         }
+    }
+
+    private void drawSlider(GuiGraphicsExtractor graphics, MenuItem item, int y, int itemRight, int accent) {
+        double value = Mth.clamp(item.slider().getter().getAsDouble(), 0, 1);
+        String percent = Math.round(value * 100) + "%";
+        graphics.text(this.font, item.label(), menuX + 6, y + 2, 0xFFFFFFFF, true);
+        graphics.text(this.font, percent, itemRight - 6 - this.font.width(percent), y + 2, accent, true);
+        int left = sliderLeft();
+        int right = itemRight - 6;
+        int trackY = y + 15;
+        int knob = left + (int) Math.round((right - left) * value);
+        graphics.fill(left, trackY, right, trackY + 2, 0x60FFFFFF);
+        graphics.fill(left, trackY, knob, trackY + 2, accent);
+        graphics.fill(knob - 1, trackY - 3, knob + 2, trackY + 5, item == draggingSlider ? accent : 0xFFFFFFFF);
     }
 
     private void openElementMenu(HudElement element, double mouseX, double mouseY) {
@@ -350,6 +402,9 @@ public class HudEditScreen extends Screen {
         items.add(new MenuItem("Center vertically", () -> center(element, false), true));
         items.add(new MenuItem(parent != null ? "Unstick from " + parent.name : "Unstick", () -> unstick(element), parent != null));
         items.add(new MenuItem(layout.squareCorners ? "Use rounded corners" : "Use square corners", () -> HudManager.editable(element).squareCorners = !layout.squareCorners, true));
+        items.add(MenuItem.slider("Background opacity", () -> HudContext.backgroundOpacity(element),
+                value -> HudManager.editable(element).backgroundOpacity = (float) value));
+        items.add(new MenuItem("Reset opacity", () -> HudManager.editable(element).backgroundOpacity = null, layout.backgroundOpacity != null));
         if (inLocation) {
             items.add(MenuItem.separator());
             items.add(new MenuItem("Use the All Locations layout", () -> HudManager.useDefault(element), HudManager.hasOverride(element, location)));
@@ -471,7 +526,8 @@ public class HudEditScreen extends Screen {
                 + (layout.width > 0 ? " • " + layout.width + "px" : "")
                 + (!location.isEmpty() ? (HudManager.hasOverride(element, location) ? " • custom" : " • All Locations") : "")
                 + (parent != null ? " • stuck to " + parent.name : "")
-                + (layout.squareCorners ? " • square" : "");
+                + (layout.squareCorners ? " • square" : "")
+                + (layout.backgroundOpacity != null ? " • bg " + Math.round(layout.backgroundOpacity * 100) + "%" : "");
         int textWidth = this.font.width(label);
         int x = Mth.clamp(Mth.floor(b.x()), 2, Math.max(2, this.width - textWidth - 2));
         int y = b.bottom() + 12 <= this.height ? Mth.ceil(b.bottom()) + 2 : Mth.floor(b.y()) - 11;
@@ -494,6 +550,11 @@ public class HudEditScreen extends Screen {
         if (menuOpen()) {
             if (overMenu(event.x(), event.y())) {
                 MenuItem item = menuItemAt(event.x(), event.y());
+                if (item != null && item.isSlider() && event.button() == 0) {
+                    draggingSlider = item;
+                    setSlider(item, event.x());
+                    return true;
+                }
                 if (item != null && item.enabled() && event.button() == 0) {
                     closeMenu();
                     if (item.action() != null) item.action().run();
@@ -560,6 +621,10 @@ public class HudEditScreen extends Screen {
 
     @Override
     public boolean mouseDragged(final @NotNull MouseButtonEvent event, final double dragX, final double dragY) {
+        if (draggingSlider != null) {
+            setSlider(draggingSlider, event.x());
+            return true;
+        }
         if (dragging != null) {
             HudManager.Bounds b = HudManager.bounds(dragging, true);
             boolean snap = !this.minecraft.hasShiftDown();
@@ -607,6 +672,7 @@ public class HudEditScreen extends Screen {
 
     @Override
     public boolean mouseReleased(final @NotNull MouseButtonEvent event) {
+        draggingSlider = null;
         dragging = null;
         resizing = null;
         snapped = null;
@@ -618,6 +684,13 @@ public class HudEditScreen extends Screen {
     @Override
     public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
         if (menuOpen()) {
+            MenuItem item = menuItemAt(x, y);
+            if (item != null && item.isSlider() && scrollY != 0) {
+                double step = this.minecraft.hasShiftDown() ? 0.01 : 0.05;
+                double value = Math.round((item.slider().getter().getAsDouble() + Math.signum(scrollY) * step) * 100) / 100.0;
+                item.slider().setter().accept(Mth.clamp(value, 0, 1));
+                return true;
+            }
             if (overMenu(x, y) && scrollY != 0) {
                 menuScrollTarget = Mth.clamp(menuScrollTarget - (int) Math.signum(scrollY) * MENU_SCROLL_STEP, 0, maxMenuScroll());
             }

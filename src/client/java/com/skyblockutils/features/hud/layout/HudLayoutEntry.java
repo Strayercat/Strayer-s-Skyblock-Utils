@@ -18,6 +18,7 @@ public class HudLayoutEntry {
     public Side attachSide = null;
     public float attachOffset = 0f;
     public boolean squareCorners = false;
+    public Float backgroundOpacity = null;
     public Map<String, Boolean> options = null;
 
     public HudLayoutEntry(Anchor anchorX, Anchor anchorY, float offsetX, float offsetY, float scale) {
@@ -35,6 +36,7 @@ public class HudLayoutEntry {
         copy.attachSide = attachSide;
         copy.attachOffset = attachOffset;
         copy.squareCorners = squareCorners;
+        copy.backgroundOpacity = backgroundOpacity;
         copy.options = options == null ? null : new HashMap<>(options);
         return copy;
     }
@@ -59,6 +61,10 @@ public class HudLayoutEntry {
         if (width < 0) width = 0;
         if (!Float.isFinite(attachOffset)) attachOffset = 0f;
         if (attachTo == null || attachSide == null) detach();
+        if (backgroundOpacity != null) {
+            if (!Float.isFinite(backgroundOpacity)) backgroundOpacity = null;
+            else backgroundOpacity = Math.clamp(backgroundOpacity, 0f, 1f);
+        }
         return this;
     }
 }

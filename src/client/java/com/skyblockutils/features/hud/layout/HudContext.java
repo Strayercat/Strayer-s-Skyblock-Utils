@@ -13,6 +13,7 @@ import java.util.List;
 
 public final class HudContext {
     private static final float EDGE_EPSILON = 0.5f;
+    private static final float DEFAULT_BACKGROUND_OPACITY = 0.65f;
 
     public final GuiGraphicsExtractor graphics;
     public final HudElement element;
@@ -106,7 +107,17 @@ public final class HudContext {
 
     public void panel(int x1, int y1, int x2, int y2, int radius, int background, int border) {
         HudManager.Attachment a = attachment(x1, y1, x2, y2);
-        RoundedRect.panel(graphics, x1, y1, x2, y2, radius, background, border, edges(x1, y1, x2, y2, a), corners(x1, y1, x2, y2, a));
+        RoundedRect.panel(graphics, x1, y1, x2, y2, radius, withOpacity(background), border, edges(x1, y1, x2, y2, a), corners(x1, y1, x2, y2, a));
+    }
+
+    private int withOpacity(int color) {
+        if (element == null) return color;
+        return Math.round(255 * backgroundOpacity(element)) << 24 | (color & 0xFFFFFF);
+    }
+
+    public static float backgroundOpacity(HudElement element) {
+        Float opacity = HudManager.layout(element).backgroundOpacity;
+        return opacity == null ? DEFAULT_BACKGROUND_OPACITY : opacity;
     }
 
     public void overlay(Identifier texture, float x, float y, float size, int textureSize) {
