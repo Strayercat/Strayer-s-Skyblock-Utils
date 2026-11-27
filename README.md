@@ -13,7 +13,9 @@ SSU started as a personal project: things I wanted in the game that other mods d
 - [Cloth Config API](https://modrinth.com/mod/cloth-config) : Required
 - [Mod Menu](https://modrinth.com/mod/modmenu) : Recommended
 
-Everything can be configured with `/ssu config` or through Mod Menu. The config is split into **General**, **HUD Settings**, **Chat**, **Per Skill**, **Events** and **Voice Chat** tabs. HUD Settings only has the HUD editor, the cat and an on/off toggle for each HUD, everything else about a HUD is set in the HUD editor.
+Everything can be configured with `/ssu config` or through Mod Menu. The config is split into **General**, **HUD Settings**, **Chat**, **Per Skill**, **Events** and **Voice Chat** tabs. HUD Settings only has the HUD editor, the button editor, the cat and an on/off toggle for each HUD, everything else about a HUD is set in the HUD editor.
+
+SSU keeps its files in `config/SSU/` (config, chat filters, button layouts and caches). An old `config/SkyblockUtils.json` is moved there automatically, with a backup in `config/SSU/old/`.
 
 ---
 
@@ -38,6 +40,7 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
     - Reset position, reset size, auto width, scale to 100%
     - Center it horizontally or vertically, unstick it
     - Square or rounded corners
+    - Background opacity slider, and a reset for it
     - Use the All Locations layout, or make this location's layout the All Locations one
 - **Middle click a HUD** to hide it in the current location
 - **Right click empty space** to bring back the HUDs hidden in the current location
@@ -45,6 +48,43 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 - A short guide to every control is shown in the background of the editor
 - HUDs can't go off screen
 - Works with the SSU HUD, custom sidebar, slayer tracker, carry tracker, bestiary HUD, stash HUD, voice chat HUD and system messages HUD
+
+</details>
+
+<details>
+<summary><b>Inventory Buttons</b></summary>
+
+- Replaces the crafting grid, offhand slot and recipe book button in your inventory with a 3×4 grid of buttons in 3 named rows
+- Comes with a default set: stashes, recipe book, bestiary, calendar, SkyCrypt, wiki, glowing players, HUD editor and SSU config
+- Each button has a name, an icon and up to 3 actions: click, Shift + click and Ctrl + click, each with its own name in the tooltip
+- Actions can be a command, a chat message, a URL or an SSU action (wiki, your SkyCrypt, HUD editor, SSU config, button editor, glowing players)
+- **Button editor**: open it with `/ssu buttons`, the **Edit Buttons** button in the config or Shift + click on the default SSU Config button
+    - Drag a button to move or swap it, drag a row name onto another to swap rows
+    - Right click a button or row for more (clear, reset to default, copy…)
+    - Names support color codes, `&#RRGGBB` hex colors and SSU's title gradient
+- **Per-location sets**: edit the Default set, or give a location its own buttons
+- **Icon picker** with Minecraft items, SkyBlock items (heads included), SSU icons and emojis, with search and recent icons
+    - Use your own head, a plain head or any player's head
+    - Hover any item, even in a menu, and press the **Copy Hovered Item As Button Icon** key, then paste it in the icon picker
+- **Saved layouts**: save, load, rename and delete layouts, or export one as text to share and import someone else's
+- Toggle it in the **HUD Settings** tab of the config
+
+</details>
+
+<details>
+<summary><b>Wiki & SkyCrypt</b></summary>
+
+- Hover a SkyBlock item (or hold it) and press `U` to open its page on the Hypixel SkyBlock wiki
+    - Reforges, stars, pet levels and stack counts are stripped from the name so the search lands on the right item
+    - With no item, it opens the wiki's home page
+    - SkyBlock item tooltips show a hint with the key (can be turned off)
+- `/ssu wiki` opens the wiki home page
+- `/ssu skycrypt [player]` opens a player's SkyCrypt profile, or yours with no name
+- **In-game browser**: pages open inside the game instead of your normal browser
+    - The browser engine is downloaded the first time you use it
+    - `Ctrl + O` opens the page in your normal browser, `Ctrl + Scroll` or `Ctrl + -/=/0` zooms, `Esc` closes it
+    - Can be preloaded when you join SkyBlock so pages open instantly (~150 MB RAM)
+    - Turn it off in the **General** tab to always use your normal browser
 
 </details>
 
@@ -130,6 +170,7 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 - Hides itself after 2 minutes without a kill
 - Progress is loaded from your SkyBlock profile and kept up to date as you kill mobs
 - Maxed mobs and showing it in dungeons can be toggled per location in the HUD editor
+- Kill counts can be slightly off: there's no way to make kill detection fully reliable, so SSU uses strict checks to keep miscounts as rare as possible, but they can still happen
 
 </details>
 
@@ -176,7 +217,7 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 - Contextual HUD with time, ping, TPS, FPS, coordinates, sidebar, dailies, party info and island fun facts, each toggleable per location
 - Custom sidebar
 - Stash HUD showing how much is in your item and material stash, and hides the stash reminders from chat
-- Customizable mod colors and notification style
+- Customizable mod colors and notification style, switching color profiles applies right away without a restart
 - Notifications and screenshot previews always show on top of everything, including chat and menus
 - Zoom
 - NPC locator with `/ssu npcfinder <npc>`
@@ -187,7 +228,6 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 - Auto Hoppity eggs
 - Custom block breaking animation
 - Option to remove the first person arm swing animation
-- Vanilla recipe book redirects to the SkyBlock recipe book
 
 </details>
 
@@ -195,23 +235,26 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| `/ssu config` | Open the config screen |
-| `/ssu hud` | Open the HUD editor |
-| `/ssu carry <player> <amount> <price>` | Start tracking a slayer carry |
-| `/ssu carry adjust <player> add\|remove [amount]` | Add or remove completed carries by hand (default 1) |
-| `/ssu carry stop [player]` | Stop a carry (the player is required when carrying several) |
-| `/ssu slayer reset` | Reset the slayer tracker's session stats |
-| `/ssu autorejoin <floor\|off>` | Auto-rejoin a floor (`m1`–`m7`, `f1`–`f7`) |
-| `/ssu glowingplayers add <player>` | Make a player glow |
-| `/ssu glowingplayers remove <player>` | Remove a glowing player |
-| `/ssu glowingplayers list` | List glowing players |
-| `/ssu glowingplayers clear` | Remove all glowing players |
-| `/ssu glowingplayers gui` | Open the glowing players GUI |
-| `/ssu npcfinder <npc>` | Locate an NPC |
-| `/ssu partyinvites` | Show your last 10 party invites |
-| `/ssu disableReminder <type>` | Disable a daily reminder |
+| Command                                           | Description                                                 |
+|---------------------------------------------------|-------------------------------------------------------------|
+| `/ssu config`                                     | Open the config screen                                      |
+| `/ssu hud`                                        | Open the HUD editor                                         |
+| `/ssu buttons`                                    | Open the inventory button editor                            |
+| `/ssu wiki`                                       | Open the Hypixel SkyBlock wiki                              |
+| `/ssu skycrypt [player]`                          | Open a player's SkyCrypt profile (yours by default)         |
+| `/ssu carry <player> <amount> <price>`            | Start tracking a slayer carry                               |
+| `/ssu carry adjust <player> add\|remove [amount]` | Add or remove completed carries by hand (default 1)         |
+| `/ssu carry stop [player]`                        | Stop a carry (the player is required when carrying several) |
+| `/ssu slayer reset`                               | Reset the slayer tracker's session stats                    |
+| `/ssu autorejoin <floor\|off>`                    | Auto-rejoin a floor (`m1`–`m7`, `f1`–`f7`)                  |
+| `/ssu glowingplayers add <player>`                | Make a player glow                                          |
+| `/ssu glowingplayers remove <player>`             | Remove a glowing player                                     |
+| `/ssu glowingplayers list`                        | List glowing players                                        |
+| `/ssu glowingplayers clear`                       | Remove all glowing players                                  |
+| `/ssu glowingplayers gui`                         | Open the glowing players GUI                                |
+| `/ssu npcfinder <npc>`                            | Locate an NPC                                               |
+| `/ssu partyinvites`                               | Show your last 10 party invites                             |
+| `/ssu disableReminder <type>`                     | Disable a daily reminder                                    |
 
 `/strayerskyblockutils` works as an alias for `/ssu`.
 
@@ -219,19 +262,21 @@ Everything can be configured with `/ssu config` or through Mod Menu. The config 
 
 All keybinds can be changed in **Options → Controls → Strayer's Skyblock Utils**.
 
-| Keybind | Default |
-|---|---|
-| Show SSU HUD | `Z` |
-| Zoom | `C` |
-| Chat Peek | `Left Alt` |
-| Server Chat History | `H` |
-| Copy Hovered System Message | Unbound |
-| Send coordinates in chat | `Home` |
-| Corleone Timer | `T` |
-| Puff Timer | `Y` |
-| Voice Chat Push To Talk | `V` |
-| Voice Chat Mute | `M` |
-| Voice Chat Deafen | Unbound |
+| Keybind                          | Default        |
+|----------------------------------|----------------|
+| Show SSU HUD                     | `Z`            |
+| Zoom                             | `C`            |
+| Chat Peek                        | `Left Alt`     |
+| Server Chat History              | `H`            |
+| Copy Hovered System Message      | `Middle Mouse` |
+| Open Wiki                        | `U`            |
+| Copy Hovered Item As Button Icon | Unbound        |
+| Send coordinates in chat         | `Home`         |
+| Corleone Timer                   | `T`            |
+| Puff Timer                       | `Y`            |
+| Voice Chat Push To Talk          | `V`            |
+| Voice Chat Mute                  | `M`            |
+| Voice Chat Deafen                | Unbound        |
 
 ---
 
@@ -243,6 +288,7 @@ SSU connects to its own server to find other SSU users, to set up voice chat and
 - **Finding SSU users:** only hashed player names from your tab list, party and guild are sent.
 - **Voice chat:** Audio goes directly between players and is encrypted, it never passes through the SSU server.
 - **Bestiary:** your SkyBlock profile ID is sent so the server can load your bestiary progress from the Hypixel API. The profile and the kills SSU counts are cached on the server so your progress carries over between sessions.
+- **Item list:** the icon picker downloads SkyBlock's public item list straight from the Hypixel API (not through the SSU server) and caches it in `config/SSU/cache/`.
 
 ---
 
@@ -260,6 +306,8 @@ If you run into one, please [open an issue](https://github.com/Strayercat/Straye
 
 ## Credits
 
+- [MCEF Modern](https://modrinth.com/mod/mcef-modern), the Chromium browser used for the in-game wiki and SkyCrypt
+- [Hypixel Mod API](https://modrinth.com/mod/hypixel-mod-api), used for location detection
 - [Concentus](https://github.com/lostromb/concentus), a pure Java Opus codec (BSD license)
 - [rnnoise4j](https://github.com/henkelmax/rnnoise4j) by Max Henkel, Java bindings for [RNNoise](https://github.com/xiph/rnnoise) (BSD license)
 
